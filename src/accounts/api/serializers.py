@@ -9,11 +9,10 @@ from rest_framework_simplejwt.serializers import \
     TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.oauth.models import Role, AdviserTeacher, StudentResult, \
-    StudentEntResult, PhoneOtp, City, TokenVersion
-from src.quizzes.api.serializers import LessonSerializer, \
-    LessonPairListSerializer
-from config.celery import send_to_mail
+from src.accounts.models import Role,  TokenVersion
+# from src.quizzes.api.serializers import LessonSerializer, \
+#     LessonPairListSerializer
+# from config.celery import send_to_mail
 
 User = get_user_model()
 
@@ -42,39 +41,39 @@ class UserDefaultInformation(serializers.ModelSerializer):
         )
 
 
-class CityListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = (
-            'id',
-            'name'
-        )
+# class CityListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = City
+#         fields = (
+#             'id',
+#             'name'
+#         )
 
 
-class AllUserInformationSerializer(serializers.ModelSerializer):
-    user_generates = serializers.SerializerMethodField()
-    lesson_pair = LessonPairListSerializer()
-    city = CityListSerializer()
-
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'first_name',
-            'last_name',
-            'phone',
-            'iin',
-            'lesson_pair',
-            'city',
-            'user_generates'
-        )
-
-    def get_user_generates(self, obj):
-        last = [i for i in obj.user_generates.all().order_by('id')]
-        if last:
-            return last[-1].password
-        return ''
-
+# class AllUserInformationSerializer(serializers.ModelSerializer):
+#     user_generates = serializers.SerializerMethodField()
+#     lesson_pair = LessonPairListSerializer()
+#     city = CityListSerializer()
+#
+#     class Meta:
+#         model = User
+#         fields = (
+#             'id',
+#             'first_name',
+#             'last_name',
+#             'phone',
+#             'iin',
+#             'lesson_pair',
+#             'city',
+#             'user_generates'
+#         )
+#
+#     def get_user_generates(self, obj):
+#         last = [i for i in obj.user_generates.all().order_by('id')]
+#         if last:
+#             return last[-1].password
+#         return ''
+#
 
 class OwnRefreshToken(RefreshToken):
 
@@ -110,23 +109,23 @@ class TokenObtainPairSerializer(TokenObtainSerializer):
         return data
 
 
-class TeacherLessonSerializer(serializers.ModelSerializer):
-    # lessons = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'first_name',
-            'last_name',
-            # 'email',
-        )
-
-    def get_lessons(self, obj):
-        test_lessons = obj.teacher_lessons.select_related('lesson').all()
-        lessons = [t_l.lesson for t_l in test_lessons]
-        lessons_serializer = LessonSerializer(lessons, many=True)
-        return lessons_serializer.data
+# class TeacherLessonSerializer(serializers.ModelSerializer):
+#     # lessons = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = User
+#         fields = (
+#             'id',
+#             'first_name',
+#             'last_name',
+#             # 'email',
+#         )
+#
+#     def get_lessons(self, obj):
+#         test_lessons = obj.teacher_lessons.select_related('lesson').all()
+#         lessons = [t_l.lesson for t_l in test_lessons]
+#         lessons_serializer = LessonSerializer(lessons, many=True)
+#         return lessons_serializer.data
 
 
 class GetTeacherSerializer(serializers.ModelSerializer):
@@ -186,11 +185,11 @@ def create_user(data, role_name):
                                role=role)
     user.set_password(password)
     user.save()
-    send_to_mail.delay(
-        [email],
-        "Ваш пароль: " + password,
-        'Password'
-    )
+    # send_to_mail.delay(
+    #     [email],
+    #     "Ваш пароль: " + password,
+    #     'Password'
+    # )
     return user
 
 
@@ -284,25 +283,6 @@ class GetAdviserWithoutIdSerializer(serializers.ModelSerializer):
         )
 
 
-class CreateAdviserSerializer(WritableNestedModelSerializer,
-                              serializers.ModelSerializer):
-    adviser = AdviserSerializer()
-
-    class Meta:
-        model = AdviserTeacher
-        fields = ('id',
-                  'teacher',
-                  'adviser')
-
-
-class GetUpdateAdviserSerializer(serializers.ModelSerializer):
-    adviser = GetAdviserSerializer()
-
-    class Meta:
-        model = AdviserTeacher
-        fields = ('id',
-                  'teacher',
-                  'adviser')
 
 
 class RetrieveAdviserSerializer(serializers.ModelSerializer):
@@ -323,48 +303,48 @@ class RetrieveAdviserSerializer(serializers.ModelSerializer):
         teachers = obj.teachers.all()
         return [t.teacher.id for t in teachers]
 
+#
+# class StudentResultSerializer(serializers.ModelSerializer):
+#     lesson_name = serializers.CharField(source='variant_lesson.lesson.name_ru')
+#     lesson_id = serializers.IntegerField(source='variant_lesson.lesson.id')
+#     student = UserDefaultInformation()
+#
+#     class Meta:
+#         model = StudentResult
+#         fields = (
+#             'id',
+#             'student',
+#             'quantity',
+#             'lesson_name',
+#             'lesson_id',
+#             'file'
+#         )
+#
 
-class StudentResultSerializer(serializers.ModelSerializer):
-    lesson_name = serializers.CharField(source='variant_lesson.lesson.name_ru')
-    lesson_id = serializers.IntegerField(source='variant_lesson.lesson.id')
-    student = UserDefaultInformation()
-
-    class Meta:
-        model = StudentResult
-        fields = (
-            'id',
-            'student',
-            'quantity',
-            'lesson_name',
-            'lesson_id',
-            'file'
-        )
-
-
-class StudentEntResultSerializer(serializers.ModelSerializer):
-    student = UserDefaultInformation()
-    lesson_pair = LessonPairListSerializer()
-    variant_name = serializers.DateTimeField(
-        source='student_test.variant.name')
-    end_time = serializers.DateTimeField(source='student_test.test_end_time')
-
-    class Meta:
-        model = StudentEntResult
-        fields = (
-            'id',
-            'student',
-            'lesson_pair',
-            'mat_quantity',
-            'student_test',
-            'gramot_quantity',
-            'history_quantity',
-            'prof_1_quantity',
-            'prof_2_quantity',
-            'total',
-            'variant_name',
-            'end_time'
-        )
-
+# class StudentEntResultSerializer(serializers.ModelSerializer):
+#     student = UserDefaultInformation()
+#     lesson_pair = LessonPairListSerializer()
+#     variant_name = serializers.DateTimeField(
+#         source='student_test.variant.name')
+#     end_time = serializers.DateTimeField(source='student_test.test_end_time')
+#
+#     class Meta:
+#         model = StudentEntResult
+#         fields = (
+#             'id',
+#             'student',
+#             'lesson_pair',
+#             'mat_quantity',
+#             'student_test',
+#             'gramot_quantity',
+#             'history_quantity',
+#             'prof_1_quantity',
+#             'prof_2_quantity',
+#             'total',
+#             'variant_name',
+#             'end_time'
+#         )
+#
 
 class UserChangePasswordSerializer(serializers.Serializer):
     phone = serializers.CharField()
@@ -402,23 +382,23 @@ class StudentInformationUpdateSerializer(serializers.ModelSerializer):
         )
 
 
-class PhoneOtpSerializer(serializers.ModelSerializer):
-    phone = serializers.CharField()
-    forgot = serializers.BooleanField(write_only=True, default=False)
-
-    class Meta:
-        model = PhoneOtp
-        fields = (
-            'pk',
-            'phone',
-            'forgot'
-        )
-
-    def create(self, validated_data):
-        phone = validated_data['phone']
-        forgot = validated_data['forgot']
-        phone_opt = PhoneOtp.create_otp_for_phone(phone=phone, forgot=forgot)
-        return phone_opt
+# class PhoneOtpSerializer(serializers.ModelSerializer):
+#     phone = serializers.CharField()
+#     forgot = serializers.BooleanField(write_only=True, default=False)
+#
+#     class Meta:
+#         model = PhoneOtp
+#         fields = (
+#             'pk',
+#             'phone',
+#             'forgot'
+#         )
+#
+#     def create(self, validated_data):
+#         phone = validated_data['phone']
+#         forgot = validated_data['forgot']
+#         phone_opt = PhoneOtp.create_otp_for_phone(phone=phone, forgot=forgot)
+#         return phone_opt
 
 
 class ValidateOtpSerializer(serializers.Serializer):

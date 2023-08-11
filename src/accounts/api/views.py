@@ -17,7 +17,6 @@ from django_filters import rest_framework as filters
 # from src.base.services import send_sms
 from src.accounts.api.serializers import (AuthMeSerializer,
                                           TokenObtainPairSerializer,
-                                          TeacherLessonSerializer,
                                           StudentLessonSerializer,
                                           AddTeacherSerializer,
                                           CuratorSerializer,
@@ -25,7 +24,6 @@ from src.accounts.api.serializers import (AuthMeSerializer,
                                           GetTeacherSerializer,
                                           UserChangePasswordSerializer,
                                           SendPasswordToEmailSerializer,
-                                          PhoneOtpSerializer,
                                           ValidateOtpSerializer)
 
 # from src.oauth.models import UserGeneratePassword, StudentLesson, \

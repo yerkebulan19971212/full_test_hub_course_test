@@ -1,16 +1,29 @@
+import ast
+import os
+from dotenv import load_dotenv
+from datetime import timedelta
 from pathlib import Path
+
+from pathlib import Path
+
+from src.services.utils import getenv_bool
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+print(BASE_DIR)
+print(os.getenv('SECRET_KEY'))
+print("===========BASE_DIR")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3*9qurr+o8!zftyc679su$^-=9ii*x@99+g^f3ff7frpgkd(w5'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = getenv_bool('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -81,7 +94,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -102,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'src.oauth.api.authentication.OwnJWTAuthentication',
+        'src.accounts.api.authentication.OwnJWTAuthentication',
     )
 }
 
