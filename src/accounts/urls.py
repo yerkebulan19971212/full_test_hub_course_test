@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 # from rest_framework_simplejwt.views import TokenRefreshView
 
 from src.accounts.api.views import (auth_me_view, get_token_view)
@@ -9,4 +9,11 @@ from src.accounts.api.views import (auth_me_view, get_token_view)
 urlpatterns = [
     path('login/', get_token_view),
     path('me/', auth_me_view, name='auth_me'),
+]
+
+
+accounts_api_v1_urlpatterns = [
+    path('api/v1/', include(urlpatterns)),
+    # path('super-admin/', include(admin_urlpatterns)),
+    # path('quizzes/', include(urlpatterns))
 ]

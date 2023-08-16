@@ -4,17 +4,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 import debug_toolbar
-from src.accounts.urls import urlpatterns as user_urlpatterns
+from src.accounts.urls import accounts_api_v1_urlpatterns
 
-api_v1_urlpatterns = [
-    path('user/', include(user_urlpatterns)),
-    # path('super-admin/', include(admin_urlpatterns)),
-    # path('quizzes/', include(urlpatterns))
-]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include(api_v1_urlpatterns)),
+    path('accounts/', include(accounts_api_v1_urlpatterns)),
 ]
 
 # urlpatterns += doc_url
