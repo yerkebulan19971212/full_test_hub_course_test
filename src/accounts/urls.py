@@ -4,7 +4,7 @@ from django.urls import path, include
 from src.accounts.api.views import (auth_me_view, get_token_view)
 
 # from src.accounts.views import city_list
-# from src.quizzes.api.views.students import StudentResultAvarageView
+# from src.quizzes.api_views.views.students import StudentResultAvarageView
 
 urlpatterns = [
     path('login/', get_token_view),
@@ -13,7 +13,7 @@ urlpatterns = [
 
 
 accounts_api_v1_urlpatterns = [
-    path('api/v1/', include(urlpatterns)),
+    path('api_views/v1/', include(urlpatterns)),
     # path('super-admin/', include(admin_urlpatterns)),
     # path('quizzes/', include(urlpatterns))
 ]

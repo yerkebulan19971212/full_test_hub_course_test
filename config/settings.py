@@ -114,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'src.accounts.api.authentication.OwnJWTAuthentication',
+        'src.accounts.api_views.authentication.OwnJWTAuthentication',
     )
 }
 

@@ -10,7 +10,7 @@ from rest_framework_simplejwt.serializers import \
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from src.accounts.models import Role,  TokenVersion
-# from src.quizzes.api.serializers import LessonSerializer, \
+# from src.quizzes.api_views.serializers import LessonSerializer, \
 #     LessonPairListSerializer
 # from config.celery import send_to_mail
 

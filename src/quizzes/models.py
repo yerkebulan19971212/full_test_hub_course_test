@@ -18,7 +18,6 @@ class Variant(
         related_name='course_type_lessons'
     )
 
-
     class Meta:
         db_table = 'quizzes\".\"variant'
 
@@ -41,6 +40,7 @@ class StudentTest(
         db_index=True,
         related_name='course_type_lessons'
     )
+    
 
 
     class Meta:

@@ -74,6 +74,10 @@ class CourseType(
         return f"{self.name_code}"
 
 
+class LessonManager():
+    def get_all_active(self):
+        pass
+
 class Lesson(
     abstract_models.UUID,
     abstract_models.AbstractBaseName,
@@ -89,6 +93,7 @@ class Lesson(
         db_index=True,
         related_name='lessons'
     )
+    objects = LessonManager()
 
     class Meta:
         db_table = 'common\".\"lesson'

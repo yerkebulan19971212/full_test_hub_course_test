@@ -43,7 +43,7 @@ class OwnJWTAuthentication(JWTAuthentication):
     An authentication plugin that authenticates requests through a JSON web
     token provided in a request header.
     """
-    www_authenticate_realm = 'api'
+    www_authenticate_realm = 'api_views'
 
     def authenticate(self, request):
         header = self.get_header(request)
