@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import datetime
 
-from src.quizzes.models import StudentTest, Variant
+from src.quizzes.mosdels import StudentTest, Variant
 
 #
 # @receiver(post_save, sender=User)

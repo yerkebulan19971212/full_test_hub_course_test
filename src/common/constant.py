@@ -32,7 +32,7 @@ class TestLang(str, Choice):
     RUSSIAN = 'ru'
 
 
-class QuizzesType(str, Choice):
+class QuizzType(str, Choice):
     BY_LESSON = 'BY_LESSON'
     FULL_TEST_ENT = 'FULL_TEST_ENT'
     INFINITY_QUIZ = 'INFINITY_QUIZ'
@@ -70,3 +70,10 @@ class FavoriteType(str, Choice):
 
 class UniversityStatus(str, Choice):
     NATIONAL = 'TEST'
+
+
+class QuizzStatus(str, Choice):
+    NOT_PASSED = 'NOT_PASSED'
+    CONTINUE = 'CONTINUE'
+    PASSED = 'PASSED'
+    EXPIRED = 'EXPIRED'
