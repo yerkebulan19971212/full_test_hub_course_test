@@ -15,16 +15,16 @@ from django_filters import rest_framework as filters
 # from src.base.paginations import StudentPagination
 # from src.base.permissions import SuperAdminPermission, TeacherPermission
 # from src.base.services import send_sms
-from src.accounts.api.serializers import (AuthMeSerializer,
-                                          TokenObtainPairSerializer,
-                                          StudentLessonSerializer,
-                                          AddTeacherSerializer,
-                                          CuratorSerializer,
-                                          CreateStudentSerializer,
-                                          GetTeacherSerializer,
-                                          UserChangePasswordSerializer,
-                                          SendPasswordToEmailSerializer,
-                                          ValidateOtpSerializer)
+from src.accounts.api_views.serializers import (AuthMeSerializer,
+                                                TokenObtainPairSerializer,
+                                                StudentLessonSerializer,
+                                                AddTeacherSerializer,
+                                                CuratorSerializer,
+                                                CreateStudentSerializer,
+                                                GetTeacherSerializer,
+                                                UserChangePasswordSerializer,
+                                                SendPasswordToEmailSerializer,
+                                                ValidateOtpSerializer)
 
 # from src.oauth.models import UserGeneratePassword, StudentLesson, \
 #     PhoneOtp

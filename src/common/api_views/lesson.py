@@ -1,13 +1,16 @@
 from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
 
 from src.common.models import Lesson
 from src.common.serializers import LessonSerializer
+from src.common import filters
 
 
-class GetAllActiveLessonByCourseType(generics.ListAPIView):
-    queryset = Lesson.objects.filter(is_active=True)
+class GetAllActiveLesson(generics.ListAPIView):
+    queryset = Lesson.objects.get_all_active()
     serializer_class = LessonSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.LessonFilter
 
 
-
-get_all_active_lesson_by_course_type_view = GetAllActiveLessonByCourseType.as_view()
+get_all_active_lesson_view = GetAllActiveLesson.as_view()

@@ -9,7 +9,8 @@ from rest_framework_simplejwt.serializers import \
     TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.accounts.models import Role,  TokenVersion
+from src.accounts.models import Role, TokenVersion
+
 # from src.quizzes.api_views.serializers import LessonSerializer, \
 #     LessonPairListSerializer
 # from config.celery import send_to_mail
@@ -283,8 +284,6 @@ class GetAdviserWithoutIdSerializer(serializers.ModelSerializer):
         )
 
 
-
-
 class RetrieveAdviserSerializer(serializers.ModelSerializer):
     teachers = serializers.SerializerMethodField()
     adviser = serializers.SerializerMethodField()
@@ -302,6 +301,7 @@ class RetrieveAdviserSerializer(serializers.ModelSerializer):
     def get_teachers(self, obj):
         teachers = obj.teachers.all()
         return [t.teacher.id for t in teachers]
+
 
 #
 # class StudentResultSerializer(serializers.ModelSerializer):

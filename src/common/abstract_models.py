@@ -4,7 +4,7 @@ from django.db import models
 
 
 class UUID(models.Model):
-    uuid_field = models.UUIDField(
+    uuid = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
         unique=True
@@ -68,3 +68,9 @@ class AbstractBaseTitle(models.Model):
 
     class Meta:
         abstract = True
+
+
+class AbstractQuerySet(models.QuerySet):
+
+    def get_all_active(self):
+        return self.filter(is_active=True)
