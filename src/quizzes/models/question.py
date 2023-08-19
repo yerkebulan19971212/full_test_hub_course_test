@@ -5,8 +5,14 @@ from src.common import abstract_models
 
 class CommonQuestion(
     abstract_models.TimeStampedModel,
-    abstract_models.AbstractBaseNameCode
+    # abstract_models.AbstractBaseNameCode
 ):
+    name_code = models.CharField(
+        max_length=255,
+        # unique=True,
+        null=True,
+        blank=True
+    )
     text = models.TextField(blank=True, null=True)
     file = models.FileField(blank=True, null=True)
 

@@ -25,7 +25,9 @@ class QuestionLevel(
 
 
 class LessonQuestionLevel(
+    abstract_models.UUID,
     abstract_models.Ordering,
+    abstract_models.IsActive,
     abstract_models.TimeStampedModel
 ):
     test_type_lesson = models.ForeignKey(

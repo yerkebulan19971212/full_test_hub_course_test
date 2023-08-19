@@ -31,3 +31,31 @@ class Variant(
 
     def __str__(self):
         return f"{self.name_code}"
+
+
+class VariantQuestion(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel
+):
+    question = models.ForeignKey(
+        'quizzes.Question',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='variant_questions'
+    )
+    variant = models.ForeignKey(
+        'quizzes.Variant',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='variant_questions'
+    )
+
+    class Meta:
+        db_table = 'quizz\".\"variant_question'
+
+    def __str__(self):
+        return f"{self.variant.name_code}"
