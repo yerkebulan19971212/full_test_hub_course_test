@@ -34,6 +34,7 @@ class TestLang(str, Choice):
 
 class QuizzType(str, Choice):
     BY_LESSON = 'BY_LESSON'
+    FLASH_CARD = 'FLASH_CARD'
     FULL_TEST_ENT = 'FULL_TEST_ENT'
     INFINITY_QUIZ = 'INFINITY_QUIZ'
 
@@ -46,7 +47,7 @@ class Status(str, Choice):
 
 class ChoiceType(int, Choice):
     CHOICE = 0
-    MULTI_CHOICE = 0
+    MULTI_CHOICE = 1
 
 
 class GradeType(int, Choice):

@@ -1,6 +1,9 @@
 from django.db import models
+from django.db.models import Prefetch
 
 from src.common import abstract_models
+from src.common.constant import ChoiceType
+from src.quizzes import models as quizzes_models
 
 
 class CommonQuestion(
@@ -23,6 +26,25 @@ class CommonQuestion(
         if self.text:
             return str(self.text)
         return "None"
+
+
+class QuestionQuerySet(abstract_models.AbstractQuerySet):
+
+    def get_questions_for_flash_card(self, lang: str, lesson: int,
+                                     question_number: int):
+        return self.filter(
+            variant__language=lang,
+            lesson_question_level__test_type_lesson__lesson_id=lesson,
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+        )[:question_number]
+
+    def get_questions_with_answer(self):
+        return self.prefetch_related(
+            Prefetch('answers', queryset=quizzes_models.Answer.objects.all()))
+
+
+class QuestionManager(models.Manager):
+    pass
 
 
 class Question(
@@ -50,6 +72,8 @@ class Question(
         on_delete=models.CASCADE,
         db_index=True
     )
+
+    objects = QuestionManager.from_queryset(QuestionQuerySet)()
 
     class Meta:
         db_table = 'quizz\".\"question'

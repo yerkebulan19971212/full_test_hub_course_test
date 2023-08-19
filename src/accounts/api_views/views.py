@@ -66,25 +66,25 @@ class CreateStudentUserView(generics.CreateAPIView):
 class TokenObtainPairView(BaseTokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
 
-    def post(self, request, *args, **kwargs):
-        phone = self.request.data.get('phone').lower()
-        user = User.objects.select_related('role').filter(phone=phone)
-        if not user.exists():
-            return Response({"detail": "Такой пользователь не найден"},
-                            status=status.HTTP_400_BAD_REQUEST)
-        user = user.first()
-        if not user.is_active:
-            return Response({"detail": "Такой пользователь не найден"},
-                            status=status.HTTP_400_BAD_REQUEST)
-        role = user.role
-        if role.name != "student":
-            return Response({"detail": "Вы не студент"},
-                            status=status.HTTP_400_BAD_REQUEST)
-        if not user.check_password(self.request.data.get('password')):
-            return Response({"detail": "Неверный пароль"},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        return super().post(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+        # phone = self.request.data.get('phone').lower()
+        # user = User.objects.select_related('role').filter(phone=phone)
+        # if not user.exists():
+        #     return Response({"detail": "Такой пользователь не найден"},
+        #                     status=status.HTTP_400_BAD_REQUEST)
+        # user = user.first()
+        # if not user.is_active:
+        #     return Response({"detail": "Такой пользователь не найден"},
+        #                     status=status.HTTP_400_BAD_REQUEST)
+        # role = user.role
+        # if role.name != "student":
+        #     return Response({"detail": "Вы не студент"},
+        #                     status=status.HTTP_400_BAD_REQUEST)
+        # if not user.check_password(self.request.data.get('password')):
+        #     return Response({"detail": "Неверный пароль"},
+        #                     status=status.HTTP_400_BAD_REQUEST)
+        #
+        # return super().post(request, *args, **kwargs)
 
 
 get_token_view = TokenObtainPairView.as_view()

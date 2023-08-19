@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 import debug_toolbar
 from src.accounts.urls import accounts_api_v1_urlpatterns
 from src.common.urls import api_v1_urlpatterns as common_url
+from src.quizzes.urls import urlpatterns as quizzes_url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,6 +14,8 @@ urlpatterns = [
          include((accounts_api_v1_urlpatterns, 'accounts'),
                  namespace='accounts')),
     path('commmon/', include((common_url, 'common'), namespace='common')),
+    path('quizzes/',
+         include((quizzes_url, 'quizzes'), namespace='quizzes')),
 ]
 
 urlpatterns += doc_url
