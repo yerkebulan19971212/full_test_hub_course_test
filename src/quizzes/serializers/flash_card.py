@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from src.common.constant import QuizzType, ChoiceType
 from src.common.models import CourseType
-from src.quizzes.models import StudentQuizz, Question
+from src.quizzes.models import StudentQuizz, Question, Answer
 from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
 
@@ -41,10 +41,24 @@ class FlashCardQuizzSerializer(serializers.ModelSerializer):
         return student_quizz
 
 
+class FlashCardAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = (
+            'answer',
+        )
+
+
 class FlashCardQuestionSerializer(serializers.ModelSerializer):
+    answer = serializers.SerializerMethodField()
+
     class Meta:
         model = Question
         fields = (
-            'id',
             'question',
+            'answer'
         )
+
+    def get_answer(self, obj):
+        answers = obj.answers.all()
+        return FlashCardAnswerSerializer(answers[0], many=False).data['answer']

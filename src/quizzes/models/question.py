@@ -42,6 +42,10 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return self.prefetch_related(
             Prefetch('answers', queryset=quizzes_models.Answer.objects.all()))
 
+    def get_questions_with_correct_answer(self):
+        queryset = quizzes_models.Answer.objects.filter(correct=True)
+        return self.prefetch_related(Prefetch('answers', queryset=queryset))
+
 
 class QuestionManager(models.Manager):
     pass

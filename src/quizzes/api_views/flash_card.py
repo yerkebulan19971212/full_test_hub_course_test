@@ -20,8 +20,8 @@ new_flash_card_view = NewFlashCardQuizz.as_view()
 
 class GetFlashCardQuestions(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = serializers.QuestionSerializer
-    queryset = Question.objects.get_questions_with_answer()
+    serializer_class = serializers.FlashCardQuestionSerializer
+    queryset = Question.objects.get_questions_with_correct_answer()
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.FlashCardQuestionFilter
 
