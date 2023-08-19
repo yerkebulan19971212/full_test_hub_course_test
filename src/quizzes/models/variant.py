@@ -1,5 +1,6 @@
 from django.db import models
 from src.common import abstract_models
+from src.common.constant import TestLang
 
 
 class Variant(
@@ -15,13 +16,18 @@ class Variant(
         on_delete=models.CASCADE,
         null=True,
         db_index=True,
-        related_name='course_type_lessons'
+        related_name='variants'
     )
+    language = models.CharField(
+        max_length=64,
+        choices=TestLang.choices(),
+        default=TestLang.KAZAKH,
+        db_index=True
+    )
+    variant_title = models.IntegerField()
 
     class Meta:
-        db_table = 'quizzes\".\"variant'
+        db_table = 'quizz\".\"variant'
 
     def __str__(self):
         return f"{self.name_code}"
-
-

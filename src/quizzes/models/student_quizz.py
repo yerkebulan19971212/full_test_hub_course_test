@@ -40,7 +40,7 @@ class StudentQuizz(
     # end_time = models.DateTimeField()
 
     class Meta:
-        db_table = 'quizzes\".\"student_test'
+        db_table = 'quizz\".\"student_test'
 
     def __str__(self):
         return f"{self.name_code}"

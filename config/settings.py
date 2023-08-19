@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'src.accounts.apps.AccountsConfig',
     'src.common.apps.CommonConfig',
     'src.services.apps.ServicesConfig',
+    'src.quizzes.apps.QuizzesConfig',
 ]
 
 MIDDLEWARE = [
