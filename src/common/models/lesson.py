@@ -32,4 +32,35 @@ class Lesson(
         db_table = 'common\".\"lesson'
 
     def __str__(self):
-        return f"{self.name_code}"
+        return f"{self.name_ru}"
+
+
+class LessonPair(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel
+):
+    icon = models.ImageField(
+        upload_to='lesson_images',
+        blank=True,
+        null=True
+    )
+    lesson_1 = models.ForeignKey(
+        'common.Lesson',
+        related_name='lesson_1',
+        on_delete=models.CASCADE
+    )
+    lesson_2 = models.ForeignKey(
+        'common.Lesson',
+        on_delete=models.CASCADE,
+        related_name='lesson_2',
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        db_table = 'common\".\"lesson_pair'
+
+    def __str__(self):
+        return f'{self.lesson_1.name_ru} - {self.lesson_2.name_ru if self.lesson_2 else ""}'

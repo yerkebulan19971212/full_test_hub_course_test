@@ -5,8 +5,8 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from src.common.models import Lesson, CourseTypeLesson, CourseType
-from src.common.serializers import LessonSerializer
+from src.common.models import Lesson, CourseTypeLesson, CourseType, LessonPair
+from src.common.serializers import LessonSerializer, LessonPairListSerializer
 from src.common import filters
 from src.quizzes.models import QuestionLevel, LessonQuestionLevel, \
     CommonQuestion, Question, Answer, VariantQuestion, Variant
@@ -73,15 +73,16 @@ class ImportQuestionFromTestHubApp(APIView):
                         for r in res_q.json():
                             question = r["question"]
                             comon_q = question["common_question"]
-                            common_q_o=None
+                            common_q_o = None
                             if comon_q:
-                                common_q_o,_ = CommonQuestion.objects.get_or_create(
+                                common_q_o, _ = CommonQuestion.objects.get_or_create(
                                     # name_code=comon_q["name_code"],
                                     file=comon_q["file"],
                                     text=comon_q["text"],
                                 )
                             lq = LessonQuestionLevel.objects.filter(
-                                question_level__name_code=question["lesson_question_level"]["name_code"],
+                                question_level__name_code=
+                                question["lesson_question_level"]["name_code"],
                                 test_type_lesson__lesson=l
                             ).first()
                             q = Question.objects.create(
@@ -112,3 +113,15 @@ class ImportQuestionFromTestHubApp(APIView):
 
 
 import_question_from_test_hub_app = ImportQuestionFromTestHubApp.as_view()
+
+
+class LessonPairListView(generics.ListAPIView):
+    serializer_class = LessonPairListSerializer
+    queryset = LessonPair.objects.only(
+        'id', 'lesson_1', 'lesson_2'
+    ).select_related(
+        'lesson_1', 'lesson_2'
+    ).all()
+
+
+lesson_pair_list_view = LessonPairListView.as_view()

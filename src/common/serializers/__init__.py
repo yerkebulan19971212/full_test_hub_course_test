@@ -1,1 +1,1 @@
-from .lesson import LessonSerializer
+from .lesson import LessonSerializer, LessonPairListSerializer
