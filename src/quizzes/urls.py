@@ -2,7 +2,8 @@ from django.urls import path, include
 from src.quizzes.api_views import (new_flash_card_view, new_quizz_test_view,
                                    get_flash_card_question,
                                    get_quiz_test_question_view,
-                                   pass_quizz_test_answer_view)
+                                   pass_quizz_test_answer_view,
+                                   quiz_test_check_answer_view, finish_quiz_test)
 
 flash_card = [
     path('new/', new_flash_card_view),
@@ -13,6 +14,8 @@ quizz_test = [
     path('new/', new_quizz_test_view),
     path('question/<int:student_quizz>/', get_quiz_test_question_view),
     path('pass-answer/', pass_quizz_test_answer_view),
+    path('check/<int:question_id>/', quiz_test_check_answer_view),
+    path('finish/<int:student_quizz>/', finish_quiz_test),
 ]
 
 api_v1_urlpatterns = [
