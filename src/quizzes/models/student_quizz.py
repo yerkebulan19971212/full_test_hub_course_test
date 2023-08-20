@@ -1,6 +1,6 @@
 from django.db import models
 from src.common import abstract_models
-from src.common.constant import QuizzType, QuizzStatus
+from src.common.constant import QuizzType, QuizzStatus, TestLang
 
 
 class StudentQuizz(
@@ -32,6 +32,12 @@ class StudentQuizz(
     quizz_type = models.CharField(
         max_length=128,
         choices=QuizzType.choices()
+    )
+    language = models.CharField(
+        max_length=64,
+        choices=TestLang.choices(),
+        default=TestLang.KAZAKH,
+        db_index=True
     )
     # start_time = models.DateTimeField()
     quizz_start_time = models.DateTimeField(null=True, blank=True)

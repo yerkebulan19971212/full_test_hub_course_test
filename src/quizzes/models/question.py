@@ -1,9 +1,11 @@
 from django.db import models
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, Q
+from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
-from src.common.constant import ChoiceType
+from src.common.constant import ChoiceType, QuizzType
 from src.quizzes import models as quizzes_models
+from src.quizzes.models import StudentQuizz
 
 
 class CommonQuestion(
@@ -45,6 +47,29 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
     def get_questions_with_correct_answer(self):
         queryset = quizzes_models.Answer.objects.filter(correct=True)
         return self.prefetch_related(Prefetch('answers', queryset=queryset))
+
+    def get_question_for_quizz(self, student_quizz_id: int):
+        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        answer_queryset = quizzes_models.Answer.objects.all()
+        queryset = self.prefetch_related(
+            Prefetch('answers', queryset=answer_queryset)
+        ).filter(
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE,
+            variant__language=student_quizz.language,
+            lesson_question_level__test_type_lesson__lesson=student_quizz.lesson
+        ).annotate(
+            question_count=Coalesce(
+                Count(
+                    'student_quizz_questions',
+                    filter=Q(
+                        student_quizz_questions__student_quizz__user=student_quizz.user,
+                        student_quizz_questions__student_quizz__quizz_type=QuizzType.INFINITY_QUIZ
+                    ),
+                    distinct=True),
+                0),
+            # filter=
+        ).order_by('question_count', '?')
+        return queryset
 
 
 class QuestionManager(models.Manager):

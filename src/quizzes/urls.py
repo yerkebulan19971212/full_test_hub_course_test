@@ -1,12 +1,24 @@
 from django.urls import path, include
-from src.common.api_views import (get_all_active_lesson_view, )
-from src.common.api_views.lesson import import_question_from_test_hub_app
-from src.quizzes.api_views import new_flash_card_view
-from src.quizzes.api_views.flash_card import get_flash_card_question
+from src.quizzes.api_views import (new_flash_card_view, new_quizz_test_view,
+                                   get_flash_card_question,
+                                   get_quiz_test_question_view,
+                                   pass_quizz_test_answer_view)
+
+flash_card = [
+    path('new/', new_flash_card_view),
+    path('questions/', get_flash_card_question),
+]
+
+quizz_test = [
+    path('new/', new_quizz_test_view),
+    path('question/<int:student_quizz>/', get_quiz_test_question_view),
+    path('pass-answer/', pass_quizz_test_answer_view),
+]
 
 api_v1_urlpatterns = [
-    path('new-flash_card/', new_flash_card_view),
-    path('flash_card-questions/', get_flash_card_question),
+    path('flash-card/', include(flash_card)),
+    path('quizz-test/', include(quizz_test)),
+
 ]
 
 app_name = 'quizzes'
