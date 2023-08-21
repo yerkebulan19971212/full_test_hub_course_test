@@ -15,3 +15,14 @@ class FlashCardQuestionFilter(django_filters.FilterSet):
         fields = (
             'student_quizz_id',
         )
+
+
+class StudentQuizQuestionFilter(django_filters.FilterSet):
+    student_quizz_id = filters.NumberFilter(
+        field_name="student_quizz_questions__student_quizz_id")
+
+    class Meta:
+        model = models.Question
+        fields = (
+            'student_quizz_id',
+        )

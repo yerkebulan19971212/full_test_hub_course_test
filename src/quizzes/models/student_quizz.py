@@ -29,6 +29,12 @@ class StudentQuizz(
         related_name='student_quizzes',
         null=True
     )
+    lesson_pair = models.ForeignKey(
+        'common.LessonPair',
+        on_delete=models.CASCADE,
+        related_name='student_quizzes',
+        null=True
+    )
     quizz_type = models.CharField(
         max_length=128,
         choices=QuizzType.choices()
