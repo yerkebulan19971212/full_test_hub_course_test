@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, Prefetch
 from django.db.models.functions import Coalesce
 from rest_framework import generics, status
 from rest_framework import permissions
@@ -145,3 +145,27 @@ class FullQuizLessonListView(generics.ListAPIView):
 
 
 full_quizz_lesson_view = FullQuizLessonListView.as_view()
+
+
+class FullQuizQuestionListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.FullQuizQuestionSerializer
+    queryset = Question.objects.select_related(
+        'common_question').prefetch_related('answers').all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.FullQuizzQuestionFilter
+
+    @swagger_auto_schema(tags=["full-test"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        student_quizz = self.request.query_params.get('student_quizz_id')
+        answer = Answer.objects.filter(
+            student_answers__student_quizz_id=student_quizz)
+        return super().get_queryset().prefetch_related(
+            Prefetch('student_answers', queryset=answer)
+        ).order_by('id')
+
+
+full_quizz_question_view = FullQuizQuestionListView.as_view()

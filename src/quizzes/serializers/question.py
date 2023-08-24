@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
-from src.quizzes.models import Question
+from src.quizzes.models import Question, CommonQuestion
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -14,3 +14,34 @@ class QuestionSerializer(serializers.ModelSerializer):
             'question',
             'answers'
         )
+
+
+class CommonQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommonQuestion
+        fields = (
+            'id',
+            'text',
+            'file'
+        )
+
+
+class FullQuizQuestionSerializer(serializers.ModelSerializer):
+    answer = AnswerSerializer(source='answers', many=True)
+    common_question = CommonQuestionSerializer(many=False)
+    user_ans = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Question
+        fields = (
+            'id',
+            'question',
+            'common_question',
+            # 'choice_type',
+            # 'number',
+            'user_ans',
+            'answer'
+        )
+
+    def get_user_ans(self, obj):
+        return [i.answer_id for i in obj.student_answers.all()]
