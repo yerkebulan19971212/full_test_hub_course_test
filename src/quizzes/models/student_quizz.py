@@ -78,6 +78,13 @@ class StudentQuizzQuestion(
         db_index=True,
         related_name='student_quizz_questions'
     )
+    lesson = models.ForeignKey(
+        'common.Lesson',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='student_quizz_questions'
+    )
 
     class Meta:
         db_table = 'quizz\".\"student_quizz_question'

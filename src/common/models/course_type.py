@@ -20,7 +20,7 @@ class CourseType(
     abstract_models.TimeStampedModel
 ):
     icon = models.FileField(upload_to='test_type', null=True, blank=True)
-
+    quizz_duration = models.DurationField(null=True, blank=True)
     objects = CourseTypeManager.from_queryset(CourseTypeQuerySet)()
 
     class Meta:

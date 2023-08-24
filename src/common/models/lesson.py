@@ -18,13 +18,13 @@ class Lesson(
     abstract_models.IsActive,
     abstract_models.TimeStampedModel
 ):
-    course_type = models.ForeignKey(
-        'common.CourseType',
-        on_delete=models.CASCADE,
-        null=True,
-        db_index=True,
-        related_name='lessons'
-    )
+    # course_type = models.ForeignKey(
+    #     'common.CourseType',
+    #     on_delete=models.CASCADE,
+    #     null=True,
+    #     db_index=True,
+    #     related_name='lessons'
+    # )
     math = models.BooleanField(default=False)
     objects = LessonManager.from_queryset(LessonQuerySet)()
 

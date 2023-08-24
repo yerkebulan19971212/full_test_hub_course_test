@@ -3,8 +3,9 @@ import datetime
 from django.utils import timezone
 from rest_framework import serializers
 
+from src.common import abstract_serializer
 from src.common.constant import QuizzType, ChoiceType
-from src.common.models import CourseType
+from src.common.models import CourseType, Lesson
 from src.quizzes.models import StudentQuizz, Question, Answer
 from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
@@ -29,13 +30,15 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         questions += Question.objects.get_history_full_test(language)
         questions += Question.objects.get_reading_literacy_full_test(language)
         questions += Question.objects.get_mat_full_test(language)
+        print(Question.objects.get_mat_full_test(language))
+        print("Question.objects.get_mat_full_test(language)")
         questions += Question.objects.get_full_test(language,
                                                     lesson_pair.lesson_1)
         questions += Question.objects.get_full_test(language,
                                                     lesson_pair.lesson_2)
-
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             question=q,
+            lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
             student_quizz=student_quizz
         ) for q in questions])
 
@@ -78,3 +81,37 @@ class StudentQuizzInformationSerializer(serializers.ModelSerializer):
     #     context = self.context
     #     return StudentEntResultSerializer(
     #         student_ent_result, context=context).data
+
+
+class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
+    correct = serializers.IntegerField(default=0)
+    sum_of_questions = serializers.IntegerField(default=0)
+    sum_of_point = serializers.IntegerField(default=120)
+    number = serializers.IntegerField(default=1)
+    score = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lesson
+        fields = (
+            'id',
+            'name',
+            'number',
+            'correct',
+            'score',
+            'sum_of_point',
+            'sum_of_questions'
+        )
+
+    # def get_name(self, obj):
+    #     test_id = self.context['view'].kwargs.get('test_id')
+    #     student_test = StudentQuizz.objects.select_related(
+    #             'variant'
+    #         ).get(pk=test_id)
+    #     variant = student_test.variant
+    #     if variant.test_lang == 1:
+    #         return obj.name_ru
+    #     return obj.name_kz
+
+    def get_score(self, obj):
+        return 0

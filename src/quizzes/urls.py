@@ -5,12 +5,13 @@ from src.quizzes.api_views import (new_flash_card_view, new_quizz_test_view,
                                    pass_quizz_test_answer_view,
                                    quiz_test_check_answer_view,
                                    finish_quiz_test, new_full_test_view,
-                                   full_quizz_view)
+                                   full_quizz_view, full_quizz_lesson_view)
 
 
 full_test = [
     path('new/', new_full_test_view),
     path('<int:pk>/', full_quizz_view),
+    path('lessons/<int:student_quizz>/', full_quizz_lesson_view),
     # path('questions/', get_flash_card_question),
 ]
 

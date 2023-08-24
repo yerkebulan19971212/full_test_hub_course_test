@@ -72,28 +72,25 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return queryset
 
     def get_mat_full_test(self, lang: str):
-        Question.objects.filter(
-
-        )
-        return self.filter(
+        return self.select_related('lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'
         )[:10]
 
     def get_reading_literacy_full_test(self, lang: str):
-        return self.filter(
+        return self.select_related('lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson__name_code='reading_literacy'
         )[:10]
 
     def get_history_full_test(self, lang: str):
-        return self.filter(
+        return self.select_related('lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan'
         )[:10]
 
     def get_full_test(self, lang: str, lesson):
-        return self.filter(
+        return self.select_related('lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson=lesson
         )[:35]
