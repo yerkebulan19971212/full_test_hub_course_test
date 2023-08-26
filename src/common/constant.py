@@ -39,6 +39,11 @@ class QuizzType(str, Choice):
     INFINITY_QUIZ = 'INFINITY_QUIZ'
 
 
+class PacketType(str, Choice):
+    ONE_TIME = 'ONE_TIME'
+    MANY_TIMES = 'MANY_TIMES'
+
+
 class Status(str, Choice):
     NOT_PASSED = 'NOT_PASSED'
     CONTINUE = 'CONTINUE'

@@ -1,5 +1,6 @@
 from django.db import models
 from src.common import abstract_models
+from src.common.constant import PacketType
 
 
 class QuizzTypeQuerySet(abstract_models.AbstractQuerySet):
@@ -75,3 +76,28 @@ class CourseTypeQuizz(
 
     # def __str__(self):
     #     return f"{self.lesson.name_kz}"
+
+
+class Packet(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel
+):
+    quizz_type = models.ForeignKey(
+        'common.CourseTypeQuizz',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='course_type_quizzes'
+    )
+    days = models.IntegerField(default=0)
+    price = models.IntegerField(default=0)
+    packet_type = models.CharField(
+        choices=PacketType.choices(),
+        default=PacketType.ONE_TIME
+    )
+    quantity = models.IntegerField(default=1)
+
+    class Meta:
+        db_table = 'common\".\"packet'

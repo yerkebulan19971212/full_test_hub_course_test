@@ -18,6 +18,13 @@ class StudentQuizz(
         db_index=True,
         related_name='student_quizzes'
     )
+    packet = models.ForeignKey(
+        'common.Packet',
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name='student_quizzes',
+        null=True
+    )
     status = models.CharField(
         max_length=12,
         choices=QuizzStatus.choices(),
