@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import transaction
 from django.db.models import Sum, Count, Q, Prefetch
 from django.db.models.functions import Coalesce
 from rest_framework import generics, status
@@ -10,11 +11,24 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from src.common.constant import ChoiceType
 from src.common.models import Lesson
-from src.quizzes.models import Question, Answer, StudentScore
+from src.common.utils import get_multi_score
+from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer
 from src.quizzes import serializers
 from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, StudentQuizz
+
+
+class MyTest(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = StudentQuizz.objects.all()
+    serializer_class = serializers.MyTestSerializer
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_class = filters.MyTestFilter
+
+
+my_test_view = MyTest.as_view()
 
 
 class NewFullTest(generics.CreateAPIView):
@@ -161,11 +175,77 @@ class FullQuizQuestionListView(generics.ListAPIView):
 
     def get_queryset(self):
         student_quizz = self.request.query_params.get('student_quizz_id')
-        answer = Answer.objects.filter(
-            student_answers__student_quizz_id=student_quizz)
+        answer = StudentAnswer.objects.filter(
+            student_quizz_id=student_quizz,
+            status=True
+        )
         return super().get_queryset().prefetch_related(
             Prefetch('student_answers', queryset=answer)
         ).order_by('id')
 
 
 full_quizz_question_view = FullQuizQuestionListView.as_view()
+
+
+class PassStudentAnswerView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.StudentAnswersSerializer
+
+    @swagger_auto_schema(tags=["full-test"])
+    def post(self, request, format=None):
+        data = self.request.data
+        question_id = data.get('question')
+        student_quizz_id = data.get('student_quizz')
+        answers = data.get('answers')
+
+        if answers:
+            try:
+                with transaction.atomic():
+                    score = 0
+                    question = Question.objects.select_related(
+                        'lesson_question_level__question_level'
+                    ).get(pk=question_id)
+                    correct_answers = question.answers.filter(correct=True)
+                    StudentAnswer.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question=question,
+                    ).update(status=False)
+                    StudentAnswer.objects.bulk_create([
+                        StudentAnswer(
+                            student_quizz_id=student_quizz_id,
+                            question=question,
+                            answer_id=a
+                        ) for a in answers
+                    ])
+                    question_choice = question.lesson_question_level.question_level.choice
+                    if question_choice == ChoiceType.CHOICE:
+                        if correct_answers[0].id == answers[0]:
+                            score += 1
+                    else:
+                        len_correct_answers = correct_answers.count()
+                        user_answers = Answer.objects.filter(id__in=answers)
+                        len_student_answers = user_answers.count()
+                        if len_correct_answers >= len_student_answers:
+                            user_answers = list(set(user_answers))
+                            correct_answers = list(
+                                set([ans for ans in correct_answers]))
+                            score += get_multi_score(user_answers,
+                                                     correct_answers)
+                    StudentScore.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question=question
+                    ).update(status=False)
+                    StudentScore.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question=question,
+                        score=score
+                    ).update(status=False)
+
+            except Exception as e:
+                print(e)
+                return Response({"detail": str(e)},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Success"})
+
+
+pass_answer_view = PassStudentAnswerView.as_view()

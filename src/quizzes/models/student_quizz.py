@@ -35,9 +35,11 @@ class StudentQuizz(
         related_name='student_quizzes',
         null=True
     )
-    quizz_type = models.CharField(
-        max_length=128,
-        choices=QuizzType.choices()
+    quizz_type = models.ForeignKey(
+        'common.CourseTypeQuizz',
+        on_delete=models.CASCADE,
+        related_name='student_quizzes',
+        null=True
     )
     language = models.CharField(
         max_length=64,

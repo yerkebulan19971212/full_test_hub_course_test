@@ -9,7 +9,8 @@ from src.common import models
 class QuizzTypeFilter(django_filters.FilterSet):
     test_type = filters.CharFilter(
         field_name="course_type__name_code",
-        required=True)
+        required=True
+    )
 
     class Meta:
         model = models.CourseTypeQuizz

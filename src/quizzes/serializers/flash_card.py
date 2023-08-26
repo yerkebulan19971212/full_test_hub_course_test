@@ -25,7 +25,7 @@ class FlashCardQuizzSerializer(serializers.ModelSerializer):
         language = validated_data.get("language")
         question_number = validated_data.pop("question_number")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = QuizzType.FLASH_CARD
+        # validated_data["quizz_type"] = QuizzType.FLASH_CARD
         validated_data["course_type"] = CourseType.objects.get_ent()
         student_quizz = super().create(validated_data)
         questions = Question.objects.get_questions_for_flash_card(language,

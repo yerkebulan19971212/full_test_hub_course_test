@@ -6,13 +6,16 @@ from src.quizzes.api_views import (new_flash_card_view, new_quizz_test_view,
                                    quiz_test_check_answer_view,
                                    finish_quiz_test, new_full_test_view,
                                    full_quizz_view, full_quizz_lesson_view,
-                                   full_quizz_question_view)
+                                   full_quizz_question_view,
+                                   my_test_view,
+                                   pass_answer_view)
 
 full_test = [
     path('new/', new_full_test_view),
     path('<int:pk>/', full_quizz_view),
     path('lessons/<int:student_quizz>/', full_quizz_lesson_view),
     path('questions/', full_quizz_question_view),
+    path('pass-answer/', pass_answer_view),
 ]
 
 flash_card = [
@@ -32,6 +35,7 @@ api_v1_urlpatterns = [
     path('full-test/', include(full_test)),
     path('flash-card/', include(flash_card)),
     path('quizz-test/', include(quizz_test)),
+    # path('my-test-list/', my_test_view),
 
 ]
 

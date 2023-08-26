@@ -1,12 +1,15 @@
 import datetime
 
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 
 from src.common import abstract_serializer
 from src.common.constant import QuizzType, ChoiceType
 from src.common.models import CourseType, Lesson
-from src.quizzes.models import StudentQuizz, Question, Answer
+from src.common.utils import get_multi_score
+from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
+    StudentScore
 from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
 
@@ -30,8 +33,6 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         questions += Question.objects.get_history_full_test(language)
         questions += Question.objects.get_reading_literacy_full_test(language)
         questions += Question.objects.get_mat_full_test(language)
-        print(Question.objects.get_mat_full_test(language))
-        print("Question.objects.get_mat_full_test(language)")
         questions += Question.objects.get_full_test(language,
                                                     lesson_pair.lesson_1)
         questions += Question.objects.get_full_test(language,
@@ -115,3 +116,12 @@ class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
 
     def get_score(self, obj):
         return 0
+
+
+class StudentAnswersSerializer(serializers.Serializer):
+    question = serializers.IntegerField(required=True, write_only=True)
+    student_quizz = serializers.IntegerField(required=True, write_only=True)
+    answers = serializers.ListSerializer(
+        child=serializers.IntegerField(required=True),
+        required=True, write_only=True
+    )
