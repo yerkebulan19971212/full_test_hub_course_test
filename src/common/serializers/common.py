@@ -1,13 +1,17 @@
 from rest_framework import serializers
 
 from src.common import models
-from src.common.abstract_serializer import NameSerializer
-from src.common.models import Lesson, LessonPair
 
 
 class QuizzTypeSerializer(serializers.ModelSerializer):
+    name_kz = serializers.CharField(source='quizz_type.name_kz')
+    name_ru = serializers.CharField(source='quizz_type.name_ru')
+    name_en = serializers.CharField(source='quizz_type.name_en')
+    icon = serializers.CharField(source='quizz_type.icon')
+    color = serializers.CharField(source='quizz_type.color')
+
     class Meta:
-        model = models.QuizzType
+        model = models.CourseTypeQuizz
         fields = (
             'id',
             'name_kz',

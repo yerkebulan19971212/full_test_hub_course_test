@@ -5,12 +5,12 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from src.common.models import QuizzType
+from src.common.models import QuizzType, CourseTypeQuizz
 from src.common import filters, serializers
 
 
 class GetAllActiveQuizzTypes(generics.ListAPIView):
-    queryset = QuizzType.objects.get_all_active()
+    queryset = CourseTypeQuizz.objects.get_all_active()
     serializer_class = serializers.QuizzTypeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.QuizzTypeFilter

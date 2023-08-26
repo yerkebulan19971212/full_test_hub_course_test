@@ -33,6 +33,18 @@ class QuizzType(
         return f"{self.name_code}"
 
 
+class CourseTypeQuizzQuerySet(abstract_models.AbstractQuerySet):
+    def get_all_active(self):
+        return self.filter(
+            quizz_type__is_active=True,
+            course_type__is_active=True
+        )
+
+
+class CourseTypeQuizzManager(models.Manager):
+    pass
+
+
 class CourseTypeQuizz(
     abstract_models.UUID,
     abstract_models.Ordering,
@@ -54,6 +66,8 @@ class CourseTypeQuizz(
     )
     main = models.BooleanField(default=False)
     questions_number = models.IntegerField(default=0)
+
+    objects = CourseTypeQuizzManager.from_queryset(CourseTypeQuizzQuerySet)()
 
     class Meta:
         unique_together = ('course_type', 'quizz_type')
