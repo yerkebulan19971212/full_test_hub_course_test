@@ -47,3 +47,26 @@ class StudentScore(abstract_models.TimeStampedModel):
 
     def __str__(self):
         return f'{self.question}'
+
+
+class TestFullScore(abstract_models.TimeStampedModel):
+    student_quizz = models.ForeignKey(
+        'quizzes.StudentQuizz',
+        on_delete=models.CASCADE,
+        related_name='test_full_score',
+        db_index=True
+    )
+    lesson = models.ForeignKey(
+        'common.Lesson',
+        on_delete=models.CASCADE,
+        related_name='test_full_score',
+        db_index=True,
+    )
+    unattem = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
+    number_of_question = models.IntegerField(default=0)
+    number_of_score = models.IntegerField(default=0)
+    accuracy = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'quizz\".\"test_full_score'

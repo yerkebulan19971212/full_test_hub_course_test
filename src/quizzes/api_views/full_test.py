@@ -12,9 +12,10 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from src.common.constant import ChoiceType
-from src.common.models import Lesson
+from src.common.models import Lesson, CourseTypeLesson
 from src.common.utils import get_multi_score
-from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer
+from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer, \
+    TestFullScore
 from src.quizzes import serializers
 from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, StudentQuizz
@@ -24,8 +25,8 @@ class MyTest(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = StudentQuizz.objects.all()
     serializer_class = serializers.MyTestSerializer
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = filters.MyTestFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.MyTestFilter
 
 
 my_test_view = MyTest.as_view()
@@ -249,3 +250,48 @@ class PassStudentAnswerView(generics.CreateAPIView):
 
 
 pass_answer_view = PassStudentAnswerView.as_view()
+
+
+class EntFinishView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(tags=["full-test"])
+    def post(self, request, student_quizz):
+        student_quizz = get_object_or_404(StudentQuizz, pk=student_quizz)
+        student_quizz.status = "PASSED"
+        student_quizz.quizz_end_time = datetime.now()
+        student_quizz.save()
+        if student_quizz.lesson_pair:
+            test_type_lessons = CourseTypeLesson.objects.filter(
+                main=True, course_type__name_code='ent'
+            )
+            lessons = [test_type_lesson.lesson for test_type_lesson in
+                       test_type_lessons]
+            lesson_pair = student_quizz.lesson_pair
+            lessons.append(lesson_pair.lesson_1)
+            lessons.append(lesson_pair.lesson_2)
+        else:
+            lessons = [student_quizz.lesson]
+        index = 0
+        test_full_score = []
+        for lesson in lessons:
+            index += 1
+            question_score = StudentScore.objects.filter(
+                student_quizz__student_quizz_questions__lesson=lesson,
+                student_quizz=student_quizz
+            ).exclude(status=False).distinct(). \
+                aggregate(sum_score=Coalesce(Sum('score'), 0))
+            score = question_score.get('sum_score', 0)
+            test_full_score.append(
+                TestFullScore(
+                    student_quizz=student_quizz,
+                    lesson=lesson,
+                    score=score
+                ))
+        TestFullScore.objects.bulk_create(test_full_score)
+        return Response({
+            "detail": "success"
+        }, status=status.HTTP_201_CREATED)
+
+
+full_test_finish_view = EntFinishView.as_view()

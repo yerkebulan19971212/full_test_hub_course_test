@@ -11,5 +11,5 @@ class MyTestFilter(django_filters.FilterSet):
     class Meta:
         model = models.StudentQuizz
         fields = (
-            'quizz_type'
+            'quizz_type',
         )
