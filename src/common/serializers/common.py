@@ -1,6 +1,9 @@
+import datetime
+
 from rest_framework import serializers
 
 from src.common import models
+from src.common.models import BoughtPacket
 
 
 class QuizzTypeSerializer(serializers.ModelSerializer):
@@ -23,6 +26,8 @@ class QuizzTypeSerializer(serializers.ModelSerializer):
 
 
 class PacketSerializer(serializers.ModelSerializer):
+    remainder = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Packet
@@ -32,4 +37,46 @@ class PacketSerializer(serializers.ModelSerializer):
             'price',
             'packet_type',
             'quantity',
+            'remainder',
+            'status'
         )
+
+    def get_remainder(self, obj):
+        user = self.context['request'].user
+        print(obj.id)
+        packet = BoughtPacket.objects.filter(
+            user=user,
+            packet_id=obj.id,
+            status=True
+        )
+        if packet:
+            return packet.first().remainder
+        return 0
+
+    def get_status(self, obj):
+        user = self.context['request'].user
+        packet = BoughtPacket.objects.filter(
+            user=user,
+            packet_id=obj.id,
+            status=True
+        )
+        if packet:
+            return True
+        return False
+
+
+class BuyPacketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.BoughtPacket
+        fields = (
+            'packet',
+        )
+
+    def create(self, validated_data):
+        packet = validated_data['packet']
+        validated_data[
+            'end_time'] = datetime.datetime.now() + datetime.timedelta(
+            days=packet.days)
+        validated_data['price'] = packet.price
+        validated_data['remainder'] = packet.quantity
+        return super().create(validated_data)

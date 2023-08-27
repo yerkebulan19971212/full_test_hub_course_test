@@ -101,3 +101,31 @@ class Packet(
 
     class Meta:
         db_table = 'common\".\"packet'
+
+
+class BoughtPacket(
+    abstract_models.UUID,
+    abstract_models.TimeStampedModel
+):
+    user = models.ForeignKey(
+        'accounts.User',
+        related_name='bought_packets',
+        on_delete=models.CASCADE,
+        db_index=True,
+        null=True
+    )
+    packet = models.ForeignKey(
+        'common.Packet',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='bought_packets'
+    )
+    remainder = models.IntegerField(default=0)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField()
+    price = models.IntegerField(default=0)
+    status = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'common\".\"bought_packet'

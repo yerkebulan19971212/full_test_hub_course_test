@@ -1,6 +1,7 @@
 import requests
 from django.db import transaction
 from rest_framework.response import Response
+from rest_framework import permissions
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
@@ -20,6 +21,7 @@ quizz_types_view = GetAllActiveQuizzTypes.as_view()
 
 
 class PacketListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Packet.objects.all()
     serializer_class = serializers.PacketSerializer
     filter_backends = [DjangoFilterBackend]
@@ -27,3 +29,11 @@ class PacketListView(generics.ListAPIView):
 
 
 packet_view = PacketListView.as_view()
+
+
+class BuyPacket(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.BuyPacketSerializer
+
+
+buy_packet_view = BuyPacket.as_view()
