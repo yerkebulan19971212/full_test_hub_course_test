@@ -2,8 +2,7 @@ import datetime
 
 from rest_framework import serializers
 
-from src.common.constant import QuizzType, ChoiceType
-from src.common.models import CourseType
+from src.common.models import CourseType, QuizzType
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore
 from src.quizzes.models.student_quizz import StudentQuizzQuestion
@@ -20,7 +19,8 @@ class QuizzTestSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = QuizzType.INFINITY_QUIZ
+        validated_data["quizz_type"] = QuizzType.objects.filter(
+            name_code='infinity_quizz').first()
         validated_data["course_type"] = CourseType.objects.get_ent()
         return super().create(validated_data)
 

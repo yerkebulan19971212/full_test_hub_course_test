@@ -5,8 +5,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from src.common import abstract_serializer
-from src.common.constant import QuizzType, ChoiceType
-from src.common.models import CourseType, Lesson
+from src.common.models import CourseType, Lesson, QuizzType
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore
@@ -26,7 +25,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         lesson_pair = validated_data.get("lesson_pair")
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = QuizzType.FULL_TEST_ENT
+        validated_data["quizz_type"] = QuizzType.objects.filter(
+            name_code='full_test').first()
         validated_data["course_type"] = CourseType.objects.get_ent()
         student_quizz = super().create(validated_data)
         questions = []
