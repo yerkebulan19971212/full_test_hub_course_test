@@ -20,3 +20,16 @@ class QuizzTypeSerializer(serializers.ModelSerializer):
             'icon',
             'color',
         )
+
+
+class PacketSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Packet
+        fields = (
+            'id',
+            'days',
+            'price',
+            'packet_type',
+            'quantity',
+        )

@@ -17,3 +17,12 @@ class QuizzTypeFilter(django_filters.FilterSet):
         fields = (
             'test_type',
         )
+
+
+class PacketFilter(django_filters.FilterSet):
+    class Meta:
+        model = models.Packet
+        fields = (
+            'quizz_type',
+            'packet_type',
+        )
