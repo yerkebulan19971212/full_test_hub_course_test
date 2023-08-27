@@ -1,11 +1,13 @@
 import datetime
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
 from src.common import abstract_serializer
-from src.common.models import CourseType, Lesson, QuizzType
+from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
+    CourseTypeQuizz
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore
@@ -13,21 +15,31 @@ from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
 
 class FullQuizzSerializer(serializers.ModelSerializer):
+    lessons = serializers.ListSerializer(
+        child=serializers.IntegerField(required=True),
+        required=True, write_only=True
+    )
+
     class Meta:
         model = StudentQuizz
         fields = (
             'id',
             'language',
-            'lesson_pair',
+            'lessons',
+            'quizz_type'
         )
 
     def create(self, validated_data):
-        lesson_pair = validated_data.get("lesson_pair")
+        lessons = validated_data.pop("lessons")
+        lesson_pair = LessonPair.objects.filter(
+            Q(lesson_1=lessons[0], lesson_2=lessons[1]) |
+            Q(lesson_1=lessons[1], lesson_2=lessons[0])
+        ).first()
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = QuizzType.objects.filter(
-            name_code='full_test').first()
+        validated_data["quizz_type"] = CourseTypeQuizz.objects.filter(quizz_type__name_code='full_test').first()
         validated_data["course_type"] = CourseType.objects.get_ent()
+        validated_data["lesson_pair"] = lesson_pair
         student_quizz = super().create(validated_data)
         questions = []
         questions += Question.objects.get_history_full_test(language)

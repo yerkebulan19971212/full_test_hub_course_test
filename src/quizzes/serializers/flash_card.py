@@ -2,7 +2,7 @@ import datetime
 
 from rest_framework import serializers
 
-from src.common.models import CourseType, QuizzType
+from src.common.models import CourseType, QuizzType, CourseTypeQuizz
 from src.quizzes.models import StudentQuizz, Question, Answer
 from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
@@ -24,7 +24,7 @@ class FlashCardQuizzSerializer(serializers.ModelSerializer):
         language = validated_data.get("language")
         question_number = validated_data.pop("question_number")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = QuizzType.objects.filter(name_code='flash_card').first()
+        validated_data["quizz_type"] = CourseTypeQuizz.objects.filter(quizz_type__name_code='flash_card').first()
         validated_data["course_type"] = CourseType.objects.get_ent()
         student_quizz = super().create(validated_data)
         questions = Question.objects.get_questions_for_flash_card(language,

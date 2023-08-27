@@ -4,7 +4,7 @@ from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
 from src.common.constant import ChoiceType
-from src.common.models import QuizzType
+from src.common.models import QuizzType, CourseTypeQuizz
 from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz
 
@@ -64,7 +64,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     'student_quizz_questions',
                     filter=Q(
                         student_quizz_questions__student_quizz__user=student_quizz.user,
-                        student_quizz_questions__student_quizz__quizz_type=QuizzType.objects.filter(name_code='infinity_quizz').first()
+                        student_quizz_questions__student_quizz__quizz_type=CourseTypeQuizz.objects.filter(quizz_type__name_code='infinity_quizz').first()
                     ),
                     distinct=True),
                 0),
