@@ -19,13 +19,13 @@ User = get_user_model()
 
 
 class AuthMeSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(source='role.name')
+    # role = serializers.CharField(source='role.name')
 
     class Meta:
         model = User
         fields = (
             'uuid',
-            'role',
+            # 'role',
             'first_name',
             'last_name'
         )
