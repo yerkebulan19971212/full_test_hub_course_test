@@ -23,6 +23,7 @@ class QuizzTypeSerializer(serializers.ModelSerializer):
             'name_en',
             'icon',
             'color',
+            'code',
         )
 
 
