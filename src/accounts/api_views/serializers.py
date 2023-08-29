@@ -10,6 +10,7 @@ from rest_framework_simplejwt.serializers import \
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from src.accounts.models import Role, TokenVersion
+from src.common.exception import UnexpectedError
 
 # from src.quizzes.api_views.serializers import LessonSerializer, \
 #     LessonPairListSerializer
@@ -19,13 +20,13 @@ User = get_user_model()
 
 
 class AuthMeSerializer(serializers.ModelSerializer):
-    # role = serializers.CharField(source='role.name')
+    role = serializers.CharField(source='role.name', default=None)
 
     class Meta:
         model = User
         fields = (
             'uuid',
-            # 'role',
+            'role',
             'first_name',
             'last_name'
         )
@@ -192,6 +193,36 @@ def create_user(data, role_name):
     #     'Password'
     # )
     return user
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    # is_active = serializers.BooleanField(default=False, write_only=True)
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'phone',
+            'email',
+            'password'
+        )
+
+    def create(self, validated_data):
+        try:
+            validated_data['is_active'] = False
+            password = validated_data.pop('password')
+            role = Role.objects.filter(name_code='student').first()
+            validated_data['role'] = role
+            user = super().create(validated_data=validated_data)
+            user.set_password(password)
+            user.save()
+            return user
+        except Exception as e:
+            print(e)
+            raise UnexpectedError()
 
 
 class CreateStudentSerializer(serializers.ModelSerializer):

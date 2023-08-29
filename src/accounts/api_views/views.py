@@ -17,6 +17,7 @@ from django_filters import rest_framework as filters
 # from src.base.services import send_sms
 from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 TokenObtainPairSerializer,
+                                                RegisterSerializer,
                                                 StudentLessonSerializer,
                                                 AddTeacherSerializer,
                                                 CuratorSerializer,
@@ -25,6 +26,7 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UserChangePasswordSerializer,
                                                 SendPasswordToEmailSerializer,
                                                 ValidateOtpSerializer)
+from src.common.exception import UnexpectedError
 
 # from src.oauth.models import UserGeneratePassword, StudentLesson, \
 #     PhoneOtp
@@ -44,15 +46,16 @@ class AuthMeView(generics.RetrieveAPIView):
 auth_me_view = AuthMeView.as_view()
 
 
-class CreateStudentUserView(generics.CreateAPIView):
-    serializer_class = CreateStudentSerializer
+class RegisterStudentUserView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
         phone = self.request.data.get('phone').lower()
         user = User.objects.filter(
-            phone=phone, role__name='student')
+            phone=phone, role__name_code='student')
 
         if user.filter(is_active=True).exists():
+            raise UnexpectedError()
             return Response(
                 {'detail': 'Такой пользователь уже существует'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -63,28 +66,31 @@ class CreateStudentUserView(generics.CreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
+register_view = RegisterStudentUserView.as_view()
+
+
 class TokenObtainPairView(BaseTokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
 
     # def post(self, request, *args, **kwargs):
-        # phone = self.request.data.get('phone').lower()
-        # user = User.objects.select_related('role').filter(phone=phone)
-        # if not user.exists():
-        #     return Response({"detail": "Такой пользователь не найден"},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-        # user = user.first()
-        # if not user.is_active:
-        #     return Response({"detail": "Такой пользователь не найден"},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-        # role = user.role
-        # if role.name != "student":
-        #     return Response({"detail": "Вы не студент"},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-        # if not user.check_password(self.request.data.get('password')):
-        #     return Response({"detail": "Неверный пароль"},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-        #
-        # return super().post(request, *args, **kwargs)
+    # phone = self.request.data.get('phone').lower()
+    # user = User.objects.select_related('role').filter(phone=phone)
+    # if not user.exists():
+    #     return Response({"detail": "Такой пользователь не найден"},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+    # user = user.first()
+    # if not user.is_active:
+    #     return Response({"detail": "Такой пользователь не найден"},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+    # role = user.role
+    # if role.name != "student":
+    #     return Response({"detail": "Вы не студент"},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+    # if not user.check_password(self.request.data.get('password')):
+    #     return Response({"detail": "Неверный пароль"},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+    #
+    # return super().post(request, *args, **kwargs)
 
 
 get_token_view = TokenObtainPairView.as_view()
