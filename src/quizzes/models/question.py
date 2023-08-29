@@ -4,7 +4,7 @@ from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
 from src.common.constant import ChoiceType
-from src.common.models import QuizzType, CourseTypeQuizz
+from src.common.models import QuizzType, CourseTypeQuizz, CourseTypeLesson
 from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz
 
@@ -45,6 +45,21 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return self.prefetch_related(
             Prefetch('answers', queryset=quizzes_models.Answer.objects.all()))
 
+    def get_questions_by_lesson(self, lang: str, lesson: int,
+                                course_type: str):
+        question_number = 0
+        course_types = CourseTypeLesson.objects.filter(
+            lesson=lesson,
+            course_type__name_code=course_type
+        )
+        if course_types:
+            question_number = course_types.first().questions_number
+        return self.filter(
+            variant__language=lang,
+            lesson_question_level__test_type_lesson__lesson_id=lesson,
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+        )[:question_number]
+
     def get_questions_with_correct_answer(self):
         queryset = quizzes_models.Answer.objects.filter(correct=True)
         return self.prefetch_related(Prefetch('answers', queryset=queryset))
@@ -64,7 +79,8 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     'student_quizz_questions',
                     filter=Q(
                         student_quizz_questions__student_quizz__user=student_quizz.user,
-                        student_quizz_questions__student_quizz__quizz_type=CourseTypeQuizz.objects.filter(quizz_type__name_code='infinity_quizz').first()
+                        student_quizz_questions__student_quizz__quizz_type=CourseTypeQuizz.objects.filter(
+                            quizz_type__name_code='infinity_quizz').first()
                     ),
                     distinct=True),
                 0),
@@ -73,25 +89,29 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return queryset
 
     def get_mat_full_test(self, lang: str):
-        return self.select_related('lesson_question_level__test_type_lesson').filter(
+        return self.select_related(
+            'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'
         )[:10]
 
     def get_reading_literacy_full_test(self, lang: str):
-        return self.select_related('lesson_question_level__test_type_lesson').filter(
+        return self.select_related(
+            'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson__name_code='reading_literacy'
         )[:10]
 
     def get_history_full_test(self, lang: str):
-        return self.select_related('lesson_question_level__test_type_lesson').filter(
+        return self.select_related(
+            'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan'
         )[:10]
 
     def get_full_test(self, lang: str, lesson):
-        return self.select_related('lesson_question_level__test_type_lesson').filter(
+        return self.select_related(
+            'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson=lesson
         )[:35]

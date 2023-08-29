@@ -1,7 +1,11 @@
-from .flash_card import new_flash_card_view, get_flash_card_question
-from .quiz_test import (new_quizz_test_view, get_quiz_test_question_view,
-                        pass_quizz_test_answer_view,
-                        quiz_test_check_answer_view, finish_quiz_test)
-from .full_test import (new_full_test_view, full_quizz_view,
-                        full_quizz_lesson_view, full_quizz_question_view,
-                        my_test_view, pass_answer_view, full_test_finish_view)
+from .by_lesson import (by_lesson_finish_view, by_lesson_pass_answer_view,
+                        by_lesson_quizz_lesson_view,
+                        by_lesson_quizz_question_view, by_lesson_quizz_view,
+                        new_by_lesson_quizz_view)
+from .flash_card import get_flash_card_question, new_flash_card_view
+from .full_test import (full_quizz_lesson_view, full_quizz_question_view,
+                        full_quizz_view, full_test_finish_view, my_test_view,
+                        new_full_test_view, pass_answer_view)
+from .quiz_test import (finish_quiz_test, get_quiz_test_question_view,
+                        new_quizz_test_view, pass_quizz_test_answer_view,
+                        quiz_test_check_answer_view)

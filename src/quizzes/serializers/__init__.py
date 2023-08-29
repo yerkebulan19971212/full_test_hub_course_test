@@ -5,3 +5,4 @@ from .quizz_test import (QuizzTestSerializer, QuizTestPassAnswerSerializer)
 from .full_test import (FullQuizzSerializer, StudentQuizzInformationSerializer,
                         FullQuizLessonListSerializer, StudentAnswersSerializer)
 from .common import MyTestSerializer
+from .student_quizz import ByLessonQuizzSerializer

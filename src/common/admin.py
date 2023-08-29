@@ -1,11 +1,19 @@
 from django.contrib import admin
 
-from .models import (Lesson, LessonPair, QuizzType, CourseTypeQuizz, Packet)
+from .models import (BoughtPacket, City, Country, CourseType, CourseTypeLesson,
+                     CourseTypeQuizz, KaspiPay, Lesson, LessonPair, Packet,
+                     QuizzType)
 
 admin.site.register([
-    LessonPair,
-    QuizzType,
+    BoughtPacket,
+    City,
+    Country,
+    CourseType,
+    CourseTypeLesson,
     CourseTypeQuizz,
-    Packet
+    KaspiPay,
+    Lesson,
+    LessonPair,
+    Packet,
+    QuizzType
 ])
-# Register your models here.
