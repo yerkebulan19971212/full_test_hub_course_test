@@ -413,6 +413,10 @@ class StudentInformationUpdateSerializer(serializers.ModelSerializer):
         )
 
 
+class GoogleSerializer(serializers.Serializer):
+    id_token = serializers.CharField(required=True)
+
+
 # class PhoneOtpSerializer(serializers.ModelSerializer):
 #     phone = serializers.CharField()
 #     forgot = serializers.BooleanField(write_only=True, default=False)

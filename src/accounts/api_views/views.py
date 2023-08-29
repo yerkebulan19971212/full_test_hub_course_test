@@ -1,10 +1,13 @@
 import secrets
 import string
+import requests
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max, Count
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework import generics
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import \
@@ -25,7 +28,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 GetTeacherSerializer,
                                                 UserChangePasswordSerializer,
                                                 SendPasswordToEmailSerializer,
-                                                ValidateOtpSerializer)
+                                                ValidateOtpSerializer,
+                                                GoogleSerializer)
 from src.common.exception import UnexpectedError
 
 # from src.oauth.models import UserGeneratePassword, StudentLesson, \
@@ -119,6 +123,7 @@ class StaffTokenObtainPairView(BaseTokenObtainPairView):
     #
     #     return super().post(request, *args, **kwargs)
 
+
 # class GenerateOTPView(CreateAPIView):
 #     serializer_class = PhoneOtpSerializer
 #
@@ -156,3 +161,38 @@ class StaffTokenObtainPairView(BaseTokenObtainPairView):
 #
 #
 # validate_otp = ValidateOTPView.as_view()
+
+
+class GoogleJWTView(APIView):
+    @swagger_auto_schema(request_body=GoogleSerializer)
+    def post(self, request, *args, **kwargs):
+        id_token = request.data.get('id_token', None)
+        if not id_token:
+            return None
+
+        try:
+            # Verify the JWT signature and extract the user ID and email
+            response = requests.get(
+                f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={id_token}')
+            response.raise_for_status()
+            user_data = response.json()
+        except Exception as e:
+            raise AuthenticationFailed('Failed to verify Google id_token')
+
+        # Get or create user
+        user, created = User.objects.get_or_create(
+            email=user_data['email'])
+        if created:
+            user.username = user_data['email']
+            user.set_unusable_password()
+            user.save()
+
+        refresh = TokenObtainPairSerializer.get_token(user)
+        data = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+
+google = GoogleJWTView.as_view()

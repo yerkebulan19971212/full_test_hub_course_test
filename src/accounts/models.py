@@ -119,6 +119,10 @@ class User(
     balance = models.IntegerField(
         default=0
     )
+    user_id = models.IntegerField(
+        null=True,
+        unique=True
+    )
 
     def __str__(self):
         return self.email

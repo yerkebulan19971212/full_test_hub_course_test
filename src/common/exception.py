@@ -1,7 +1,8 @@
 from rest_framework import serializers, status
 
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import APIException
 
 
-class UnexpectedError(Exception):
+class UnexpectedError(APIException):
     message = _("unexpected error")
