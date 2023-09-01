@@ -30,6 +30,7 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 SendPasswordToEmailSerializer,
                                                 ValidateOtpSerializer,
                                                 GoogleSerializer)
+from src.accounts.models import Role
 from src.common.exception import UnexpectedError
 
 # from src.oauth.models import UserGeneratePassword, StudentLesson, \
@@ -54,9 +55,13 @@ class RegisterStudentUserView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
-        phone = self.request.data.get('phone').lower()
+        phone = self.request.data.get('phone')
+        if phone:
+            phone = phone.lower()
         user = User.objects.filter(
-            phone=phone, role__name_code='student')
+            phone=phone,
+            role__name_code='student'
+        )
 
         if user.filter(is_active=True).exists():
             raise UnexpectedError()
@@ -184,6 +189,9 @@ class GoogleJWTView(APIView):
             email=user_data['email'])
         if created:
             user.username = user_data['email']
+            user.first_name = user_data['given_name']
+            user.last_name = user_data['family_name']
+            user.role = Role.objects.filter(name_code='student').first()
             user.set_unusable_password()
             user.save()
 
