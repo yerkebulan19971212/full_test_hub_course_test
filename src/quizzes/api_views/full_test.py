@@ -28,6 +28,9 @@ class MyTest(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.MyTestFilter
 
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
 
 my_test_view = MyTest.as_view()
 
