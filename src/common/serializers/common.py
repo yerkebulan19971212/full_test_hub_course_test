@@ -76,6 +76,7 @@ class BuyPacketSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         packet = validated_data['packet']
+        validated_data['user'] = self.context['request'].user
         validated_data[
             'end_time'] = datetime.datetime.now() + datetime.timedelta(
             days=packet.days)
