@@ -26,7 +26,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             'id',
             'language',
             'lessons',
-            'quizz_type'
+            'packet'
         )
 
     def create(self, validated_data):
