@@ -25,6 +25,9 @@ class Lesson(
     #     db_index=True,
     #     related_name='lessons'
     # )
+    icon = models.FileField(upload_to='lesson', null=True, blank=True)
+    choose_icon = models.FileField(upload_to='lesson/choose', null=True,
+                                   blank=True)
     math = models.BooleanField(default=False)
     objects = LessonManager.from_queryset(LessonQuerySet)()
 

@@ -35,8 +35,10 @@ class LessonWithPairsSerializer(NameSerializer):
         model = Lesson
         fields = (
             'id',
+            'icon',
+            'choose_icon',
             'name',
-            'lessons'
+            'lessons',
         )
 
     def get_lessons(self, obj):
