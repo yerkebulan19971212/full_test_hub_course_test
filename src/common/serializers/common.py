@@ -52,7 +52,7 @@ class PacketSerializer(serializers.ModelSerializer):
             status=True
         )
         if packet:
-            return packet.first().remainder
+            return obj.quantity - packet.first().remainder
         return 0
 
     def get_status(self, obj):
