@@ -7,7 +7,7 @@ from src.common import models
 
 
 class LessonFilter(django_filters.FilterSet):
-    test_type = filters.CharFilter(field_name="course_type__name_code")
+    test_type = filters.CharFilter(field_name="course_type_lessons__course_type__name_code")
     main = filters.BooleanFilter(field_name="course_type_lessons__main")
 
     class Meta:
