@@ -169,7 +169,7 @@ class FullQuizQuestionListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.FullQuizQuestionSerializer
     queryset = Question.objects.select_related(
-        'common_question').prefetch_related('answers').all()
+        'common_question').prefetch_related('answers').all().distinct()
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.FullQuizzQuestionFilter
 
