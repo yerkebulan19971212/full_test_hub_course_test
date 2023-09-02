@@ -30,8 +30,8 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
     answer = AnswerSerializer(source='answers', many=True)
     common_question = CommonQuestionSerializer(many=False)
     user_ans = serializers.SerializerMethodField()
-    choice_type = serializers.IntegerField(
-        source='lesson_question_level.question_level.choice_type')
+    choice = serializers.IntegerField(
+        source='lesson_question_level.question_level.choice')
 
     class Meta:
         model = Question
@@ -39,7 +39,7 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
             'id',
             'question',
             'common_question',
-            'choice_type',
+            'choice',
             # 'number',
             'user_ans',
             'answer'
