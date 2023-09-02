@@ -30,12 +30,14 @@ class LessonPairListSerializer(serializers.ModelSerializer):
 
 class LessonWithPairsSerializer(NameSerializer):
     lessons = serializers.SerializerMethodField()
+    main = serializers.BooleanField()
 
     class Meta:
         model = Lesson
         fields = (
             'id',
             'icon',
+            'main',
             'choose_icon',
             'name',
             'lessons',

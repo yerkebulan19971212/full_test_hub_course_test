@@ -1,5 +1,6 @@
 import requests
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from rest_framework.response import Response
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
@@ -129,7 +130,13 @@ lesson_pair_list_view = LessonPairListView.as_view()
 
 
 class GetAllActiveLessonWithPairs(generics.ListAPIView):
-    queryset = Lesson.objects.get_all_active()
+    queryset = Lesson.objects.get_all_active().annotate(
+        main=Exists(
+            CourseTypeLesson.objects.filter(
+                lesson_id=OuterRef('pk'),
+                main=True
+            ))
+    ).order_by('-main')
     serializer_class = LessonWithPairsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.LessonFilter

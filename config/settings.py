@@ -16,10 +16,6 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-print(BASE_DIR)
-print(os.getenv('SECRET_KEY'))
-print("===========BASE_DIR")
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -52,6 +48,8 @@ INSTALLED_APPS = [
     'storages',
 
     'drf_yasg',
+    'rest_framework',
+    'django_filters',
 
     'src.accounts.apps.AccountsConfig',
     'src.common.apps.CommonConfig',
@@ -69,14 +67,27 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+if DEBUG:
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware"
+    ]
+    import os  # only if you haven't already imported this
+    import socket  # only if you haven't already imported this
+
+    # hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    # INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1"]
+    INTERNAL_IPS = ["127.0.0.1"]
 
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # 'DIRS': [BASE_DIR / 'templates']
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
+        # 'DIRS': [os.path.join(BASE_DIR, 'templates')],
         # ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -86,6 +97,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'staticfiles': 'django.templatetags.static',
+            }
         },
     },
 ]
@@ -127,7 +141,7 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'src.accounts.api_views.authentication.OwnJWTAuthentication',
-    )
+    ),
 }
 
 # Internationalization
