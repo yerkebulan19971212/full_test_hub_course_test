@@ -84,6 +84,9 @@ class Packet(
     abstract_models.IsActive,
     abstract_models.TimeStampedModel
 ):
+    name_kz = models.CharField(max_length=255, default='', blank=True)
+    name_ru = models.CharField(max_length=255, default='', blank=True)
+    name_en = models.CharField(max_length=255, default='', blank=True)
     quizz_type = models.ForeignKey(
         'common.CourseTypeQuizz',
         on_delete=models.CASCADE,
