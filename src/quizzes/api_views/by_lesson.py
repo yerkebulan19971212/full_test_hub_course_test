@@ -113,7 +113,7 @@ class ByLessonQuizLessonListView(generics.ListAPIView):
 
         return Response({
             "lessons": data,
-            "duration": duration_time
+            "duration": "4:00:00"
         }, status=status.HTTP_200_OK)
 
     def get_queryset(self):
