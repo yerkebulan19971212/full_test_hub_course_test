@@ -29,7 +29,7 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
         lesson = validated_data.get("lesson")
         validated_data["quizz_start_time"] = datetime.datetime.now()
         validated_data["quizz_type"] = CourseTypeQuizz.objects.filter(
-            quizz_type__name_code='full_test').first()
+            quizz_type__name_code='by_lesson').first()
         course_type = CourseType.objects.get_ent()
         validated_data["course_type"] = course_type
         student_quizz = super().create(validated_data)
