@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
-from src.quizzes.models import Question, CommonQuestion
+from src.quizzes.models import Question, CommonQuestion, StudentScore, \
+    TestFullScore
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -47,3 +48,14 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
 
     def get_user_ans(self, obj):
         return [i.answer_id for i in obj.student_answers.all()]
+
+
+class ResultScoreSerializer(serializers.ModelSerializer):
+    sum_score = serializers.IntegerField(default=None)
+
+    class Meta:
+        model = Question
+        fields = (
+            'id',
+            'sum_score'
+        )

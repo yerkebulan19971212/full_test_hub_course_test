@@ -292,9 +292,50 @@ class EntFinishView(views.APIView):
                     score=score
                 ))
         TestFullScore.objects.bulk_create(test_full_score)
-        return Response({
-            "detail": "success"
-        }, status=status.HTTP_201_CREATED)
+        return Response({"detail": "success"}, status=status.HTTP_201_CREATED)
 
 
 full_test_finish_view = EntFinishView.as_view()
+
+
+class GetTestFullScoreResultListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.FullQuizQuestionSerializer
+    queryset = TestFullScore.objects.select_related(
+        'common_question').prefetch_related('answers').all().distinct()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.FullQuizzQuestionFilter
+
+    @swagger_auto_schema(tags=["full-test"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        student_quizz = self.request.query_params.get('student_quizz_id')
+        answer = StudentAnswer.objects.filter(
+            student_quizz_id=student_quizz,
+            status=True
+        )
+        return super().get_queryset().prefetch_related(
+            Prefetch('student_answers', queryset=answer)
+        ).order_by('id')
+
+
+get_full_test_full_score_result_view = GetTestFullScoreResultListView.as_view()
+
+
+class GetResultListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.ResultScoreSerializer
+    queryset = Question.objects.all().annotate(
+        sum_score=Sum('question_score__score')
+    ).order_by('id')
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.FullQuizzQuestionFilter
+
+    @swagger_auto_schema(tags=["full-test"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+get_full_test_result_view = GetResultListView.as_view()
