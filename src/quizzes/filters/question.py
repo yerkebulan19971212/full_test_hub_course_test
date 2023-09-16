@@ -20,6 +20,17 @@ class FullQuizzQuestionFilter(django_filters.FilterSet):
         )
 
 
+class TestFullScoreFilter(django_filters.FilterSet):
+    student_quizz_id = filters.NumberFilter(
+        field_name="student_quizz", required=True)
+
+    class Meta:
+        model = models.TestFullScore
+        fields = (
+            'student_quizz_id',
+        )
+
+
 class StudentQuizQuestionFilter(django_filters.FilterSet):
     student_quizz_id = filters.NumberFilter(
         field_name="student_quizz_questions__student_quizz_id")

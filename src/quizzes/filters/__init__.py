@@ -1,3 +1,3 @@
 from .flash_card import FlashCardQuestionFilter
-from .question import FullQuizzQuestionFilter
+from .question import FullQuizzQuestionFilter, TestFullScoreFilter
 from .common import MyTestFilter

@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
-from src.quizzes.models import Question, CommonQuestion, StudentScore, \
-    TestFullScore
+from src.quizzes.models import Question, CommonQuestion, TestFullScore
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -48,6 +47,27 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
 
     def get_user_ans(self, obj):
         return [i.answer_id for i in obj.student_answers.all()]
+
+
+class TestFullScoreSerializer(serializers.ModelSerializer):
+    name_kz = serializers.CharField(source='lesson.name_kz')
+    name_ru = serializers.CharField(source='lesson.name_ru')
+    name_en = serializers.CharField(source='lesson.name_en')
+
+    class Meta:
+        model = TestFullScore
+        fields = (
+            'id',
+            'lesson_id',
+            'unattem',
+            'score',
+            'number_of_question',
+            'number_of_score',
+            'accuracy',
+            'name_kz',
+            'name_ru',
+            'name_en',
+        )
 
 
 class ResultScoreSerializer(serializers.ModelSerializer):

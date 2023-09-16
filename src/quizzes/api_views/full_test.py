@@ -185,7 +185,7 @@ class FullQuizQuestionListView(generics.ListAPIView):
         )
         return super().get_queryset().prefetch_related(
             Prefetch('student_answers', queryset=answer)
-        ).order_by('id')
+        ).order_by('student_quizz_questions__order')
 
 
 full_quizz_question_view = FullQuizQuestionListView.as_view()
@@ -300,25 +300,14 @@ full_test_finish_view = EntFinishView.as_view()
 
 class GetTestFullScoreResultListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = serializers.FullQuizQuestionSerializer
-    queryset = TestFullScore.objects.select_related(
-        'common_question').prefetch_related('answers').all().distinct()
+    serializer_class = serializers.TestFullScoreSerializer
+    queryset = TestFullScore.objects.all()
     filter_backends = [DjangoFilterBackend]
-    filterset_class = filters.FullQuizzQuestionFilter
+    filterset_class = filters.TestFullScoreFilter
 
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        student_quizz = self.request.query_params.get('student_quizz_id')
-        answer = StudentAnswer.objects.filter(
-            student_quizz_id=student_quizz,
-            status=True
-        )
-        return super().get_queryset().prefetch_related(
-            Prefetch('student_answers', queryset=answer)
-        ).order_by('id')
 
 
 get_full_test_full_score_result_view = GetTestFullScoreResultListView.as_view()
@@ -328,8 +317,9 @@ class GetResultListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.ResultScoreSerializer
     queryset = Question.objects.all().annotate(
-        sum_score=Sum('question_score__score')
-    ).order_by('id')
+        sum_score=Sum('question_score__score',
+                      filter=Q(question_score__status=True))
+    ).order_by('student_quizz_questions__order')
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.FullQuizzQuestionFilter
 
