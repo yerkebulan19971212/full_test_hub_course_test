@@ -329,3 +329,41 @@ class GetResultListView(generics.ListAPIView):
 
 
 get_full_test_result_view = GetResultListView.as_view()
+
+
+class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.ResultScoreSerializer
+    queryset = Question.objects.all().annotate(
+        sum_score=Sum('question_score__score',
+                      filter=Q(question_score__status=True))
+    ).order_by('student_quizz_questions__order')
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.FullQuizzQuestionFilter
+
+    @swagger_auto_schema(tags=["full-test"])
+    def get(self, request, *args, **kwargs):
+        student_quizz_id = self.kwargs.get('student_quizz_id')
+        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        total_score = TestFullScore.objects.filter(
+            student_quizz_id=student_quizz_id
+        ).aggregate(total_score=Coalesce(Sum('score'), 0)).get("total_score")
+        total_bal = 140
+        answered_questions = StudentAnswer.objects.filter(
+            student_quizz=student_quizz_id,
+            status=True
+        ).aggregate(
+            answered_questions=Coalesce(Sum('question_id', distinct=True), 0)
+        ).get("answered_questions")
+
+        return Response({
+            "total_score": total_score,
+            "total_bal": total_bal,
+            "answered_questions": answered_questions,
+            "start_time": student_quizz.quizz_start_time,
+            "end_time": student_quizz.quizz_end_time,
+            "duration": student_quizz.quizz_start_time - student_quizz.quizz_end_time,
+        })
+
+
+st_result_view = StudentQuizFinishInfoListView.as_view()
