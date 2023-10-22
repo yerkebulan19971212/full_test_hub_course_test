@@ -30,6 +30,7 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
     answer = AnswerSerializer(source='answers', many=True)
     common_question = CommonQuestionSerializer(many=False)
     user_ans = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
     choice = serializers.IntegerField(
         source='lesson_question_level.question_level.choice')
 
@@ -42,11 +43,16 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
             'choice',
             # 'number',
             'user_ans',
-            'answer'
+            'answer',
+            'order',
         )
 
     def get_user_ans(self, obj):
         return [i.answer_id for i in obj.student_answers.all()]
+
+    def get_order(self, obj):
+        return obj.student_quizz_questions.filter(
+            student_quizz_id=80).first().order
 
 
 class TestFullScoreSerializer(serializers.ModelSerializer):
@@ -79,3 +85,8 @@ class ResultScoreSerializer(serializers.ModelSerializer):
             'id',
             'sum_score'
         )
+
+
+class FullQuizQuestionQuerySerializer(serializers.Serializer):
+    student_quizz_id = serializers.IntegerField(required=True)
+    lesson_id = serializers.IntegerField(required=True)

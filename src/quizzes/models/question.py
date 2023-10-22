@@ -97,7 +97,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'))
         for i in range(random.randint(1, 10)):
             random.shuffle(questions)
-        return questions
+        return questions[:10]
 
     def get_reading_literacy_full_test(self, lang: str):
         questions_list = []
@@ -106,8 +106,6 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         for i in range(random.randint(1, 5)):
             random.shuffle(variants)
         for q in QuestionLevel.objects.all().order_by('id')[:3]:
-            print(q)
-            print(q.name_code)
             random.shuffle(variants)
             variant = variants[1]
             questions = self.select_related(
@@ -124,8 +122,6 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 questions_list += [q for q in questions[:3]]
             else:
                 questions_list += [q for q in questions[:5]]
-            print(len(questions_list))
-            print(questions_list)
         return questions_list
 
     def get_history_full_test(self, lang: str):

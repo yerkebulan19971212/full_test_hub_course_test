@@ -19,6 +19,7 @@ from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer, \
 from src.quizzes import serializers
 from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, StudentQuizz
+from src.quizzes.serializers import FullQuizQuestionQuerySerializer
 
 
 class MyTest(generics.ListAPIView):
@@ -169,22 +170,31 @@ class FullQuizQuestionListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.FullQuizQuestionSerializer
     queryset = Question.objects.select_related(
-        'common_question').prefetch_related('answers').all().distinct()
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = filters.FullQuizzQuestionFilter
+        'common_question',
+        'lesson_question_level',
+        'lesson_question_level__question_level'
+    ).prefetch_related(
+        'answers',
+        'student_quizz_questions',
+    ).all().distinct()
 
-    @swagger_auto_schema(tags=["full-test"])
+    @swagger_auto_schema(tags=["full-test"],
+                         query_serializer=FullQuizQuestionQuerySerializer)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        student_quizz = self.request.query_params.get('student_quizz_id')
+        student_quizz_id = self.request.query_params.get('student_quizz_id')
+        lesson_id = self.request.query_params.get('lesson_id')
         answer = StudentAnswer.objects.filter(
-            student_quizz_id=student_quizz,
+            student_quizz_id=student_quizz_id,
             status=True
         )
         return super().get_queryset().prefetch_related(
             Prefetch('student_answers', queryset=answer)
+        ).filter(
+            student_quizz_questions__lesson_id=lesson_id,
+            student_quizz_questions__student_quizz_id=student_quizz_id,
         ).order_by('student_quizz_questions__order')
 
 
