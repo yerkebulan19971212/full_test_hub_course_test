@@ -11,7 +11,7 @@ from src.common.serializers import LessonSerializer, LessonPairListSerializer, \
     LessonWithPairsSerializer
 from src.common import filters
 from src.quizzes.models import QuestionLevel, LessonQuestionLevel, \
-    CommonQuestion, Question, Answer, VariantQuestion, Variant
+    CommonQuestion, Question, Answer, VariantQuestion, Variant, AnswerSign
 
 
 class GetAllActiveLesson(generics.ListAPIView):
@@ -55,11 +55,15 @@ class ImportQuestionFromTestHubApp(APIView):
 
     def get(self, request, *args, **kwargs):
         lessons = Lesson.objects.get_all_active()
-        variant_list_url = "http://127.0.0.1:8008/api/v1/generation/variant-list/"
+        variant_list_url = "http://127.0.0.1:8007/api/v1/super-admin/variant-list/"
         res = requests.get(variant_list_url)
+        answersign = AnswerSign.objects.all()
+        print(res)
+        print("=======res")
+        ql_list = QuestionLevel.objects.all().order_by('id')
         try:
             with transaction.atomic():
-                for v in res.json():
+                for v in res.json().get("data"):
                     print('===============================================')
                     question_l = []
                     variant = Variant.objects.create(
@@ -67,46 +71,61 @@ class ImportQuestionFromTestHubApp(APIView):
                         variant_title=v["variant"]
                     )
                     for l in lessons:
-                        question_url = "http://127.0.0.1:8008/api/v1/generation/variant-question-list/?"
+                        question_url = "http://127.0.0.1:8007/api/v1/quizzes/get-all-question-2-2/?"
                         question_url += "variant_id=" + str(
                             v.get('id')) + "&lesson_code=" + l.name_code
                         print(question_url)
                         res_q = requests.get(question_url)
-                        for r in res_q.json():
-                            question = r["question"]
-                            comon_q = question["common_question"]
-                            common_q_o = None
-                            if comon_q:
-                                common_q_o, _ = CommonQuestion.objects.get_or_create(
-                                    # name_code=comon_q["name_code"],
-                                    file=comon_q["file"],
-                                    text=comon_q["text"],
+
+
+                        start = 0
+                        end = 5
+                        order = 1
+                        if l.name_code == 'reading_literacy':
+                            end = 2
+                            print(end)
+                        for ql in ql_list:
+                            if l.name_code == 'reading_literacy':
+                                print(end)
+                            for r in res_q.json()[start:end]:
+                                question = r
+                                comon_q = question["common_question"]
+                                common_q_o = None
+                                if comon_q:
+                                    common_q_o, _ = CommonQuestion.objects.get_or_create(
+                                        text=comon_q["text"],
+                                    )
+                                lq = LessonQuestionLevel.objects.filter(
+                                    question_level=ql,
+                                    test_type_lesson__lesson=l
+                                ).first()
+                                q = Question.objects.create(
+                                    order=order,
+                                    lesson_question_level=lq,
+                                    common_question=common_q_o,
+                                    question=question["question"],
+                                    variant=variant
                                 )
-                            lq = LessonQuestionLevel.objects.filter(
-                                question_level__name_code=
-                                question["lesson_question_level"]["name_code"],
-                                test_type_lesson__lesson=l
-                            ).first()
-                            q = Question.objects.create(
-                                lesson_question_level=lq,
-                                common_question=common_q_o,
-                                question=question["question"],
-                                math=question["math"],
-                                variant=variant
-                            )
-                            Answer.objects.bulk_create([
-                                Answer(
-                                    question=q,
-                                    answer=a["answer"],
-                                    correct=a["correct"],
-                                    math=a["math"],
-                                    answer_sign_id=a["answer_sign"],
-                                ) for a in question["answers"]
-                            ])
-                            question_l.append(VariantQuestion(
-                                variant=variant,
-                                question=q
-                            ))
+                                Answer.objects.bulk_create([
+                                    Answer(
+                                        answer_sign=answersign[i],
+                                        question=q,
+                                        answer=a["answer"],
+                                        correct=a["correct"],
+                                    ) for i, a in enumerate(question["answer"])
+                                ])
+                                question_l.append(VariantQuestion(
+                                    variant=variant,
+                                    question=q
+                                ))
+
+                                order += 1
+
+                            start = end
+                            if l.name_code == 'reading_literacy' and ql.name_code == "A":
+                                end += 3
+                            else:
+                                end += 5
                     VariantQuestion.objects.bulk_create(question_l)
         except Exception as e:
             print(e)

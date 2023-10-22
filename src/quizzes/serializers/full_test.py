@@ -50,10 +50,11 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         questions += Question.objects.get_full_test(language,
                                                     lesson_pair.lesson_2)
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
+            order=i,
             question=q,
             lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
             student_quizz=student_quizz
-        ) for q in questions])
+        ) for i,q in enumerate(questions)])
 
         return student_quizz
 

@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from django.db.models import Prefetch, Count, Q
 from django.db.models.functions import Coalesce
@@ -6,7 +8,7 @@ from src.common import abstract_models
 from src.common.constant import ChoiceType
 from src.common.models import QuizzType, CourseTypeQuizz, CourseTypeLesson
 from src.quizzes import models as quizzes_models
-from src.quizzes.models import StudentQuizz
+from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
 
 
 class CommonQuestion(
@@ -89,32 +91,85 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return queryset
 
     def get_mat_full_test(self, lang: str):
-        return self.select_related(
+        questions = list(self.select_related(
             'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
-            lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'
-        )[:10]
+            lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'))
+        for i in range(random.randint(1, 10)):
+            random.shuffle(questions)
+        return questions
 
     def get_reading_literacy_full_test(self, lang: str):
-        return self.select_related(
-            'lesson_question_level__test_type_lesson').filter(
-            variant__language=lang,
-            lesson_question_level__test_type_lesson__lesson__name_code='reading_literacy'
-        )[:10]
+        questions_list = []
+        variants = [v for v in
+                    Variant.objects.filter(is_active=True).order_by('?')]
+        for i in range(random.randint(1, 5)):
+            random.shuffle(variants)
+        for q in QuestionLevel.objects.all().order_by('id')[:3]:
+            print(q)
+            print(q.name_code)
+            random.shuffle(variants)
+            variant = variants[1]
+            questions = self.select_related(
+                'lesson_question_level__test_type_lesson'
+            ).filter(
+                variant__language=lang,
+                variant=variant,
+                lesson_question_level__question_level=q,
+                lesson_question_level__test_type_lesson__lesson__name_code='reading_literacy'
+            ).order_by('order')
+            if q.name_code == 'A':
+                questions_list += [q for q in questions[:2]]
+            elif q.name_code == 'B':
+                questions_list += [q for q in questions[:3]]
+            else:
+                questions_list += [q for q in questions[:5]]
+            print(len(questions_list))
+            print(questions_list)
+        return questions_list
 
     def get_history_full_test(self, lang: str):
-        return self.select_related(
-            'lesson_question_level__test_type_lesson').filter(
-            variant__language=lang,
-            lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan'
-        )[:10]
+        questions_list = []
+        variants = [v for v in
+                    Variant.objects.filter(is_active=True).order_by('?')]
+        for i in range(random.randint(1, 5)):
+            random.shuffle(variants)
+        variant = variants[1]
+        for q in QuestionLevel.objects.all().order_by('id')[:4]:
+            questions = self.select_related(
+                'lesson_question_level__test_type_lesson').filter(
+                variant__language=lang,
+                lesson_question_level__question_level=q,
+                lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan')
+            if q.name_code == 'C':
+                questions = questions.filter(variant=variant)
+            if q.name_code == 'D':
+                if len(variants) > 1:
+                    variant = variants[2]
+                questions = questions.filter(variant=variant)
+            questions_list += [q for q in questions[:5]]
+        return questions_list
 
     def get_full_test(self, lang: str, lesson):
-        return self.select_related(
-            'lesson_question_level__test_type_lesson').filter(
-            variant__language=lang,
-            lesson_question_level__test_type_lesson__lesson=lesson
-        )[:35]
+        questions_list = []
+        variants = [v for v in
+                    Variant.objects.filter(is_active=True).order_by('?')]
+        for i in range(random.randint(1, 5)):
+            random.shuffle(variants)
+        variant = variants[1]
+        for q in QuestionLevel.objects.all().order_by('id'):
+            questions = self.select_related(
+                'lesson_question_level__test_type_lesson'
+            ).filter(
+                variant__language=lang,
+                lesson_question_level__question_level=q,
+                lesson_question_level__test_type_lesson__lesson=lesson
+            )
+            if q.name_code == 'E':
+                questions = questions.filter(variant=variant)
+            questions_list += [q for q in questions[:5]]
+
+        return questions_list
 
 
 class QuestionManager(models.Manager):
