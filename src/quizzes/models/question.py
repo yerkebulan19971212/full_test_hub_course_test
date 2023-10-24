@@ -35,8 +35,8 @@ class CommonQuestion(
 
 class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
-    def get_questions_for_flash_card(self, lang: str, lesson: int,
-                                     question_number: int):
+    def get_questions_for_flash_card(
+            self, lang: str, lesson: int, question_number: int):
         return self.filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson_id=lesson,
@@ -45,10 +45,11 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_questions_with_answer(self):
         return self.prefetch_related(
-            Prefetch('answers', queryset=quizzes_models.Answer.objects.all()))
+            Prefetch('answers', queryset=quizzes_models.Answer.objects.all())
+        )
 
-    def get_questions_by_lesson(self, lang: str, lesson: int,
-                                course_type: str):
+    def get_questions_by_lesson(
+            self, lang: str, lesson: int, course_type: str):
         question_number = 0
         course_types = CourseTypeLesson.objects.filter(
             lesson=lesson,
