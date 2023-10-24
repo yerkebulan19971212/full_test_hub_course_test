@@ -143,6 +143,10 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 if len(variants) > 1:
                     variant = variants[2]
                 questions = questions.filter(variant=variant)
+            else:
+                for i in range(random.randint(1, 10)):
+                    questions = [q for q in questions]
+                    random.shuffle(questions)
             questions_list += [q for q in questions[:5]]
         return questions_list
 
@@ -163,6 +167,10 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             )
             if q.name_code == 'E':
                 questions = questions.filter(variant=variant)
+            else:
+                for i in range(random.randint(1, 10)):
+                    questions = [q for q in questions]
+                    random.shuffle(questions)
             questions_list += [q for q in questions[:5]]
 
         return questions_list
