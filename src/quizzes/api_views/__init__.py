@@ -7,7 +7,7 @@ from .full_test import (full_quizz_lesson_view, full_quizz_question_view,
                         full_quizz_view, full_test_finish_view, my_test_view,
                         get_full_test_result_view,
                         get_full_test_full_score_result_view,
-                        new_full_test_view, pass_answer_view)
+                        new_full_test_view, pass_answer_view, st_result_view)
 from .quiz_test import (finish_quiz_test, get_quiz_test_question_view,
                         new_quizz_test_view, pass_quizz_test_answer_view,
                         quiz_test_check_answer_view)

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Prefetch
+from django.db.models import Sum, Count, Q, Prefetch, Exists, OuterRef
 from django.db.models.functions import Coalesce
 from rest_framework import generics, status
 from rest_framework import permissions
@@ -211,7 +211,7 @@ class PassStudentAnswerView(generics.CreateAPIView):
         question_id = data.get('question')
         student_quizz_id = data.get('student_quizz')
         answers = data.get('answers')
-
+        print(answers)
         if answers:
             try:
                 with transaction.atomic():
@@ -299,7 +299,11 @@ class EntFinishView(views.APIView):
                 TestFullScore(
                     student_quizz=student_quizz,
                     lesson=lesson,
-                    score=score
+                    score=score,
+                    unattem=140 - score,
+                    number_of_score=140,
+                    number_of_question=120,
+                    accuracy=100 * score / 140
                 ))
         TestFullScore.objects.bulk_create(test_full_score)
         return Response({"detail": "success"}, status=status.HTTP_201_CREATED)
@@ -312,12 +316,51 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.TestFullScoreSerializer
     queryset = TestFullScore.objects.all()
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = filters.TestFullScoreFilter
+
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_class = filters.TestFullScoreFilter
 
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        student_quizz_id = self.kwargs.get('pk')
+        data = super().get(request, *args, **kwargs).data
+        for d in data:
+            questions = Question.objects.filter(
+                student_quizz_questions__student_quizz_id=student_quizz_id,
+                student_quizz_questions__lesson_id=d.get('lesson_id'),
+            ).annotate(
+                answered_correct=Exists(
+                    StudentAnswer.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question_id=OuterRef('pk'),
+                        status=True,
+                    )),
+                answered=Exists(
+                    StudentAnswer.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question_id=OuterRef('pk'),
+                    ))
+            ).order_by('student_quizz_questions__order')
+            d['questions'] = []
+            for q in questions:
+                answered = 'NOT_ANSWERED'
+                if q.answered_correct and q.answered:
+                    answered = 'CORRECT'
+                elif q.answered_correct is False and q.answered:
+                    answered = 'WRONG'
+
+                d['questions'].append({
+                    "question_id": q.id,
+                    "correct_answered": answered,
+                })
+        return Response({
+            "lesson": data,
+            # "": data,
+        })
+
+    def get_queryset(self):
+        student_quizz_id = self.kwargs.get('pk')
+        return super().get_queryset().filter(student_quizz_id=student_quizz_id)
 
 
 get_full_test_full_score_result_view = GetTestFullScoreResultListView.as_view()
@@ -348,12 +391,10 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
         sum_score=Sum('question_score__score',
                       filter=Q(question_score__status=True))
     ).order_by('student_quizz_questions__order')
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = filters.FullQuizzQuestionFilter
 
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
-        student_quizz_id = self.kwargs.get('student_quizz_id')
+        student_quizz_id = self.kwargs.get('pk')
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
         total_score = TestFullScore.objects.filter(
             student_quizz_id=student_quizz_id
@@ -363,17 +404,35 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
             student_quizz=student_quizz_id,
             status=True
         ).aggregate(
-            answered_questions=Coalesce(Sum('question_id', distinct=True), 0)
+            answered_questions=Coalesce(Count('question_id', distinct=True), 0)
         ).get("answered_questions")
-
+        quantity_question = StudentQuizzQuestion.objects.filter(
+            student_quizz=student_quizz
+        ).count()
         return Response({
-            "total_score": total_score,
-            "total_bal": total_bal,
-            "answered_questions": answered_questions,
+            "total_user_score": total_score,
+            "total_score": total_bal,
             "start_time": student_quizz.quizz_start_time,
             "end_time": student_quizz.quizz_end_time,
-            "duration": student_quizz.quizz_start_time - student_quizz.quizz_end_time,
+            "duration": student_quizz.quizz_end_time - student_quizz.quizz_start_time,
+            "quantity_question": quantity_question,
+            "quantity_correct_question": answered_questions,
+            "quantity_wrong_question": quantity_question - answered_questions,
+            "correct_question_percent": 100 * answered_questions / quantity_question,
         })
 
 
 st_result_view = StudentQuizFinishInfoListView.as_view()
+
+
+class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.ResultScoreSerializer
+    queryset = Question.objects.all().annotate(
+        sum_score=Sum('question_score__score',
+                      filter=Q(question_score__status=True))
+    ).order_by('student_quizz_questions__order')
+
+    @swagger_auto_schema(tags=["full-test"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

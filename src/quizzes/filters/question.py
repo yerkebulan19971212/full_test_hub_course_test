@@ -40,3 +40,5 @@ class StudentQuizQuestionFilter(django_filters.FilterSet):
         fields = (
             'student_quizz_id',
         )
+
+
