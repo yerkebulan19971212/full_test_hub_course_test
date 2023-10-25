@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import transaction
 from django.db.models import Sum, Count, Q, Prefetch
 from django.db.models.functions import Coalesce
+from django.utils.dateparse import parse_duration
 from rest_framework import generics, status
 from rest_framework import permissions
 from rest_framework import views
@@ -111,10 +112,14 @@ class ByLessonQuizLessonListView(generics.ListAPIView):
         #     }
         duration = datetime.now() - student_test.quizz_start_time
         data = self.list(request, *args, **kwargs).data
-
+        duration = parse_duration(str(duration))
         return Response({
             "lessons": data,
-            "duration": duration
+            "duration": {
+                "hour": duration.seconds // 3600,
+                "minute": (duration.seconds % 3600) // 60,
+                "seconds": duration.seconds % 60,
+            }
         }, status=status.HTTP_200_OK)
 
     def get_queryset(self):
