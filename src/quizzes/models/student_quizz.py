@@ -108,10 +108,11 @@ class StudentQuizzFile(
     abstract_models.IsActive,
     abstract_models.TimeStampedModel
 ):
-    icon = models.FileField(upload_to='student_quizz/icon')
-    file = models.FileField(upload_to='student_quizz/file')
+    icon = models.FileField(upload_to='student-quizz/icon')
+    file = models.FileField(upload_to='student-quizz/file')
+    file_name = models.CharField(max_length=1024, null=True)
     course_type = models.ForeignKey(
-        'common.CourseType',
+        'common.QuizzType',
         on_delete=models.CASCADE,
         null=True,
         db_index=True,

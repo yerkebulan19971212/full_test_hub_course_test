@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import StudentQuizz
+from .models import StudentQuizz, StudentQuizzFile
 
 admin.site.register([
+    StudentQuizzFile
 ])
 
 
@@ -11,12 +12,14 @@ class StudentQuizzAdmin(admin.ModelAdmin):
         'user', 'id', 'course_type', 'packet', 'status', 'lesson',
         'lesson_pair', 'quizz_type', 'language', 'quizz_start_time',
         'quizz_end_time', 'created',
-        'modified')
+        'modified'
+    )
     fields = (
         'user', 'id', 'course_type', 'packet', 'status', 'lesson',
         'lesson_pair', 'quizz_type', 'language', 'quizz_start_time',
         'quizz_end_time', 'created',
-        'modified')
+        'modified'
+    )
     readonly_fields = ('pk', 'created', 'modified')
     search_fields = (
         'user__email',

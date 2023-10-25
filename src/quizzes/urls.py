@@ -17,7 +17,7 @@ from src.quizzes.api_views import (by_lesson_finish_view,
                                    quiz_test_check_answer_view,
                                    get_full_test_result_view,
                                    get_full_test_full_score_result_view,
-                                   st_result_view)
+                                   st_result_view, get_files_view)
 
 full_test = [
     path('new/', new_full_test_view),
@@ -60,6 +60,7 @@ api_v1_urlpatterns = [
     path('quizz-test/', include(quizz_test)),
     path('by-lesson/', include(by_lesson_quizz)),
     path('my-test-list/', my_test_view),
+    path('get-files/', get_files_view),
 
 ]
 

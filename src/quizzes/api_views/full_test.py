@@ -14,11 +14,13 @@ from rest_framework.response import Response
 from src.common.constant import ChoiceType
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.utils import get_multi_score
+from src.quizzes.filters import StudentQuizFileFilterSerializer
 from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer, \
     TestFullScore
 from src.quizzes import serializers
 from src.quizzes import filters
-from src.quizzes.models.student_quizz import StudentQuizzQuestion, StudentQuizz
+from src.quizzes.models.student_quizz import StudentQuizzQuestion, \
+    StudentQuizz, StudentQuizzFile
 from src.quizzes.serializers import FullQuizQuestionQuerySerializer
 
 
@@ -38,6 +40,19 @@ class MyTest(generics.ListAPIView):
 
 
 my_test_view = MyTest.as_view()
+
+
+class GetFilesView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = StudentQuizzFile.objects.all()
+    serializer_class = serializers.StudentQuizzFileSerializer
+
+    @swagger_auto_schema(query_serializer=StudentQuizFileFilterSerializer)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+get_files_view = GetFilesView.as_view()
 
 
 class NewFullTest(generics.CreateAPIView):

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
-from src.quizzes.models import Question, CommonQuestion, StudentQuizz
+from src.quizzes.models import Question, CommonQuestion, StudentQuizz, \
+    StudentQuizzFile
 
 
 class MyTestSerializer(serializers.ModelSerializer):
@@ -17,3 +18,20 @@ class MyTestSerializer(serializers.ModelSerializer):
             'quizz_duration',
             'quantity_question'
         )
+
+
+class StudentQuizzFileSerializer(serializers.ModelSerializer):
+    size = serializers.SerializerMethodField()
+
+    class Meta:
+        model = StudentQuizzFile
+        fields = (
+            'id',
+            'icon',
+            'file',
+            'file_name',
+            'size',
+        )
+
+    def get_size(self, obj):
+        return obj.file.size / 1024 / 1024
