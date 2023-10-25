@@ -109,11 +109,12 @@ class ByLessonQuizLessonListView(generics.ListAPIView):
         #         "minute": (duration.seconds // 60) % 60,
         #         "seconds": duration.seconds % 60
         #     }
+        duration = datetime.now() - student_test.quizz_start_time
         data = self.list(request, *args, **kwargs).data
 
         return Response({
             "lessons": data,
-            "duration": "4:00:00"
+            "duration": duration
         }, status=status.HTTP_200_OK)
 
     def get_queryset(self):

@@ -300,7 +300,7 @@ class EntFinishView(views.APIView):
             question_full_score = StudentQuizzQuestion.objects.filter(
                 student_quizz=student_quizz,
                 lesson=lesson
-            ).exclude(status=False).distinct().aggregate(
+            ).distinct().aggregate(
                 sum_score=Coalesce(
                     Sum('question__lesson_question_level__question_level__point'),
                     0)
