@@ -293,16 +293,28 @@ class EntFinishView(views.APIView):
                 student_quizz=student_quizz
             ).exclude(status=False).distinct(). \
                 aggregate(sum_score=Coalesce(Sum('score'), 0))
+            quantity_question = StudentQuizzQuestion.objects.filter(
+                student_quizz=student_quizz,
+                lesson=lesson
+            ).count()
+            question_full_score = StudentQuizzQuestion.objects.filter(
+                student_quizz=student_quizz,
+                lesson=lesson
+            ).exclude(status=False).distinct().aggregate(
+                sum_score=Coalesce(
+                    Sum('question__lesson_question_level__question_level__point'),
+                    0)
+            ).get("sum_score")
             score = question_score.get('sum_score', 0)
             test_full_score.append(
                 TestFullScore(
                     student_quizz=student_quizz,
                     lesson=lesson,
                     score=score,
-                    unattem=140 - score,
-                    number_of_score=140,
-                    number_of_question=120,
-                    accuracy=100 * score / 140
+                    unattem=quantity_question - score,
+                    number_of_score=question_full_score,
+                    number_of_question=quantity_question,
+                    accuracy=100 * score / question_full_score
                 ))
         TestFullScore.objects.bulk_create(test_full_score)
         return Response({"detail": "success"}, status=status.HTTP_201_CREATED)
@@ -349,15 +361,11 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
                     answered = 'CORRECT'
                 elif q.answered_correct is False and q.answered:
                     answered = 'WRONG'
-
                 d['questions'].append({
                     "question_id": q.id,
                     "correct_answered": answered,
                 })
-        return Response({
-            "lesson": data,
-            # "": data,
-        })
+        return Response(data)
 
     def get_queryset(self):
         student_quizz_id = self.kwargs.get('pk')
