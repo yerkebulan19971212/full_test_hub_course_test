@@ -40,6 +40,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         validated_data["quizz_type"] = CourseTypeQuizz.objects.filter(quizz_type__name_code='full_test').first()
         validated_data["course_type"] = CourseType.objects.get_ent()
         validated_data["lesson_pair"] = lesson_pair
+        validated_data["quizz_duration"] = CourseTypeQuizz.course_type.quizz_duration
         student_quizz = super().create(validated_data)
         questions = []
         questions += Question.objects.get_history_full_test(language)

@@ -30,7 +30,11 @@ class MyTest(generics.ListAPIView):
     filterset_class = filters.MyTestFilter
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset().filter(
+            user=self.request.user
+        ).annotate(
+            quantity_question=Coalesce(Count('student_quizz_questions'), 0),
+        ).order('-created')
 
 
 my_test_view = MyTest.as_view()

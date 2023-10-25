@@ -54,7 +54,7 @@ class StudentQuizz(
         default=TestLang.KAZAKH,
         db_index=True
     )
-    # start_time = models.DateTimeField()
+    quizz_duration = models.DurationField(default="0", null=True, blank=True)
     quizz_start_time = models.DateTimeField(null=True, blank=True)
     quizz_end_time = models.DateTimeField(null=True, blank=True)
 
@@ -100,3 +100,20 @@ class StudentQuizzQuestion(
 
     def __str__(self):
         return f"{self.student_quizz}"
+
+
+class StudentQuizzFile(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel
+):
+    icon = models.FileField(upload_to='student_quizz/icon')
+    file = models.FileField(upload_to='student_quizz/file')
+    course_type = models.ForeignKey(
+        'common.CourseType',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='course_type_files',
+    )
