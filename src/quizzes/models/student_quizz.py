@@ -63,8 +63,8 @@ class StudentQuizz(
     class Meta:
         db_table = 'quizz\".\"student_test'
 
-    def __str__(self):
-        return f"{self.name_code}"
+    # def __str__(self):
+    #     return f"{self.name_code}"
 
 
 class StudentQuizzQuestion(
