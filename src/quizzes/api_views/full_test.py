@@ -34,7 +34,7 @@ class MyTest(generics.ListAPIView):
             user=self.request.user
         ).annotate(
             quantity_question=Coalesce(Count('student_quizz_questions'), 0),
-        ).order('-created')
+        ).order_by('-created')
 
 
 my_test_view = MyTest.as_view()
