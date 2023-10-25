@@ -211,7 +211,6 @@ class PassStudentAnswerView(generics.CreateAPIView):
         question_id = data.get('question')
         student_quizz_id = data.get('student_quizz')
         answers = data.get('answers')
-        print(answers)
         if answers:
             try:
                 with transaction.atomic():
@@ -333,12 +332,14 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
                     StudentAnswer.objects.filter(
                         student_quizz_id=student_quizz_id,
                         question_id=OuterRef('pk'),
+                        answer__correct=True,
                         status=True,
                     )),
                 answered=Exists(
                     StudentAnswer.objects.filter(
                         student_quizz_id=student_quizz_id,
                         question_id=OuterRef('pk'),
+                        status=True,
                     ))
             ).order_by('student_quizz_questions__order')
             d['questions'] = []
