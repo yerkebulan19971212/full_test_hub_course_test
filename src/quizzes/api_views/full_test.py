@@ -419,6 +419,13 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
         ).aggregate(
             answered_questions=Coalesce(Count('question_id', distinct=True), 0)
         ).get("answered_questions")
+        quantity_correct_question = StudentAnswer.objects.filter(
+            student_quizz=student_quizz_id,
+            status=True,
+            answer__correct=True
+        ).aggregate(
+            answered_questions=Coalesce(Count('question_id', distinct=True), 0)
+        ).get("answered_questions")
         quantity_question = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz
         ).count()
@@ -429,9 +436,10 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
             "end_time": student_quizz.quizz_end_time,
             "duration": student_quizz.quizz_end_time - student_quizz.quizz_start_time,
             "quantity_question": quantity_question,
-            "quantity_correct_question": answered_questions,
-            "quantity_wrong_question": quantity_question - answered_questions,
-            "correct_question_percent": 100 * answered_questions / quantity_question,
+            "quantity_answered_questions": answered_questions,
+            "quantity_correct_question": quantity_correct_question,
+            "quantity_wrong_question": answered_questions - quantity_correct_question,
+            "correct_question_percent": 100 * quantity_correct_question / answered_questions,
         })
 
 
