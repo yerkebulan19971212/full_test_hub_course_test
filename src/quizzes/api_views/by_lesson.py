@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Prefetch
+from django.db.models import Sum, Count, Q, Prefetch, Exists, OuterRef
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.dateparse import parse_duration
@@ -21,6 +21,7 @@ from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer, \
 from src.quizzes import serializers
 from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, StudentQuizz
+from src.quizzes.serializers import FullQuizQuestionQuerySerializer
 
 
 class NewByLessonQuiz(generics.CreateAPIView):
@@ -145,22 +146,25 @@ class ByLessonQuizQuestionListView(generics.ListAPIView):
     serializer_class = serializers.FullQuizQuestionSerializer
     queryset = Question.objects.select_related(
         'common_question').prefetch_related('answers').all()
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = filters.FullQuizzQuestionFilter
 
-    @swagger_auto_schema(tags=["by-lesson"])
+    @swagger_auto_schema(tags=["by-lesson"],
+                         query_serializer=FullQuizQuestionQuerySerializer)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        student_quizz = self.request.query_params.get('student_quizz_id')
+        student_quizz_id = self.request.query_params.get('student_quizz_id')
+        lesson_id = self.request.query_params.get('lesson_id')
         answer = StudentAnswer.objects.filter(
-            student_quizz_id=student_quizz,
+            student_quizz_id=student_quizz_id,
             status=True
         )
         return super().get_queryset().prefetch_related(
             Prefetch('student_answers', queryset=answer)
-        ).order_by('id')
+        ).filter(
+            student_quizz_questions__lesson_id=lesson_id,
+            student_quizz_questions__student_quizz_id=student_quizz_id,
+        ).order_by('student_quizz_questions__order')
 
 
 by_lesson_quizz_question_view = ByLessonQuizQuestionListView.as_view()
@@ -239,33 +243,28 @@ class ByLessonFinishView(views.APIView):
         student_quizz.status = "PASSED"
         student_quizz.quizz_end_time = datetime.now()
         student_quizz.save()
-        if student_quizz.lesson_pair:
-            test_type_lessons = CourseTypeLesson.objects.filter(
-                main=True, course_type__name_code='ent'
-            )
-            lessons = [test_type_lesson.lesson for test_type_lesson in
-                       test_type_lessons]
-            lesson_pair = student_quizz.lesson_pair
-            lessons.append(lesson_pair.lesson_1)
-            lessons.append(lesson_pair.lesson_2)
-        else:
-            lessons = [student_quizz.lesson]
-        index = 0
         test_full_score = []
-        for lesson in lessons:
-            index += 1
-            question_score = StudentScore.objects.filter(
-                student_quizz__student_quizz_questions__lesson=lesson,
-                student_quizz=student_quizz
-            ).exclude(status=False).distinct(). \
-                aggregate(sum_score=Coalesce(Sum('score'), 0))
-            score = question_score.get('sum_score', 0)
-            test_full_score.append(
-                TestFullScore(
-                    student_quizz=student_quizz,
-                    lesson=lesson,
-                    score=score
-                ))
+        question_score = StudentScore.objects.filter(
+            student_quizz=student_quizz
+        ).exclude(status=False).distinct(). \
+            aggregate(sum_score=Coalesce(Sum('score'), 0))
+        quantity_question = StudentQuizzQuestion.objects.filter(
+            student_quizz=student_quizz).count()
+        question_full_score = StudentQuizzQuestion.objects.filter(
+            student_quizz=student_quizz,
+        ).distinct().aggregate(sum_score=Coalesce(
+            Sum('question__lesson_question_level__question_level__point'), 0)
+        ).get("sum_score")
+        score = question_score.get('sum_score', 0)
+        test_full_score.append(
+            TestFullScore(
+                student_quizz=student_quizz,
+                lesson=student_quizz.lesson,
+                score=score,
+                unattem=quantity_question - score,
+                number_of_score=question_full_score,
+                number_of_question=quantity_question,
+                accuracy=100 * score / question_full_score))
         TestFullScore.objects.bulk_create(test_full_score)
         return Response({
             "detail": "success"
@@ -273,3 +272,119 @@ class ByLessonFinishView(views.APIView):
 
 
 by_lesson_finish_view = ByLessonFinishView.as_view()
+
+
+class ByLessonFinishInfoListView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.ResultScoreSerializer
+    queryset = Question.objects.all().annotate(
+        sum_score=Sum('question_score__score',
+                      filter=Q(question_score__status=True))
+    ).order_by('student_quizz_questions__order')
+
+    @swagger_auto_schema(tags=["by-lesson"])
+    def get(self, request, *args, **kwargs):
+        student_quizz_id = self.kwargs.get('pk')
+        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        total_score = TestFullScore.objects.filter(
+            student_quizz_id=student_quizz_id
+        ).aggregate(total_score=Coalesce(Sum('score'), 0)).get("total_score")
+        total_bal = 140
+        answered_questions = StudentAnswer.objects.filter(
+            student_quizz=student_quizz_id,
+            status=True
+        ).aggregate(
+            answered_questions=Coalesce(Count('question_id', distinct=True), 0)
+        ).get("answered_questions")
+        quantity_correct_question = StudentAnswer.objects.filter(
+            student_quizz=student_quizz_id,
+            status=True,
+            answer__correct=True
+        ).aggregate(
+            answered_questions=Coalesce(Count('question_id', distinct=True), 0)
+        ).get("answered_questions")
+        quantity_question = StudentQuizzQuestion.objects.filter(
+            student_quizz=student_quizz
+        ).count()
+        if answered_questions > 0:
+            correct_question_percent = 100 * quantity_correct_question / answered_questions
+        else:
+            correct_question_percent = 0
+        return Response({
+            "total_user_score": total_score,
+            "total_score": total_bal,
+            "start_time": student_quizz.quizz_start_time,
+            "end_time": student_quizz.quizz_end_time,
+            "duration": student_quizz.quizz_end_time - student_quizz.quizz_start_time,
+            "quantity_question": quantity_question,
+            "quantity_answered_questions": answered_questions,
+            "quantity_correct_question": quantity_correct_question,
+            "quantity_wrong_question": answered_questions - quantity_correct_question,
+            "correct_question_percent": correct_question_percent,
+        })
+
+
+by_lesson_result_view = ByLessonFinishInfoListView.as_view()
+
+
+class ResultQuestionView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.QuestionResultSerializer
+    queryset = Question.objects.all()
+    lookup_field = 'pk'
+
+    @swagger_auto_schema(tags=["by-lesson"])
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+get_by_lesson_result_question = ResultQuestionView.as_view()
+
+
+class GetTestFullScoreResultListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.TestFullScoreSerializer
+    queryset = TestFullScore.objects.all()
+
+    @swagger_auto_schema(tags=["by-lesson"])
+    def get(self, request, *args, **kwargs):
+        student_quizz_id = self.kwargs.get('pk')
+        data = super().get(request, *args, **kwargs).data
+        for d in data:
+            questions = Question.objects.filter(
+                student_quizz_questions__student_quizz_id=student_quizz_id,
+                student_quizz_questions__lesson_id=d.get('lesson_id'),
+            ).annotate(
+                answered_correct=Exists(
+                    StudentAnswer.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question_id=OuterRef('pk'),
+                        answer__correct=True,
+                        status=True,
+                    )),
+                answered=Exists(
+                    StudentAnswer.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question_id=OuterRef('pk'),
+                        status=True,
+                    ))
+            ).order_by('student_quizz_questions__order')
+            d['questions'] = []
+            for q in questions:
+                answered = 'NOT_ANSWERED'
+                if q.answered_correct and q.answered:
+                    answered = 'CORRECT'
+                elif q.answered_correct is False and q.answered:
+                    answered = 'WRONG'
+                d['questions'].append({
+                    "question_id": q.id,
+                    "correct_answered": answered,
+                })
+        return Response(data)
+
+    def get_queryset(self):
+        student_quizz_id = self.kwargs.get('pk')
+        return super().get_queryset().filter(student_quizz_id=student_quizz_id)
+
+
+get_by_lesson_full_score_result_view = GetTestFullScoreResultListView.as_view()

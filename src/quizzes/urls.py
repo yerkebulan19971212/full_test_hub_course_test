@@ -17,7 +17,9 @@ from src.quizzes.api_views import (by_lesson_finish_view,
                                    quiz_test_check_answer_view,
                                    get_result_question,
                                    get_full_test_full_score_result_view,
-                                   st_result_view, get_files_view)
+                                   st_result_view, get_files_view,
+                                   get_by_lesson_result_question,
+                                   by_lesson_result_view)
 
 full_test = [
     path('new/', new_full_test_view),
@@ -28,8 +30,8 @@ full_test = [
     path('finish/<int:student_quizz>/', full_test_finish_view),
     path('result/<int:pk>/', st_result_view),
     path('result-lesson/<int:pk>/', get_full_test_full_score_result_view),
-
-    path('result-questions/<int:pk>/<int:student_quizz_id>/', get_result_question),
+    path('result-questions/<int:pk>/<int:student_quizz_id>/',
+         get_result_question),
 ]
 
 by_lesson_quizz = [
@@ -39,6 +41,9 @@ by_lesson_quizz = [
     path('questions/', by_lesson_quizz_question_view),
     path('pass-answer/', by_lesson_pass_answer_view),
     path('finish/<int:student_quizz>/', by_lesson_finish_view),
+
+    path('result/<int:pk>/', by_lesson_result_view),
+    path('result-questions/<int:pk>/<int:student_quizz_id>/', get_by_lesson_result_question),
 ]
 
 flash_card = [

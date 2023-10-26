@@ -457,19 +457,6 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
 st_result_view = StudentQuizFinishInfoListView.as_view()
 
 
-class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = serializers.ResultScoreSerializer
-    queryset = Question.objects.all().annotate(
-        sum_score=Sum('question_score__score',
-                      filter=Q(question_score__status=True))
-    ).order_by('student_quizz_questions__order')
-
-    @swagger_auto_schema(tags=["full-test"])
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
 class ResultQuestionView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.QuestionResultSerializer
@@ -479,16 +466,6 @@ class ResultQuestionView(generics.RetrieveAPIView):
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
-
-    # def get_queryset(self):
-    #     student_quizz_id = self.kwargs.get('student_quizz_id')
-    #     answer = StudentAnswer.objects.filter(
-    #         student_quizz_id=student_quizz_id,
-    #         status=True
-    #     )
-    #     return super().get_queryset().prefetch_related(
-    #         Prefetch('student_answers', queryset=answer)
-    #     )
 
 
 get_result_question = ResultQuestionView.as_view()
