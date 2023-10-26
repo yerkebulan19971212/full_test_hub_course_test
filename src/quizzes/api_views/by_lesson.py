@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import transaction
 from django.db.models import Sum, Count, Q, Prefetch
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from django.utils.dateparse import parse_duration
 from rest_framework import generics, status
 from rest_framework import permissions
@@ -102,17 +103,16 @@ class ByLessonQuizLessonListView(generics.ListAPIView):
             test_start_time = student_test.quizz_start_time
             # difference_duration = datetime.now() - localtime(
             #     test_start_time).replace(tzinfo=None)
-        duration = student_test.course_type.quizz_duration
-        # if difference_duration <= duration:
-        #     duration = student_test.variant.duration - difference_duration
-        #     duration_time = {
-        #         "hour": duration.seconds // 3600,
-        #         "minute": (duration.seconds // 60) % 60,
-        #         "seconds": duration.seconds % 60
-        #     }
-        duration = datetime.now() - student_test.quizz_start_time
+        duration = student_test.quizz_type.quizz_type.quizz_duration
+        duration_dif = timezone.now() - student_test.quizz_start_time
+        duration = duration - duration_dif
+        if duration.total_seconds() <= 0:
+            student_test.quizz_duration = 0
+        else:
+            student_test.quizz_duration = duration
+        student_test.save()
         data = self.list(request, *args, **kwargs).data
-        duration = parse_duration(str(duration))
+        duration = parse_duration(str(student_test.quizz_duration))
         return Response({
             "lessons": data,
             "duration": {

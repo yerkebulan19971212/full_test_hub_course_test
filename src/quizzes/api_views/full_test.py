@@ -3,6 +3,8 @@ from datetime import datetime
 from django.db import transaction
 from django.db.models import Sum, Count, Q, Prefetch, Exists, OuterRef
 from django.db.models.functions import Coalesce
+from django.utils import timezone
+from django.utils.dateparse import parse_duration
 from rest_framework import generics, status
 from rest_framework import permissions
 from rest_framework import views
@@ -115,39 +117,32 @@ class FullQuizLessonListView(generics.ListAPIView):
                 student_test.status != "CONTINUE"):
             return Response({"detail": "Вы уже прошли этот тест"},
                             status=status.HTTP_400_BAD_REQUEST)
-            # elif datetime.now() > localtime(student_test.end_time).replace(
-            #         tzinfo=None):
-            # return Response({"detail": "Тест тапсыратын уакыт отип кетти"},
-            #                 status=status.HTTP_400_BAD_REQUEST)
         else:
             student_test.status = "CONTINUE"
             student_test.save()
-        duration_time = {
-            "hour": 0,
-            "minute": 0,
-            "seconds": 0
-        }
+
         if not student_test.quizz_start_time:
             student_test.quizz_start_time = datetime.now()
-            student_test.save()
             # difference_duration = timedelta(seconds=0)
         else:
             test_start_time = student_test.quizz_start_time
-            # difference_duration = datetime.now() - localtime(
-            #     test_start_time).replace(tzinfo=None)
-        duration = student_test.course_type.quizz_duration
-        # if difference_duration <= duration:
-        #     duration = student_test.variant.duration - difference_duration
-        #     duration_time = {
-        #         "hour": duration.seconds // 3600,
-        #         "minute": (duration.seconds // 60) % 60,
-        #         "seconds": duration.seconds % 60
-        #     }
+        duration = student_test.quizz_type.quizz_type.quizz_duration
+        duration_dif = timezone.now() - student_test.quizz_start_time
+        duration = duration - duration_dif
+        if duration.total_seconds() <= 0:
+            student_test.quizz_duration = 0
+        else:
+            student_test.quizz_duration = duration
+        student_test.save()
         data = self.list(request, *args, **kwargs).data
 
         return Response({
             "lessons": data,
-            "duration": duration_time
+            "duration": {
+                "hour": duration.seconds // 3600,
+                "minute": (duration.seconds % 3600) // 60,
+                "seconds": duration.seconds % 60,
+            }
         }, status=status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -346,9 +341,6 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.TestFullScoreSerializer
     queryset = TestFullScore.objects.all()
-
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_class = filters.TestFullScoreFilter
 
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
