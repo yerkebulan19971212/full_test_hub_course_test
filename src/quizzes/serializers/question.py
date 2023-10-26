@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
-from src.quizzes.models import Question, CommonQuestion, TestFullScore
+from src.quizzes.models import Question, CommonQuestion, TestFullScore, \
+    StudentAnswer
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -49,6 +50,7 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
     def get_user_ans(self, obj):
         return [i.answer_id for i in obj.student_answers.all()]
 
+
 class TestFullScoreSerializer(serializers.ModelSerializer):
     name_kz = serializers.CharField(source='lesson.name_kz')
     name_ru = serializers.CharField(source='lesson.name_ru')
@@ -84,3 +86,40 @@ class ResultScoreSerializer(serializers.ModelSerializer):
 class FullQuizQuestionQuerySerializer(serializers.Serializer):
     student_quizz_id = serializers.IntegerField(required=True)
     lesson_id = serializers.IntegerField(required=True)
+
+
+class QuestionResultSerializer(serializers.ModelSerializer):
+    answers = serializers.SerializerMethodField()
+    common_question = CommonQuestionSerializer(many=False)
+    choice = serializers.IntegerField(
+        source='lesson_question_level.question_level.choice')
+
+    class Meta:
+        model = Question
+        fields = (
+            'id',
+            'question',
+            'common_question',
+            'choice',
+            'answers',
+        )
+
+    def get_answers(self, obj):
+        answers = obj.answers.all()
+        answers_data = AnswerSerializer(answers, many=True).data
+        student_quizz_id = self.context.get('view').kwargs.get(
+            'student_quizz_id')
+        for a in answers_data:
+            ans_exists = StudentAnswer.objects.filter(
+                student_quizz_id=student_quizz_id,
+                question=obj,
+                answer_id=a.get('id')
+            ).first()
+            if ans_exists:
+                if ans_exists.answer.correct:
+                    a["correct"] = "CORRECT"
+                else:
+                    a["correct"] = "WRONG"
+            else:
+                a["correct"] = "NOT_CHOOSE"
+        return answers_data

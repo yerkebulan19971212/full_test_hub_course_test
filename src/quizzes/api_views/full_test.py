@@ -394,22 +394,22 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
 get_full_test_full_score_result_view = GetTestFullScoreResultListView.as_view()
 
 
-class GetResultListView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = serializers.ResultScoreSerializer
-    queryset = Question.objects.all().annotate(
-        sum_score=Sum('question_score__score',
-                      filter=Q(question_score__status=True))
-    ).order_by('student_quizz_questions__order')
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = filters.FullQuizzQuestionFilter
-
-    @swagger_auto_schema(tags=["full-test"])
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-get_full_test_result_view = GetResultListView.as_view()
+# class GetResultListView(generics.ListAPIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#     serializer_class = serializers.ResultScoreSerializer
+#     queryset = Question.objects.all().annotate(
+#         sum_score=Sum('question_score__score',
+#                       filter=Q(question_score__status=True))
+#     ).order_by('student_quizz_questions__order')
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_class = filters.FullQuizzQuestionFilter
+#
+#     @swagger_auto_schema(tags=["full-test"])
+#     def get(self, request, *args, **kwargs):
+#         return super().get(request, *args, **kwargs)
+#
+#
+# get_full_test_result_view = GetResultListView.as_view()
 
 
 class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
@@ -444,6 +444,10 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
         quantity_question = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz
         ).count()
+        if answered_questions > 0:
+            correct_question_percent = 100 * quantity_correct_question / answered_questions
+        else:
+            correct_question_percent = 0
         return Response({
             "total_user_score": total_score,
             "total_score": total_bal,
@@ -454,7 +458,7 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
             "quantity_answered_questions": answered_questions,
             "quantity_correct_question": quantity_correct_question,
             "quantity_wrong_question": answered_questions - quantity_correct_question,
-            "correct_question_percent": 100 * quantity_correct_question / answered_questions,
+            "correct_question_percent": correct_question_percent,
         })
 
 
@@ -472,3 +476,27 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+
+class ResultQuestionView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.QuestionResultSerializer
+    queryset = Question.objects.all()
+    lookup_field = 'pk'
+
+    @swagger_auto_schema(tags=["full-test"])
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    # def get_queryset(self):
+    #     student_quizz_id = self.kwargs.get('student_quizz_id')
+    #     answer = StudentAnswer.objects.filter(
+    #         student_quizz_id=student_quizz_id,
+    #         status=True
+    #     )
+    #     return super().get_queryset().prefetch_related(
+    #         Prefetch('student_answers', queryset=answer)
+    #     )
+
+
+get_result_question = ResultQuestionView.as_view()

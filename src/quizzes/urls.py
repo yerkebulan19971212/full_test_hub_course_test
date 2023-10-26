@@ -15,7 +15,7 @@ from src.quizzes.api_views import (by_lesson_finish_view,
                                    new_quizz_test_view, pass_answer_view,
                                    pass_quizz_test_answer_view,
                                    quiz_test_check_answer_view,
-                                   get_full_test_result_view,
+                                   get_result_question,
                                    get_full_test_full_score_result_view,
                                    st_result_view, get_files_view)
 
@@ -29,7 +29,7 @@ full_test = [
     path('result/<int:pk>/', st_result_view),
     path('result-lesson/<int:pk>/', get_full_test_full_score_result_view),
 
-    path('result-questions/', get_full_test_result_view),
+    path('result-questions/<int:pk>/<int:student_quizz_id>/', get_result_question),
 ]
 
 by_lesson_quizz = [
