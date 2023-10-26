@@ -35,12 +35,14 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             Q(lesson_1=lessons[0], lesson_2=lessons[1]) |
             Q(lesson_1=lessons[1], lesson_2=lessons[0])
         ).first()
+        c = CourseTypeQuizz.objects.filter(
+            quizz_type__name_code='full_test').first()
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = CourseTypeQuizz.objects.filter(quizz_type__name_code='full_test').first()
+        validated_data["quizz_type"] = c
         validated_data["course_type"] = CourseType.objects.get_ent()
         validated_data["lesson_pair"] = lesson_pair
-        validated_data["quizz_duration"] = CourseTypeQuizz.course_type.quizz_duration
+        validated_data["quizz_duration"] = c.course_type.quizz_duration
         student_quizz = super().create(validated_data)
         questions = []
         questions += Question.objects.get_history_full_test(language)
