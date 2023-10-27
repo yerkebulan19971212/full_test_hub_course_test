@@ -25,6 +25,7 @@ class AuthMeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
+            'id',
             'uuid',
             'role',
             'first_name',
