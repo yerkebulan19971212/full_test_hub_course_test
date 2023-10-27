@@ -304,10 +304,10 @@ class EntFinishView(views.APIView):
         for lesson in lessons:
             index += 1
             question_score = StudentScore.objects.filter(
-                student_quizz__student_quizz_questions__lesson=lesson,
-                student_quizz=student_quizz
-            ).exclude(status=False).distinct(). \
-                aggregate(sum_score=Coalesce(Sum('score'), 0))
+                question__student_quizz_questions__lesson=lesson,
+                student_quizz=student_quizz,
+                status=True
+            ).distinct().aggregate(sum_score=Coalesce(Sum('score'), 0))
             quantity_question = StudentQuizzQuestion.objects.filter(
                 student_quizz=student_quizz,
                 lesson=lesson
