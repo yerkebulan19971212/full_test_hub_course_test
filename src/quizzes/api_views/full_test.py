@@ -262,11 +262,12 @@ class PassStudentAnswerView(generics.CreateAPIView):
                         student_quizz_id=student_quizz_id,
                         question=question
                     ).update(status=False)
-                    StudentScore.objects.filter(
+                    StudentScore.objects.get_or_create(
                         student_quizz_id=student_quizz_id,
                         question=question,
-                        score=score
-                    ).update(status=False)
+                        score=score,
+                        status=True
+                    )
 
             except Exception as e:
                 print(e)
