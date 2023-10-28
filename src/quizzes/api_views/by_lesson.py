@@ -388,3 +388,61 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
 
 
 get_by_lesson_full_score_result_view = GetTestFullScoreResultListView.as_view()
+
+
+class ByLessonQuestionByTypeProgressView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(tags=["by-lesson"])
+    def get(self, request, *args, **kwargs):
+        student_quizz_id = self.kwargs.get('pk')
+        questions = Question.objects.filter(
+            student_quizz_questions__student_quizz_id=student_quizz_id
+        )
+        score = StudentScore.objects.filter(student_quizz_id=student_quizz_id)
+
+        choice_questions = questions.filter(
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+        )
+        choice_score = score.filter(
+            question_id__in=[q.id for q in choice_questions]
+        ).aggregate(sum_score=Coalesce(
+            Sum('score'), 0)
+        ).get("sum_score")
+        choice = choice_questions.aggregate(sum_score=Coalesce(
+            Sum('lesson_question_level__question_level__point'), 0)
+        ).get("sum_score")
+
+        multi_choice_questions = questions.filter(
+            lesson_question_level__question_level__choice=ChoiceType.MULTI_CHOICE
+        )
+        multi_choice = multi_choice_questions.aggregate(sum_score=Coalesce(
+            Sum('lesson_question_level__question_level__point'), 0)
+        ).get("sum_score")
+        multi_choice_score = score.filter(
+            question_id__in=[q.id for q in multi_choice_questions]
+        ).aggregate(sum_score=Coalesce(
+            Sum('score'), 0)
+        ).get("sum_score")
+
+        common_question = questions.filter(
+            common_question__isnull=False
+        )
+        common = common_question.aggregate(sum_score=Coalesce(
+            Sum('lesson_question_level__question_level__point'), 0)
+        ).get("sum_score")
+        common_score = score.filter(
+            question_id__in=[q.id for q in common_question]
+        ).aggregate(sum_score=Coalesce(
+            Sum('score'), 0)
+        ).get("sum_score")
+        return Response({
+            "choice": choice,
+            "choice_score": choice_score,
+            "common_question": common,
+            "common_score": common_score,
+            "multi_choice": multi_choice,
+            "multi_choice_score": multi_choice_score,
+        })
+
+by_lesson_result_task_progress_view = ByLessonQuestionByTypeProgressView.as_view()
