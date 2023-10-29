@@ -26,3 +26,15 @@ class EmailExistError(APIException):
     message = _("email_exist")
     default_detail = _("email exist")
     default_code = "email_exist"
+
+
+class IsNotStudentError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("is not student")
+    default_code = "is_not_student"
+
+
+class IsNotStaffError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("is not staff")
+    default_code = "is_not_staff"

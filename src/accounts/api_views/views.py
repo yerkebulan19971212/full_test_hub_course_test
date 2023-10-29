@@ -15,10 +15,13 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 RegisterPhoneSerializer,
                                                 GoogleSerializer,
                                                 RegisterEmailSerializer,
-                                                OwnRefreshToken)
+                                                OwnRefreshToken,
+                                                TokenObtainPairSerializerByEmail,
+                                                TokenObtainPairSerializerByPhone)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
-                                  EmailExistError)
+                                  EmailExistError, IsNotStudentError,
+                                  IsNotStaffError)
 
 User = get_user_model()
 
@@ -82,36 +85,47 @@ class RegisterStudentEmailUserView(generics.CreateAPIView):
 register_email_view = RegisterStudentEmailUserView.as_view()
 
 
-class TokenObtainPairView(BaseTokenObtainPairView):
-    serializer_class = TokenObtainPairSerializer
+class TokenObtainPairByPhoneView(BaseTokenObtainPairView):
+    serializer_class = TokenObtainPairSerializerByPhone
 
-    # def post(self, request, *args, **kwargs):
-    # phone = self.request.data.get('phone').lower()
-    # user = User.objects.select_related('role').filter(phone=phone)
-    # if not user.exists():
-    #     return Response({"detail": "Такой пользователь не найден"},
-    #                     status=status.HTTP_400_BAD_REQUEST)
-    # user = user.first()
-    # if not user.is_active:
-    #     return Response({"detail": "Такой пользователь не найден"},
-    #                     status=status.HTTP_400_BAD_REQUEST)
-    # role = user.role
-    # if role.name != "student":
-    #     return Response({"detail": "Вы не студент"},
-    #                     status=status.HTTP_400_BAD_REQUEST)
-    # if not user.check_password(self.request.data.get('password')):
-    #     return Response({"detail": "Неверный пароль"},
-    #                     status=status.HTTP_400_BAD_REQUEST)
-    #
-    # return super().post(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        phone = self.request.data.get("phone")
+        user = User.objects.filter(phone=phone).first()
+        if user.role.name_code != "student":
+            raise IsNotStudentError()
+        return super().post(request, *args, **kwargs)
 
 
-get_token_view = TokenObtainPairView.as_view()
+token_by_phone_view = TokenObtainPairByPhoneView.as_view()
+
+
+class TokenObtainPairByEmailView(BaseTokenObtainPairView):
+    serializer_class = TokenObtainPairSerializerByEmail
+
+    def post(self, request, *args, **kwargs):
+        email = self.request.data.get("email")
+        user = User.objects.filter(email=email).first()
+        if user.role.name_code != "student":
+            raise IsNotStudentError()
+        return super().post(request, *args, **kwargs)
+
+
+token_by_email_view = TokenObtainPairByEmailView.as_view()
 
 
 class StaffTokenObtainPairView(BaseTokenObtainPairView):
     """ логин для сотрудников """
-    serializer_class = TokenObtainPairSerializer
+    serializer_class = TokenObtainPairSerializerByEmail
+
+    def post(self, request, *args, **kwargs):
+        email = self.request.data.get("email")
+        user = User.objects.filter(email=email).first()
+        if user.role.name_code == "student":
+            raise IsNotStaffError()
+        return super().post(request, *args, **kwargs)
+
+
+token_staff_view = StaffTokenObtainPairView.as_view()
 
 
 class GoogleJWTView(APIView):

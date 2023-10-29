@@ -57,6 +57,14 @@ class TokenObtainPairSerializer(TokenObtainSerializer):
         return data
 
 
+class TokenObtainPairSerializerByPhone(TokenObtainPairSerializer):
+    username_field = 'phone'
+
+
+class TokenObtainPairSerializerByEmail(TokenObtainPairSerializer):
+    username_field = 'email'
+
+
 class RegisterPhoneSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 

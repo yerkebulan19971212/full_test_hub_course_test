@@ -27,4 +27,4 @@ def error_handler(exc, context):
 
         set_rollback()
         return Response(data, status=exc.status_code, headers=headers)
-    return error_handler(exc=ServerError(), context=context)
+    # return error_handler(exc=ServerError(), context=context)
