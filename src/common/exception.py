@@ -15,12 +15,14 @@ class ServerError(APIException):
 
 
 class PhoneExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
     message = _("phone_exist")
     default_detail = _("Phone exist")
     default_code = "phone_exist"
 
 
 class EmailExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
     message = _("email_exist")
     default_detail = _("email exist")
     default_code = "email_exist"
