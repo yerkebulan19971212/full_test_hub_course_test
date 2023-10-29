@@ -14,7 +14,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 TokenObtainPairSerializer,
                                                 RegisterPhoneSerializer,
                                                 GoogleSerializer,
-                                                RegisterEmailSerializer)
+                                                RegisterEmailSerializer,
+                                                OwnRefreshToken)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError)
@@ -46,7 +47,13 @@ class RegisterStudentPhoneUserView(generics.CreateAPIView):
         not_active_user = user.filter(is_active=False)
         if not_active_user.exists():
             not_active_user.delete()
-        return self.create(request, *args, **kwargs)
+        res = self.create(request, *args, **kwargs)
+        if res.status_code == status.HTTP_201_CREATED:
+            user = User.objects.filter(phone=phone).first()
+            token = OwnRefreshToken.for_user(user)
+            return Response(
+                {"refresh": str(token), "access": str(token.access_token)})
+        return res
 
 
 register_phone_view = RegisterStudentPhoneUserView.as_view()
@@ -63,7 +70,13 @@ class RegisterStudentEmailUserView(generics.CreateAPIView):
         not_active_user = user.filter(is_active=False)
         if not_active_user.exists():
             not_active_user.delete()
-        return self.create(request, *args, **kwargs)
+        res = self.create(request, *args, **kwargs)
+        if res.status_code == status.HTTP_201_CREATED:
+            user = User.objects.filter(email=email).first()
+            token = OwnRefreshToken.for_user(user)
+            return Response(
+                {"refresh": str(token), "access": str(token.access_token)})
+        return res
 
 
 register_email_view = RegisterStudentEmailUserView.as_view()
