@@ -142,6 +142,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'src.accounts.api_views.authentication.OwnJWTAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'src.services.error_handler.error_handler',
+
 }
 
 # Internationalization

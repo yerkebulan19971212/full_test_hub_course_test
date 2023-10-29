@@ -1,9 +1,5 @@
-import secrets
-import string
 import requests
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Max, Count
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework import generics
@@ -12,34 +8,22 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import \
     TokenObtainPairView as BaseTokenObtainPairView
-from rest_framework.permissions import IsAuthenticated
-from django_filters import rest_framework as filters
+from rest_framework import permissions
 
-# from src.base.paginations import StudentPagination
-# from src.base.permissions import SuperAdminPermission, TeacherPermission
-# from src.base.services import send_sms
 from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 TokenObtainPairSerializer,
-                                                RegisterSerializer,
-                                                StudentLessonSerializer,
-                                                AddTeacherSerializer,
-                                                CuratorSerializer,
-                                                CreateStudentSerializer,
-                                                GetTeacherSerializer,
-                                                UserChangePasswordSerializer,
-                                                SendPasswordToEmailSerializer,
-                                                ValidateOtpSerializer,
-                                                GoogleSerializer)
+                                                RegisterPhoneSerializer,
+                                                GoogleSerializer,
+                                                RegisterEmailSerializer)
 from src.accounts.models import Role
-from src.common.exception import UnexpectedError
-
-# from src.oauth.models import UserGeneratePassword, StudentLesson, \
-#     PhoneOtp
+from src.common.exception import (UnexpectedError, PhoneExistError,
+                                  EmailExistError)
 
 User = get_user_model()
 
 
 class AuthMeView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = AuthMeSerializer
     queryset = User.objects.all()
 
@@ -51,31 +35,38 @@ class AuthMeView(generics.RetrieveAPIView):
 auth_me_view = AuthMeView.as_view()
 
 
-class RegisterStudentUserView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
+class RegisterStudentPhoneUserView(generics.CreateAPIView):
+    serializer_class = RegisterPhoneSerializer
 
     def post(self, request, *args, **kwargs):
-        phone = self.request.data.get('phone')
-        if phone:
-            phone = phone.lower()
-        user = User.objects.filter(
-            phone=phone,
-            role__name_code='student'
-        )
-
+        phone = self.request.data.get("phone")
+        user = User.objects.filter(phone=phone, role__name_code='student')
         if user.filter(is_active=True).exists():
-            raise UnexpectedError()
-            return Response(
-                {'detail': 'Такой пользователь уже существует'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise PhoneExistError()
         not_active_user = user.filter(is_active=False)
         if not_active_user.exists():
             not_active_user.delete()
         return self.create(request, *args, **kwargs)
 
 
-register_view = RegisterStudentUserView.as_view()
+register_phone_view = RegisterStudentPhoneUserView.as_view()
+
+
+class RegisterStudentEmailUserView(generics.CreateAPIView):
+    serializer_class = RegisterEmailSerializer
+
+    def post(self, request, *args, **kwargs):
+        email = self.request.data.get("email")
+        user = User.objects.filter(email=email, role__name_code='student')
+        if user.filter(is_active=True).exists():
+            raise EmailExistError()
+        not_active_user = user.filter(is_active=False)
+        if not_active_user.exists():
+            not_active_user.delete()
+        return self.create(request, *args, **kwargs)
+
+
+register_email_view = RegisterStudentEmailUserView.as_view()
 
 
 class TokenObtainPairView(BaseTokenObtainPairView):
@@ -108,64 +99,6 @@ get_token_view = TokenObtainPairView.as_view()
 class StaffTokenObtainPairView(BaseTokenObtainPairView):
     """ логин для сотрудников """
     serializer_class = TokenObtainPairSerializer
-
-    # def post(self, request, *args, **kwargs):
-    #     phone = self.request.data.get('phone')
-    #     user = User.objects.filter(phone=phone)
-    #     if user:
-    #         user = user.first()
-    #     else:
-    #         return Response({"detail": "Такой пользователь не найден"},
-    #                         status=status.HTTP_400_BAD_REQUEST)
-    #     role = user.role
-    #     if role:
-    #         if role.name == 'student':
-    #             return Response({"detail": "student"},
-    #                             status=status.HTTP_400_BAD_REQUEST)
-    #     else:
-    #         return Response({"detail": "role net"},
-    #                         status=status.HTTP_400_BAD_REQUEST)
-    #
-    #     return super().post(request, *args, **kwargs)
-
-
-# class GenerateOTPView(CreateAPIView):
-#     serializer_class = PhoneOtpSerializer
-#
-#     def post(self, request, *args, **kwargs):
-#         phone = self.request.data.get('phone')
-#         forgot = self.request.data.get('forgot', False)
-#         phone_opt = PhoneOtp.create_otp_for_phone(phone=phone, forgot=forgot)
-#         text = "Juz40test.kz код для подтверждения - " + str(phone_opt.otp)
-#         if forgot:
-#             text = "Juz40test.kz код для подтверждения - " + str(phone_opt.otp)
-#         send = send_sms(phone, text)
-#         if send.get('code') != 0:
-#             return Response({"error": send.get('data').get(
-#                 'recipient') + send.get('message')}, status=400)
-#         return Response({"status": "Сообшение успешно отправлено"}, status=200)
-#
-#
-# generate_otp = GenerateOTPView.as_view()
-#
-#
-# class ValidateOTPView(CreateAPIView):
-#     serializer_class = ValidateOtpSerializer
-#
-#     def post(self, request, *args, **kwargs):
-#         phone = self.request.data.get('phone')
-#         otp = self.request.data.get('otp')
-#         phone_otp = PhoneOtp.objects.filter(phone=phone).last()
-#         if otp == phone_otp.otp:
-#             User.objects.filter(phone=phone).update(is_active=True)
-#             phone_otp.used = True
-#             phone_otp.save()
-#             return Response({"success": True}, status=status.HTTP_200_OK)
-#         return Response({"success": False, "detail": "Неверный код"},
-#                         status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# validate_otp = ValidateOTPView.as_view()
 
 
 class GoogleJWTView(APIView):

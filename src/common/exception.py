@@ -5,4 +5,22 @@ from rest_framework.exceptions import APIException
 
 
 class UnexpectedError(APIException):
-    message = _("unexpected error")
+    message = _("server error")
+    default_code = _("server_error")
+
+
+class ServerError(APIException):
+    message = _("server error")
+    default_code = _("server_error")
+
+
+class PhoneExistError(APIException):
+    message = _("phone_exist")
+    default_detail = _("Phone exist")
+    default_code = "phone_exist"
+
+
+class EmailExistError(APIException):
+    message = _("email_exist")
+    default_detail = _("email exist")
+    default_code = "email_exist"

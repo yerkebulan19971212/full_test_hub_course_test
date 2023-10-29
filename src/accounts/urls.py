@@ -1,15 +1,13 @@
 from django.urls import path, include
-# from rest_framework_simplejwt.views import TokenRefreshView
-
 from src.accounts.api_views.views import (auth_me_view, get_token_view,
-                                          register_view, google)
+                                          register_email_view, google,
+                                          register_phone_view)
 
-# from src.accounts.views import city_list
-# from src.quizzes.api_views.views.students import StudentResultAvarageView
 app_name = 'accounts'
 urlpatterns = [
     path('login/', get_token_view),
-    path('register/', register_view),
+    path('register-phone/', register_phone_view),
+    path('register-email/', register_email_view),
     path('google/', google),
     path('me/', auth_me_view, name='auth_me'),
 ]
