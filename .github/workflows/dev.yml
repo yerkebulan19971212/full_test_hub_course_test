@@ -50,11 +50,4 @@ jobs:
         username: ${{ secrets.TESTENV_USER }}
         password: ${{ secrets.TESTENV_PASS }}
         port: ${{ secrets.TESTENV_SSH_PORT }}
-        script: |
-                cd "${{ env.path }}"
-                echo директория "$PWD"
-                ls
-#                chmod +x scripts/*
-#                for f in scripts/"${{ env.branch }}"/*.sh; do
-#                  bash "$f" || break
-#                done
+        run: systemctl restart gunicorn_full_course
