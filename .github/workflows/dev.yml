@@ -53,7 +53,7 @@ jobs:
         script: |
                 cd "${{ env.path }}"
                 echo директория "$PWD"
-                chmod +x scripts/dev/*.sh
+                chmod +x scripts/*
                 for f in scripts/"${{ env.branch }}"/*.sh; do
                   bash "$f" || break
                 done
