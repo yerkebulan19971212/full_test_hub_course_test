@@ -36,13 +36,13 @@ jobs:
         cat "$HOME/.ssh/known_hosts"
     - name: Deploy
       run: pwd
-#        rsync -e "ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no" \
-#        --exclude "${{ env.venv_file }}" \
-#        --exclude "${{ env.env_file }}" \
-#        --archive  \
-#        --compress \
-#        . \
-#        "${{ secrets.TESTENV_USER }}@${{ secrets.TESTENV_IP }}:${{ env.path }}"
+        rsync -e "ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+        --exclude "${{ env.venv_file }}" \
+        --exclude "${{ env.env_file }}" \
+        --archive  \
+        --compress \
+        . \
+        "${{ secrets.TESTENV_USER }}@${{ secrets.TESTENV_IP }}:${{ env.path }}"
 #    - name: Connect to remote server
 #      uses: appleboy/ssh-action@v0.1.7
 #      with:
