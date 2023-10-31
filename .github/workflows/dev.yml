@@ -30,16 +30,16 @@ jobs:
     - name: Install ssh-key
       run: |
         mkdir "$HOME/.ssh"
-        echo "${{ secrets.TESTENV_SSH_KEY }}" > "$HOME/.ssh/key"
-        chmod 600 "$HOME/.ssh/key"
+        echo "${{ secrets.TESTENV_SSH_KEY }}" > "$HOME/.ssh/id_rsa"
+        chmod 600 "$HOME/.ssh/id_rsa"
         ssh-keyscan -H "${{ secrets.TESTENV_IP }}" >>"$HOME/.ssh/known_hosts"
         cat "$HOME/.ssh/known_hosts"
     - name: Deploy
       run: |
-        rsync -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" \
+        rsync -e "ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no" \
         --exclude "${{ env.venv_file }}" \
         --exclude "${{ env.env_file }}" \
-        --archive  \
+        --archive  \  
         --compress \
         . \
         "${{ secrets.TESTENV_USER }}@${{ secrets.TESTENV_IP }}:${{ env.path }}"
