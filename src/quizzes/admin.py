@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import StudentQuizz, StudentQuizzFile, Question
+from .models import StudentQuizz, StudentQuizzFile, Question, QuestionLevel
 
 admin.site.register([
+    QuestionLevel,
     Question,
     StudentQuizzFile
 ])
