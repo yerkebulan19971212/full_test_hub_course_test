@@ -35,7 +35,7 @@ jobs:
         ssh-keyscan -H "${{ secrets.TESTENV_IP }}" >>"$HOME/.ssh/known_hosts"
         cat "$HOME/.ssh/known_hosts"
     - name: Deploy
-      run: pwd
+      run: |
         rsync -e "ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no" \
         --exclude "${{ env.venv_file }}" \
         --exclude "${{ env.env_file }}" \

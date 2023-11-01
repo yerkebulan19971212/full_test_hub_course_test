@@ -11,6 +11,8 @@ class LessonSerializer(NameSerializer):
         fields = (
             'id',
             'name',
+            'choose_icon',
+            'icon'
         )
 
 
