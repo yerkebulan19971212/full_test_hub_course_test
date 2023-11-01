@@ -20,7 +20,11 @@ from src.quizzes.api_views import (by_lesson_finish_view,
                                    new_flash_card_view, new_full_test_view,
                                    new_quizz_test_view, pass_answer_view,
                                    pass_quizz_test_answer_view,
-                                   quiz_test_check_answer_view, st_result_view)
+                                   result_quiz_test_view,
+                                   quiz_test_check_answer_view, st_result_view,
+                                   pass_flash_card_question,
+                                   result_flash_card_question,
+                                   repeat_flash_card_view)
 
 full_test = [
     path('new/', new_full_test_view),
@@ -53,6 +57,9 @@ by_lesson_quizz = [
 flash_card = [
     path('new/', new_flash_card_view),
     path('questions/', get_flash_card_question),
+    path('pass-question/', pass_flash_card_question),
+    path('result/<int:student_quizz>/', result_flash_card_question),
+    path('repeat/<int:student_quizz>', repeat_flash_card_view),
 ]
 
 quizz_test = [
@@ -61,6 +68,7 @@ quizz_test = [
     path('pass-answer/', pass_quizz_test_answer_view),
     path('check/<int:question_id>/', quiz_test_check_answer_view),
     path('finish/<int:student_quizz>/', finish_quiz_test),
+    path('result/<int:student_quizz>/', result_quiz_test_view),
 ]
 
 api_v1_urlpatterns = [

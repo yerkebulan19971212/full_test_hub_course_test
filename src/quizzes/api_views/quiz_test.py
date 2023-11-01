@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from rest_framework import generics, status
@@ -7,7 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 
-from src.quizzes.models import Question, Answer, StudentScore
+from src.common.constant import QuizzStatus
+from src.quizzes.models import Question, Answer, StudentScore, TestFullScore
 from src.quizzes import serializers
 from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, StudentQuizz
@@ -91,6 +94,9 @@ class FinishQuizTestAnswerView(views.APIView):
     def post(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('student_quizz')
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        student_quizz.status = QuizzStatus.PASSED
+        student_quizz.save()
+
         questions = Question.objects.filter(
             student_quizz_questions__student_quizz=student_quizz
         )
@@ -110,13 +116,22 @@ class FinishQuizTestAnswerView(views.APIView):
         attempt = question_score.values("question").distinct().count()
         question_count = questions.count()
         unattem = question_count - attempt
-
+        accuracy = int(round(100 / number_of_score * user_score))
+        TestFullScore.objects.create(
+            student_quizz=student_quizz,
+            lesson=student_quizz.lesson,
+            score=user_score,
+            unattem=unattem - user_score,
+            number_of_score=number_of_score,
+            number_of_question=question_count,
+            accuracy=accuracy
+        )
         data = {
             "user_score": user_score,
             "number_of_score": number_of_score,
             "incorrect_score": number_of_score - user_score,
-            "accuracy": int(round(100 / number_of_score * user_score)),
-            "attempt": question_count,
+            "accuracy": accuracy,
+            "attempt": attempt,
             "unattem": unattem,
             "question_number": question_count,
             "lesson_id": student_quizz.lesson_id,
@@ -132,3 +147,45 @@ class FinishQuizTestAnswerView(views.APIView):
 
 
 finish_quiz_test = FinishQuizTestAnswerView.as_view()
+
+
+class ResultQuizTestAnswerView(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @swagger_auto_schema(tags=["quizz-test"])
+    def post(self, request, *args, **kwargs):
+        student_quizz_id = self.kwargs.get('student_quizz')
+        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        questions = Question.objects.filter(
+            student_quizz_questions__student_quizz_id=student_quizz_id
+        )
+        number_of_score = questions.aggregate(
+            number_of_score=Coalesce(
+                Sum("lesson_question_level__question_level__point"),
+                0
+            )
+        ).get("number_of_score")
+        user_score = StudentScore.objects.filter(
+            student_quizz_id=student_quizz_id,
+            status=True
+        ).aggregate(
+            user_score=Coalesce(Sum('score'), 0)
+        ).get("user_score")
+        question_count = questions.count()
+
+        total_time = student_quizz.quizz_end_time - student_quizz.quizz_start_time
+        total_time_seconds = (
+                total_time - datetime(1970, 1, 1)).total_seconds()
+        average_seconds = int(round(total_time_seconds / question_count))
+        accuracy = int(round(100 / number_of_score * user_score))
+        return Response({
+            "total_time": total_time_seconds,
+            "average_seconds": average_seconds,
+            "user_score": user_score,
+            "number_of_score": number_of_score,
+            "accuracy": accuracy,
+            "inaccuracy": 100 - accuracy,
+        }, status=status.HTTP_200_OK)
+
+
+result_quiz_test_view = ResultQuizTestAnswerView.as_view()

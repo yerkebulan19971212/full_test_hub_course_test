@@ -7,6 +7,12 @@ class StudentQuizz(
     abstract_models.UUID,
     abstract_models.TimeStampedModel
 ):
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     user = models.ForeignKey(
         'accounts.User',
         related_name='student_quizzes',
@@ -94,6 +100,7 @@ class StudentQuizzQuestion(
         db_index=True,
         related_name='student_quizz_questions'
     )
+    flash_card_status = models.BooleanField(null=True)
 
     class Meta:
         db_table = 'quizz\".\"student_quizz_question'

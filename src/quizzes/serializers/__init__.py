@@ -1,4 +1,5 @@
-from .flash_card import FlashCardQuizzSerializer, FlashCardQuestionSerializer
+from .flash_card import (FlashCardQuizzSerializer, FlashCardQuestionSerializer,
+                         PassFlashCardQuestionSerializer)
 from .answer import AnswerSerializer
 from .question import (QuestionSerializer, FullQuizQuestionSerializer,
                        ResultScoreSerializer, TestFullScoreSerializer,
