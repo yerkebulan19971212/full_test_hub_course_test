@@ -86,3 +86,23 @@ class BuyPacketSerializer(serializers.ModelSerializer):
         user.balance -= packet.price
         user.save()
         return super().create(validated_data)
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.City
+        fields = (
+            'name_kz',
+            'name_ru',
+            'name_en',
+        )
+
+
+class SchoolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.School
+        fields = (
+            'name_kz',
+            'name_ru',
+            'name_en',
+        )

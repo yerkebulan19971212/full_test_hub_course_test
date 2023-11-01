@@ -6,7 +6,7 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from src.common.models import QuizzType, CourseTypeQuizz, Packet
+from src.common.models import QuizzType, CourseTypeQuizz, Packet, City, School
 from src.common import filters, serializers
 
 
@@ -47,3 +47,21 @@ class BuyPacket(generics.CreateAPIView):
 
 
 buy_packet_view = BuyPacket.as_view()
+
+
+class GetAllCitiesView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
+    queryset = City.objects.all()
+    serializer_class = serializers.CitySerializer
+
+
+get_all_cities_view = GetAllCitiesView.as_view()
+
+
+class GetAllSchoolView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
+    queryset = School.objects.all()
+    serializer_class = serializers.SchoolSerializer
+
+
+get_all_school_view = GetAllSchoolView.as_view()

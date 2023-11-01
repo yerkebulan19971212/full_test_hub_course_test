@@ -38,3 +38,9 @@ class IsNotStaffError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("is not staff")
     default_code = "is_not_staff"
+
+
+class PasswordNotCorrectError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("password not correct")
+    default_code = "password_not_correct"

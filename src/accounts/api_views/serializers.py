@@ -4,6 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from src.accounts.models import Role, TokenVersion
+from src.common.exception import PasswordNotCorrectError
 
 User = get_user_model()
 
@@ -126,3 +127,58 @@ class RegisterEmailSerializer(serializers.ModelSerializer):
 
 class GoogleSerializer(serializers.Serializer):
     id_token = serializers.CharField(required=True)
+
+
+class UpdatePasswordSerializer(serializers.ModelSerializer):
+    current_password = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'current_password',
+            'password'
+        )
+
+    def update(self, instance, validated_data):
+        current_password = validated_data.get('current_password')
+        password = validated_data.get('password')
+        if instance.check_password(current_password):
+            instance.set_password(password)
+        else:
+            raise PasswordNotCorrectError()
+        instance.save()
+        return instance
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'avatar',
+            'first_name',
+            'last_name',
+            'school',
+            'city',
+            'birthday',
+            'phone',
+            'email',
+        )
+
+
+class ProfileUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'avatar',
+            'first_name',
+            'last_name',
+            'school',
+            'city',
+            'birthday',
+            'phone',
+            'email',
+        )

@@ -17,7 +17,10 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 RegisterEmailSerializer,
                                                 OwnRefreshToken,
                                                 TokenObtainPairSerializerByEmail,
-                                                TokenObtainPairSerializerByPhone)
+                                                TokenObtainPairSerializerByPhone,
+                                                UpdatePasswordSerializer,
+                                                UpdateUserSerializer,
+                                                ProfileUserSerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -164,3 +167,57 @@ class GoogleJWTView(APIView):
 
 
 google = GoogleJWTView.as_view()
+
+
+class UpdatePasswordView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UpdatePasswordSerializer
+    http_method_names = ['put']
+    lookup_field = None
+
+    def get_object(self):
+        return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        res = self.update(request, *args, **kwargs)
+        if res.status_code == status.HTTP_200_OK:
+            user = self.get_object()
+            token = OwnRefreshToken.for_user(user)
+            return Response(
+                {"refresh": str(token), "access": str(token.access_token)})
+
+
+update_password_view = UpdatePasswordView.as_view()
+
+
+class UpdateProfileView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UpdateUserSerializer
+    http_method_names = ['patch']
+    lookup_field = None
+
+    def get_object(self):
+        return self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        res = self.update(request, *args, **kwargs)
+        if res.status_code == status.HTTP_200_OK:
+            user = self.get_object()
+            token = OwnRefreshToken.for_user(user)
+            return Response(
+                {"refresh": str(token), "access": str(token.access_token)})
+
+
+update_profile_view = UpdateProfileView.as_view()
+
+
+class ProfileUserView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileUserSerializer
+    lookup_field = None
+
+    def get_object(self):
+        return self.request.user
+
+
+profile_view = ProfileUserView.as_view()

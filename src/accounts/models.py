@@ -74,12 +74,12 @@ class User(
     abstract_models.Ordering,
     abstract_models.TimeStampedModel
 ):
-    # avatar = models.FileField(
-    #     # upload_to=get_path_upload_avatar,
-    #     blank=True,
-    #     null=True,
-    #     validators=[validate_size_image, validate_mb_image]
-    # )
+    avatar = models.FileField(
+        upload_to="accounts/icon",
+        blank=True,
+        null=True,
+        # validators=[validate_size_image, validate_mb_image]
+    )
     username = models.CharField(
         max_length=128,
         unique=True,
@@ -116,9 +116,16 @@ class User(
         null=True,
         db_index=True
     )
+    school = models.ForeignKey(
+        'common.School',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True
+    )
     balance = models.IntegerField(
         default=0
     )
+    birthday = models.DateTimeField(null=True)
     user_id = models.IntegerField(
         null=True,
         unique=True
