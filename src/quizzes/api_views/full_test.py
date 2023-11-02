@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.db.models import Sum, Count, Q, Prefetch, Exists, OuterRef
@@ -128,14 +128,17 @@ class FullQuizLessonListView(generics.ListAPIView):
             test_start_time = student_test.quizz_start_time
         duration = student_test.quizz_type.quizz_type.quizz_duration
         duration_dif = timezone.now() - student_test.quizz_start_time
-        duration = duration - duration_dif
         if duration.total_seconds() <= 0:
-            student_test.quizz_duration = 0
+            student_test.quizz_duration = timedelta(seconds=0)
+            student_test.status = "PASSED"
+            student_test.save()
+            return Response({"detail": "Вы уже прошли этот тест"},
+                            status=status.HTTP_400_BAD_REQUEST)
         else:
             student_test.quizz_duration = duration
         student_test.save()
         data = self.list(request, *args, **kwargs).data
-
+        duration = student_test.quizz_duration
         return Response({
             "lessons": data,
             "duration": {
