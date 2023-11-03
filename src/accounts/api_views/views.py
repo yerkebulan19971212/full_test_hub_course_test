@@ -199,14 +199,6 @@ class UpdateProfileView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
 
-    def patch(self, request, *args, **kwargs):
-        res = self.update(request, *args, **kwargs)
-        if res.status_code == status.HTTP_200_OK:
-            user = self.get_object()
-            token = OwnRefreshToken.for_user(user)
-            return Response(
-                {"refresh": str(token), "access": str(token.access_token)})
-
 
 update_profile_view = UpdateProfileView.as_view()
 

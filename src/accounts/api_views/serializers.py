@@ -130,7 +130,7 @@ class GoogleSerializer(serializers.Serializer):
 
 
 class UpdatePasswordSerializer(serializers.ModelSerializer):
-    current_password = serializers.CharField(required=True)
+    current_password = serializers.CharField(write_only=True,required=True)
     password = serializers.CharField(required=True)
 
     class Meta:
