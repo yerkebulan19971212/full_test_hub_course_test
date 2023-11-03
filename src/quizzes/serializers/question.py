@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from src.quizzes.serializers import AnswerSerializer
+from src.quizzes.serializers import AnswerSerializer, AnswerSignSerializer
 from src.quizzes.models import Question, CommonQuestion, TestFullScore, \
-    StudentAnswer
+    StudentAnswer, StudentQuizzQuestion
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -93,6 +93,9 @@ class QuestionResultSerializer(serializers.ModelSerializer):
     common_question = CommonQuestionSerializer(many=False)
     choice = serializers.IntegerField(
         source='lesson_question_level.question_level.choice')
+    lesson = serializers.SerializerMethodField()
+    order = serializers.SerializerMethodField()
+    correct_answer = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -102,11 +105,27 @@ class QuestionResultSerializer(serializers.ModelSerializer):
             'common_question',
             'choice',
             'answers',
+            'lesson',
+            'order',
+            'correct_answer'
         )
+
+    def get_order(self, obj):
+        student_quizz_id = self.context.get('view').kwargs.get(
+            'student_quizz_id')
+        stq = StudentQuizzQuestion.objects.filter(
+            student_quizz_id=student_quizz_id,
+            question=obj
+        ).first()
+        order = StudentQuizzQuestion.objects.filter(
+            student_quizz_id=student_quizz_id,
+            lesson=stq.lesson
+        ).order_by('order').first()
+        return stq.order - order.order + 1
 
     def get_answers(self, obj):
         answers = obj.answers.all()
-        answers_data = AnswerSerializer(answers, many=True).data
+        answers_data = AnswerSignSerializer(answers, many=True).data
         student_quizz_id = self.context.get('view').kwargs.get(
             'student_quizz_id')
         for a in answers_data:
@@ -123,3 +142,9 @@ class QuestionResultSerializer(serializers.ModelSerializer):
             else:
                 a["correct"] = "NOT_CHOOSE"
         return answers_data
+
+    def get_lesson(self, obj):
+        return obj.lesson_question_level.test_type_lesson.lesson.name_kz
+
+    def get_correct_answer(self, obj):
+        return [a.answer_sign.name_code for a in obj.answers.filter(correct=True)]

@@ -1,6 +1,6 @@
 from .flash_card import (FlashCardQuizzSerializer, FlashCardQuestionSerializer,
                          PassFlashCardQuestionSerializer)
-from .answer import AnswerSerializer
+from .answer import (AnswerSerializer, AnswerSignSerializer)
 from .question import (QuestionSerializer, FullQuizQuestionSerializer,
                        ResultScoreSerializer, TestFullScoreSerializer,
                        FullQuizQuestionQuerySerializer,

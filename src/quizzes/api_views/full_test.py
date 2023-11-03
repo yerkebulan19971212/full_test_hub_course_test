@@ -464,7 +464,9 @@ st_result_view = StudentQuizFinishInfoListView.as_view()
 class ResultQuestionView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.QuestionResultSerializer
-    queryset = Question.objects.all()
+    queryset = Question.objects.prefetch_related(
+        'answers__answer_sign'
+    ).all()
     lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["full-test"])
