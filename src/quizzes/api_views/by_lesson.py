@@ -296,13 +296,11 @@ class ByLessonFinishInfoListView(generics.RetrieveAPIView):
         ).aggregate(
             answered_questions=Coalesce(Count('question_id', distinct=True), 0)
         ).get("answered_questions")
-        quantity_correct_question = StudentAnswer.objects.filter(
+        quantity_correct_question = StudentScore.objects.filter(
             student_quizz=student_quizz_id,
             status=True,
-            answer__correct=True
-        ).aggregate(
-            answered_questions=Coalesce(Count('question_id', distinct=True), 0)
-        ).get("answered_questions")
+            score__gt=0
+        ).count()
         quantity_question = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz
         ).count()
@@ -444,5 +442,6 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
             "multi_choice": multi_choice,
             "multi_choice_score": multi_choice_score,
         })
+
 
 by_lesson_result_task_progress_view = ByLessonQuestionByTypeProgressView.as_view()
