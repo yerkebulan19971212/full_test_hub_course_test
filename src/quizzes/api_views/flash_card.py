@@ -55,7 +55,7 @@ class PassFlashCardQuestions(generics.CreateAPIView):
         student_quizz_question = StudentQuizzQuestion.objects.filter(
             question=question,
             student_quizz=student_quizz,
-            lesson=student_quizz.lesson
+            # lesson=student_quizz.lesson
         ).first()
         student_quizz_question.flash_card_status = know_answer
         student_quizz_question.save()
