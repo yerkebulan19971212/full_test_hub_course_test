@@ -53,6 +53,7 @@ class FlashCardQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = (
+            'id',
             'question',
             'answer'
         )
