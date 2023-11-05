@@ -69,7 +69,7 @@ pass_flash_card_question = PassFlashCardQuestions.as_view()
 class FinishFlashCardView(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    @swagger_auto_schema(tags=["quizz-test"])
+    @swagger_auto_schema(tags=["flash-card"])
     def post(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('student_quizz')
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
