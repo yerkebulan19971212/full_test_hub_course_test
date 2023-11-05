@@ -98,8 +98,7 @@ class ResultFlashCardQuestions(views.APIView):
         know_question_count = student_quizz_questions.filter(
             flash_card_status=True).count()
         total_time = student_quizz.quizz_end_time - student_quizz.quizz_start_time
-        total_time_seconds = (
-                total_time - datetime(1970, 1, 1)).total_seconds()
+        total_time_seconds = (total_time).total_seconds()
         average_seconds = int(round(total_time_seconds / question_count))
         accuracy = int(round(100 / question_count * know_question_count))
         return Response({

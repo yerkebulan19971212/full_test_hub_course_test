@@ -175,8 +175,7 @@ class ResultQuizTestAnswerView(views.APIView):
         question_count = questions.count()
 
         total_time = student_quizz.quizz_end_time - student_quizz.quizz_start_time
-        total_time_seconds = (
-                total_time - datetime(1970, 1, 1)).total_seconds()
+        total_time_seconds = (total_time).total_seconds()
         average_seconds = int(round(total_time_seconds / question_count))
         accuracy = int(round(100 / number_of_score * user_score))
         return Response({
