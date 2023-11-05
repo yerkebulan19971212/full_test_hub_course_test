@@ -56,6 +56,29 @@ class GetQuizTestQuestion(generics.RetrieveAPIView):
 get_quiz_test_question_view = GetQuizTestQuestion.as_view()
 
 
+class GetQuizTestByQuestionIdView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.QuestionSerializer
+    queryset = Question.objects.all()
+
+    def get_object(self):
+        student_quizz = self.kwargs['student_quizz']
+        question_id = self.kwargs['question_id']
+        question = Question.objects.get(pk=question_id)
+        StudentQuizzQuestion.objects.get_or_create(
+            student_quizz_id=student_quizz,
+            question=question
+        )
+        return question
+
+    @swagger_auto_schema(tags=["quizz-test"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+get_quiz_test_question_by_id_view = GetQuizTestByQuestionIdView.as_view()
+
+
 class PassQuizTestAnswerView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.QuizTestPassAnswerSerializer

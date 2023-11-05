@@ -15,4 +15,5 @@ from .full_test import (full_quizz_lesson_view, full_quizz_question_view,
                         new_full_test_view, pass_answer_view, st_result_view)
 from .quiz_test import (finish_quiz_test, get_quiz_test_question_view,
                         new_quizz_test_view, pass_quizz_test_answer_view,
+                        get_quiz_test_question_by_id_view,
                         quiz_test_check_answer_view, result_quiz_test_view)
