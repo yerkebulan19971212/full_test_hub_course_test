@@ -7,6 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework import views
 
+from src.common.constant import QuizzStatus
 from src.quizzes.models import Question, StudentQuizz, StudentQuizzQuestion
 from src.quizzes import serializers
 from src.quizzes import filters
@@ -63,6 +64,23 @@ class PassFlashCardQuestions(generics.CreateAPIView):
 
 
 pass_flash_card_question = PassFlashCardQuestions.as_view()
+
+
+class FinishFlashCardView(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @swagger_auto_schema(tags=["quizz-test"])
+    def post(self, request, *args, **kwargs):
+        student_quizz_id = self.kwargs.get('student_quizz')
+        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        student_quizz.status = QuizzStatus.PASSED
+        student_quizz.quizz_end_time = datetime.now()
+        student_quizz.save()
+
+        return Response()
+
+
+finish_flash_card_view = FinishFlashCardView.as_view()
 
 
 class ResultFlashCardQuestions(views.APIView):

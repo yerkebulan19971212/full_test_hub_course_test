@@ -95,6 +95,7 @@ class FinishQuizTestAnswerView(views.APIView):
         student_quizz_id = self.kwargs.get('student_quizz')
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
         student_quizz.status = QuizzStatus.PASSED
+        student_quizz.quizz_end_time = datetime.now()
         student_quizz.save()
 
         questions = Question.objects.filter(

@@ -21,6 +21,7 @@ from src.quizzes.api_views import (by_lesson_finish_view,
                                    new_quizz_test_view, pass_answer_view,
                                    pass_quizz_test_answer_view,
                                    result_quiz_test_view,
+                                   finish_flash_card_view,
                                    quiz_test_check_answer_view, st_result_view,
                                    pass_flash_card_question,
                                    result_flash_card_question,
@@ -59,6 +60,7 @@ flash_card = [
     path('questions/', get_flash_card_question),
     path('pass-question/', pass_flash_card_question),
     path('result/<int:student_quizz>/', result_flash_card_question),
+    path('finish/<int:student_quizz>/', finish_flash_card_view),
     path('repeat/<int:student_quizz>', repeat_flash_card_view),
 ]
 
