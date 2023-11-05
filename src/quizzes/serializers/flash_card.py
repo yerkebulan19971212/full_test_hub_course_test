@@ -33,7 +33,8 @@ class FlashCardQuizzSerializer(serializers.ModelSerializer):
                                                                   question_number)
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             question=q,
-            student_quizz=student_quizz
+            student_quizz=student_quizz,
+            lesson=student_quizz.lesson
         ) for q in questions])
 
         return student_quizz
