@@ -88,7 +88,8 @@ class User(
     email = models.EmailField(
         unique=True,
         null=True,
-        db_index=True
+        db_index=True,
+        blank=True
     )
     phone = models.CharField(
         max_length=11,
@@ -114,21 +115,27 @@ class User(
         'common.City',
         on_delete=models.CASCADE,
         null=True,
-        db_index=True
+        db_index=True,
+        blank=True
     )
     school = models.ForeignKey(
         'common.School',
         on_delete=models.CASCADE,
         null=True,
-        db_index=True
+        db_index=True,
+        blank=True
     )
     balance = models.IntegerField(
         default=0
     )
-    birthday = models.DateTimeField(null=True)
+    birthday = models.DateTimeField(
+        null=True,
+        blank=True
+    )
     user_id = models.IntegerField(
         null=True,
-        unique=True
+        unique=True,
+        blank=True
     )
 
     def __str__(self):
