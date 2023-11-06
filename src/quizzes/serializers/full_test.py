@@ -19,6 +19,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(required=True),
         required=True, write_only=True
     )
+    quizz_type = serializers.CharField(default='full_test', write_only=True)
 
     class Meta:
         model = StudentQuizz
@@ -31,12 +32,14 @@ class FullQuizzSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         lessons = validated_data.pop("lessons")
+        quizz_type = validated_data.pop("quizz_type")
+
         lesson_pair = LessonPair.objects.filter(
             Q(lesson_1=lessons[0], lesson_2=lessons[1]) |
             Q(lesson_1=lessons[1], lesson_2=lessons[0])
         ).first()
         c = CourseTypeQuizz.objects.filter(
-            quizz_type__name_code='full_test').first()
+            quizz_type__name_code=quizz_type).first()
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
         validated_data["quizz_type"] = c

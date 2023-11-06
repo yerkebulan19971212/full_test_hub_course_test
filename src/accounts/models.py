@@ -132,7 +132,7 @@ class User(
     )
 
     def __str__(self):
-        return self.email
+        return self.username
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
