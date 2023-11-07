@@ -41,6 +41,12 @@ class CourseTypeQuizzQuerySet(abstract_models.AbstractQuerySet):
             course_type__is_active=True
         )
 
+    def get_all_active_without_rating(self):
+        return self.filter(
+            quizz_type__is_active=True,
+            course_type__is_active=True
+        ).exclude(quizz_type__name_code='rating')
+
 
 class CourseTypeQuizzManager(models.Manager):
     pass

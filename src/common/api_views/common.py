@@ -11,7 +11,7 @@ from src.common import filters, serializers
 
 
 class GetAllActiveQuizzTypes(generics.ListAPIView):
-    queryset = CourseTypeQuizz.objects.get_all_active()
+    queryset = CourseTypeQuizz.objects.get_all_active_without_rating()
     serializer_class = serializers.QuizzTypeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.QuizzTypeFilter
