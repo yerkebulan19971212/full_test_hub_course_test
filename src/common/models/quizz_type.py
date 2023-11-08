@@ -80,14 +80,15 @@ class CourseTypeQuizz(
         unique_together = ('course_type', 'quizz_type')
         db_table = 'common\".\"course_type_quizz'
 
-    def __str__(self):
-        return f"{self.quizz_type.name_code}"
+    # def __str__(self):
+    #     return f"{self.quizz_type.name_code}"
 
 
 class Packet(
     abstract_models.UUID,
     abstract_models.Ordering,
     abstract_models.IsActive,
+    abstract_models.AbstractBaseNameCode,
     abstract_models.TimeStampedModel
 ):
     name_kz = models.CharField(max_length=255, default='', blank=True)

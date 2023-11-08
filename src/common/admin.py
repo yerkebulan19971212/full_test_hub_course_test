@@ -21,6 +21,7 @@ admin.site.register([
 @admin.register(Packet)
 class PacketAdmin(admin.ModelAdmin):
     list_display = (
+        'name_code',
         'pk',
         'order',
         'is_active',
@@ -37,7 +38,9 @@ class PacketAdmin(admin.ModelAdmin):
         'modified'
     )
     fields = (
+        'name_code',
         'name_kz',
+        'order',
         'pk',
         'name_ru',
         'name_en',
@@ -49,5 +52,11 @@ class PacketAdmin(admin.ModelAdmin):
         'created',
         'modified'
     )
-    readonly_fields = ('pk', 'created', 'modified')
-    search_fields = ('name_kz', 'name_ru', 'name_en')
+    readonly_fields = ('pk', 'uuid', 'created', 'modified')
+    search_fields = (
+        'pk',
+        'uuid',
+        'name_kz',
+        'name_ru',
+        'name_en'
+    )
