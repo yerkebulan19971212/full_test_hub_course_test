@@ -21,8 +21,10 @@ admin.site.register([
 @admin.register(Packet)
 class PacketAdmin(admin.ModelAdmin):
     list_display = (
-        'name_kz',
         'pk',
+        'order',
+        'is_active',
+        'name_kz',
         'name_ru',
         'name_en',
         'quizz_type',
@@ -30,6 +32,7 @@ class PacketAdmin(admin.ModelAdmin):
         'price',
         'packet_type',
         'quantity',
+        'uuid',
         'created',
         'modified'
     )
