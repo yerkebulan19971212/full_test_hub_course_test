@@ -35,6 +35,7 @@ class PacketSerializer(serializers.ModelSerializer):
         model = models.Packet
         fields = (
             'id',
+            'name_code',
             'days',
             'price',
             'packet_type',
