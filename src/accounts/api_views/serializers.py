@@ -4,7 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from src.accounts.models import Role, TokenVersion
-from src.common.exception import PasswordNotCorrectError
+from src.common.exception import PasswordNotCorrectError, \
+    EmailAlreadyExistError, PhoneAlreadyExistError
 
 User = get_user_model()
 
@@ -130,7 +131,7 @@ class GoogleSerializer(serializers.Serializer):
 
 
 class UpdatePasswordSerializer(serializers.ModelSerializer):
-    current_password = serializers.CharField(write_only=True,required=True)
+    current_password = serializers.CharField(write_only=True, required=True)
     password = serializers.CharField(required=True)
 
     class Meta:
@@ -157,14 +158,12 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
-            'avatar',
+            # 'avatar',
             'first_name',
             'last_name',
             'school',
             'city',
             'birthday',
-            'phone',
-            'email',
         )
 
 
@@ -173,7 +172,7 @@ class ProfileUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
-            'avatar',
+            # 'avatar',
             'first_name',
             'last_name',
             'school',
@@ -181,4 +180,40 @@ class ProfileUserSerializer(serializers.ModelSerializer):
             'birthday',
             'phone',
             'email',
+            'is_google',
         )
+
+
+class UpdateLoginProfileUserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=False)
+    phone = serializers.CharField(required=False)
+    password = serializers.CharField(required=True, write_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'phone',
+            'email',
+            'password'
+        )
+
+    def validate_email(self, value):
+        if value:
+            if User.objects.filter(email=value, is_active=True).exists():
+                raise EmailAlreadyExistError()
+        return value
+
+    def validate_phone(self, value):
+        if value:
+            if User.objects.filter(phone=value, is_active=True).exists():
+                raise PhoneAlreadyExistError()
+        return value
+
+    def update(self, instance, validated_data):
+        if not instance.check_password(validated_data.get("password")):
+            raise PasswordNotCorrectError()
+        instance.email = validated_data.get("email")
+        instance.phone = validated_data.get("phone")
+        instance.save()
+        return instance

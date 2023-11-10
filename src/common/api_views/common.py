@@ -1,12 +1,9 @@
-import requests
-from django.db import transaction
 from rest_framework.response import Response
 from rest_framework import permissions, status
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.views import APIView
 
-from src.common.models import QuizzType, CourseTypeQuizz, Packet, City, School
+from src.common.models import CourseTypeQuizz, Packet, City, School
 from src.common import filters, serializers
 
 

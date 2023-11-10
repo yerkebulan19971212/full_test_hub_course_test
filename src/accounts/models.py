@@ -132,6 +132,7 @@ class User(
         null=True,
         blank=True
     )
+    is_google = models.BooleanField(default=False)
     user_id = models.IntegerField(
         null=True,
         unique=True,

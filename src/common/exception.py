@@ -44,3 +44,21 @@ class PasswordNotCorrectError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("password not correct")
     default_code = "password_not_correct"
+
+
+class EmailAlreadyExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("email already exist error")
+    default_code = "email_already_exist_error"
+
+
+class PhoneAlreadyExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("phone already exist error")
+    default_code = "phone_already_exist_error"
+
+
+class PhoneAlreadyExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("phone already exist error")
+    default_code = "phone_already_exist_error"

@@ -20,7 +20,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 TokenObtainPairSerializerByPhone,
                                                 UpdatePasswordSerializer,
                                                 UpdateUserSerializer,
-                                                ProfileUserSerializer)
+                                                ProfileUserSerializer,
+                                                UpdateLoginProfileUserSerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -154,8 +155,9 @@ class GoogleJWTView(APIView):
             user.username = user_data['email']
             user.first_name = user_data['given_name']
             user.last_name = user_data['family_name']
+            user.is_google = True
             user.role = Role.objects.filter(name_code='student').first()
-            user.set_unusable_password()
+            user.password = 'google'
             user.save()
 
         refresh = TokenObtainPairSerializer.get_token(user)
@@ -213,3 +215,29 @@ class ProfileUserView(generics.RetrieveAPIView):
 
 
 profile_view = ProfileUserView.as_view()
+
+
+class UpdateLoginProfileView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UpdateLoginProfileUserSerializer
+    http_method_names = ['patch']
+    lookup_field = None
+
+    def get_object(self):
+        return self.request.user
+
+
+update_login_profile_view = UpdateLoginProfileView.as_view()
+
+
+class UpdateGooglePasswordView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UpdateLoginProfileUserSerializer
+    http_method_names = ['patch']
+    lookup_field = None
+
+    def get_object(self):
+        return self.request.user
+
+
+update_google_password_view = UpdateGooglePasswordView.as_view()
