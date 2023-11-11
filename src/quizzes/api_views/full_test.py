@@ -473,3 +473,29 @@ class ResultQuestionView(generics.RetrieveAPIView):
 
 
 get_result_question = ResultQuestionView.as_view()
+
+
+class ResultRatingView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.StudentQuizzRatingSerializer
+    queryset = StudentQuizz.objects.prefetch_related(
+        'user'
+    ).filter(
+        quizz_type__quizz_type__name_code='rating'
+    )
+
+    def get_queryset(self):
+        # StudentQuizz.objects.filter()
+        test_full_score = TestFullScore.objects.select_related(
+            'lesson'
+        ).all().order_by(
+            '-lesson__course_type_lessons__main', 'id'
+        )
+        queryset = super().get_queryset().prefetch_related(Prefetch(
+            'test_full_score',
+            queryset=test_full_score
+        ))
+        return queryset
+
+
+result_rating = ResultRatingView.as_view()

@@ -10,7 +10,7 @@ from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
     CourseTypeQuizz
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
-    StudentScore
+    StudentScore, TestFullScore
 from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
 
@@ -61,7 +61,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             question=q,
             lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
             student_quizz=student_quizz
-        ) for i,q in enumerate(questions)])
+        ) for i, q in enumerate(questions)])
 
         return student_quizz
 
@@ -145,3 +145,37 @@ class StudentAnswersSerializer(serializers.Serializer):
         child=serializers.IntegerField(required=True),
         required=True, write_only=True
     )
+
+
+class TestFullScoreRatingSerializer(serializers.ModelSerializer):
+    name_kz = serializers.CharField(source='lesson.name_kz')
+    name_ru = serializers.CharField(source='lesson.name_ru')
+    name_en = serializers.CharField(source='lesson.name_en')
+
+    class Meta:
+        model = TestFullScore
+        fields = (
+            'id',
+            'lesson_id',
+            'score',
+            'name_kz',
+            'name_ru',
+            'name_en',
+        )
+
+
+class StudentQuizzRatingSerializer(serializers.ModelSerializer):
+    # test_full_score = TestFullScoreRatingSerializer(many=True)
+    test_full_score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = StudentQuizz
+        fields = (
+            'id',
+            # 'ddf',
+            'test_full_score'
+        )
+
+    def get_test_full_score(self, obj):
+        return TestFullScoreRatingSerializer(obj.test_full_score.all(),
+                                             many=True).data

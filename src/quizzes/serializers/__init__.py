@@ -7,6 +7,7 @@ from .question import (QuestionSerializer, FullQuizQuestionSerializer,
                        QuestionResultSerializer)
 from .quizz_test import (QuizzTestSerializer, QuizTestPassAnswerSerializer)
 from .full_test import (FullQuizzSerializer, StudentQuizzInformationSerializer,
-                        FullQuizLessonListSerializer, StudentAnswersSerializer)
+                        FullQuizLessonListSerializer,
+                        StudentQuizzRatingSerializer, StudentAnswersSerializer)
 from .common import MyTestSerializer, StudentQuizzFileSerializer
 from .student_quizz import ByLessonQuizzSerializer

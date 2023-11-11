@@ -5,6 +5,7 @@ from src.quizzes.api_views import (by_lesson_finish_view,
                                    by_lesson_quizz_lesson_view,
                                    by_lesson_quizz_question_view,
                                    by_lesson_quizz_view,
+                                   result_rating,
                                    by_lesson_result_task_progress_view,
                                    by_lesson_result_view, finish_quiz_test,
                                    full_quizz_lesson_view,
@@ -83,6 +84,7 @@ api_v1_urlpatterns = [
     path('by-lesson/', include(by_lesson_quizz)),
     path('my-test-list/', my_test_view),
     path('get-files/', get_files_view),
+    path('result-rating/', result_rating),
 ]
 
 app_name = 'quizzes'
