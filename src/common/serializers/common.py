@@ -96,6 +96,7 @@ class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.City
         fields = (
+            'id',
             'name_kz',
             'name_ru',
             'name_en',
@@ -106,6 +107,7 @@ class SchoolSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.School
         fields = (
+            'id',
             'name_kz',
             'name_ru',
             'name_en',
