@@ -24,10 +24,9 @@ class PacketListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.PacketFilter
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        f = queryset.first()
-        if f.quizz_type.quizz_type.name_code == 'full_test':
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset=queryset)
+        if queryset.first().quizz_type.quizz_type.name_code == 'full_test':
             p = Packet.objects.filter(
                 name_code='rating',
                 bought_packets__user=self.request.user,
