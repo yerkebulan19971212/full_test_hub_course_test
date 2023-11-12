@@ -1,2 +1,2 @@
 from .lesson import LessonFilter
-from .common import QuizzTypeFilter, PacketFilter
+from .common import QuizzTypeFilter, PacketFilter, SchoolFilter

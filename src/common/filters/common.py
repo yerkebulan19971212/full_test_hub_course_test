@@ -26,3 +26,11 @@ class PacketFilter(django_filters.FilterSet):
             'quizz_type',
             'packet_type',
         )
+
+
+class SchoolFilter(django_filters.FilterSet):
+    class Meta:
+        model = models.School
+        fields = (
+            'city',
+        )

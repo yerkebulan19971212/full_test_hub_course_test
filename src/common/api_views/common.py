@@ -59,6 +59,8 @@ class GetAllSchoolView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = School.objects.all()
     serializer_class = serializers.SchoolSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.SchoolFilter
 
 
 get_all_school_view = GetAllSchoolView.as_view()
