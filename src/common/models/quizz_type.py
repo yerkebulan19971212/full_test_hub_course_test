@@ -80,8 +80,8 @@ class CourseTypeQuizz(
         unique_together = ('course_type', 'quizz_type')
         db_table = 'common\".\"course_type_quizz'
 
-    # def __str__(self):
-    #     return f"{self.quizz_type.name_code}"
+    def __str__(self):
+        return f"{self.quizz_type.name_code}"
 
 
 class Packet(

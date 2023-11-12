@@ -19,10 +19,22 @@ quizz_types_view = GetAllActiveQuizzTypes.as_view()
 
 class PacketListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Packet.objects.all()
+    queryset = Packet.objects.all().exclude(name_code='rating')
     serializer_class = serializers.PacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.PacketFilter
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        f = queryset.first()
+        if f.quizz_type.quizz_type.name_code == 'full_test':
+            p = Packet.objects.filter(
+                name_code='rating',
+                bought_packets__user=self.request.user,
+                bought_packets__status=True,
+            )
+            return queryset | p
+        return queryset
 
 
 packet_view = PacketListView.as_view()
