@@ -58,7 +58,13 @@ class PhoneAlreadyExistError(APIException):
     default_code = "phone_already_exist_error"
 
 
-class PhoneAlreadyExistError(APIException):
+class PasswordsDoNotMatchError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
-    default_detail = _("phone already exist error")
-    default_code = "phone_already_exist_error"
+    default_detail = _("passwords do not match error")
+    default_code = "passwords_not_match_error"
+
+
+class AccountDoesNotHavePasswordError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("account does not have password error")
+    default_code = "not_password_error"

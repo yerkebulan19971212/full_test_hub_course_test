@@ -5,7 +5,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from src.accounts.models import Role, TokenVersion
 from src.common.exception import PasswordNotCorrectError, \
-    EmailAlreadyExistError, PhoneAlreadyExistError
+    EmailAlreadyExistError, PhoneAlreadyExistError, \
+    AccountDoesNotHavePasswordError, PasswordsDoNotMatchError
 
 User = get_user_model()
 
@@ -143,6 +144,8 @@ class UpdatePasswordSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
+        if instance.is_google:
+            raise AccountDoesNotHavePasswordError()
         current_password = validated_data.get('current_password')
         password = validated_data.get('password')
         if instance.check_password(current_password):
@@ -215,5 +218,27 @@ class UpdateLoginProfileUserSerializer(serializers.ModelSerializer):
             raise PasswordNotCorrectError()
         instance.email = validated_data.get("email")
         instance.phone = validated_data.get("phone")
+        instance.save()
+        return instance
+
+
+class UpdateGooglePasswordUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(required=True)
+    password_2 = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'password'
+        )
+
+    def update(self, instance, validated_data):
+        password_2 = validated_data.pop("password_2")
+        password = validated_data.pop("password")
+        if password_2 != password:
+            raise PasswordsDoNotMatchError()
+        instance.is_google = False
+        instance.set_password(password)
         instance.save()
         return instance

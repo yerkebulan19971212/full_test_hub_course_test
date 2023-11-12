@@ -21,7 +21,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UpdatePasswordSerializer,
                                                 UpdateUserSerializer,
                                                 ProfileUserSerializer,
-                                                UpdateLoginProfileUserSerializer)
+                                                UpdateLoginProfileUserSerializer,
+                                                UpdateGooglePasswordUserSerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -232,7 +233,7 @@ update_login_profile_view = UpdateLoginProfileView.as_view()
 
 class UpdateGooglePasswordView(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UpdateLoginProfileUserSerializer
+    serializer_class = UpdateGooglePasswordUserSerializer
     http_method_names = ['patch']
     lookup_field = None
 
