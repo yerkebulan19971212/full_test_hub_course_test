@@ -14,6 +14,13 @@ class ServerError(APIException):
     default_code = _("server_error")
 
 
+class UserNotExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    message = _("user_not_exist")
+    default_detail = _("user not exist")
+    default_code = "user_not_exist"
+
+
 class PhoneExistError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     message = _("phone_exist")

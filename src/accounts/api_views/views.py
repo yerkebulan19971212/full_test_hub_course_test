@@ -26,7 +26,7 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
-                                  IsNotStaffError)
+                                  IsNotStaffError, UserNotExistError)
 
 User = get_user_model()
 
@@ -96,6 +96,8 @@ class TokenObtainPairByPhoneView(BaseTokenObtainPairView):
     def post(self, request, *args, **kwargs):
         phone = self.request.data.get("phone")
         user = User.objects.filter(phone=phone).first()
+        if user is None:
+            return UserNotExistError()
         if user.role.name_code != "student":
             raise IsNotStudentError()
         return super().post(request, *args, **kwargs)
@@ -110,6 +112,8 @@ class TokenObtainPairByEmailView(BaseTokenObtainPairView):
     def post(self, request, *args, **kwargs):
         email = self.request.data.get("email")
         user = User.objects.filter(email=email).first()
+        if user is None:
+            return UserNotExistError()
         if user.role.name_code != "student":
             raise IsNotStudentError()
         return super().post(request, *args, **kwargs)
