@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Prefetch, Exists, OuterRef
-from django.db.models.functions import Coalesce
+from django.db.models import (Sum, Count, Q, Prefetch, Exists, OuterRef, Max,
+                              Case, When, IntegerField, F, Value, CharField)
+from django.db.models.functions import Concat, Coalesce
+
 from django.utils import timezone
-from django.utils.dateparse import parse_duration
 from rest_framework import generics, status
 from rest_framework import permissions
 from rest_framework import views
@@ -15,6 +16,7 @@ from rest_framework.response import Response
 
 from src.common.constant import ChoiceType
 from src.common.models import Lesson, CourseTypeLesson
+from src.common.paginations import SimplePagination
 from src.common.utils import get_multi_score
 from src.quizzes.filters import StudentQuizFileFilterSerializer
 from src.quizzes.models import Question, Answer, StudentScore, StudentAnswer, \
@@ -476,27 +478,73 @@ get_result_question = ResultQuestionView.as_view()
 
 
 class ResultRatingView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = serializers.StudentQuizzRatingSerializer
-    queryset = StudentQuizz.objects.prefetch_related(
-        'user'
-    ).all()
-        # .filter(
-        # quizz_type__quizz_type__name_code='rating'
-    # )
+    queryset = TestFullScore.objects.all()
+    pagination_class = SimplePagination
 
     def get_queryset(self):
-        # StudentQuizz.objects.filter()
-        test_full_score = TestFullScore.objects.select_related(
-            'lesson'
-        ).all().order_by(
-            '-lesson__course_type_lessons__main', 'id'
+        return TestFullScore.objects.values(
+            'student_quizz',
+            'student_quizz__user__city__name_ru',
+            'student_quizz__user__first_name',
+            'student_quizz__user__last_name',
+            'student_quizz__lesson_pair__lesson_1',
+            'student_quizz__lesson_pair__lesson_2',
+        ).annotate(
+            total=Coalesce(Sum('score'), 0),
+            math=Max(
+                Case(When(lesson__id=15, then='score'), default=None,
+                     output_field=IntegerField())),
+            literacy=Max(
+                Case(When(lesson__id=6, then='score'), default=None,
+                     output_field=IntegerField())),
+            history=Max(
+                Case(When(lesson__id=7, then='score'), default=None,
+                     output_field=IntegerField())),
+            lesson_1_ru=Concat(
+                F('student_quizz__lesson_pair__lesson_1__name_ru'),
+                Value(' - '),
+                Max(Case(When(lesson__id=F(
+                    'student_quizz__lesson_pair__lesson_1_id'),
+                    then='score'), default=None,
+                    output_field=CharField()))),
+            lesson_1_kz=Concat(
+                F('student_quizz__lesson_pair__lesson_1__name_kz'),
+                Value(' - '),
+                Max(Case(When(lesson__id=F(
+                    'student_quizz__lesson_pair__lesson_1_id'),
+                    then='score'), default=None,
+                    output_field=CharField()))),
+            lesson_1_en=Concat(
+                F('student_quizz__lesson_pair__lesson_1__name_en'),
+                Value(' - '),
+                Max(Case(When(lesson__id=F(
+                    'student_quizz__lesson_pair__lesson_1_id'),
+                    then='score'), default=None,
+                    output_field=CharField()))),
+            lesson_2_ru=Concat(
+                F('student_quizz__lesson_pair__lesson_2__name_ru'),
+                Value(' - '),
+                Max(Case(When(lesson__id=F(
+                    'student_quizz__lesson_pair__lesson_2_id'),
+                    then='score'), default=None,
+                    output_field=CharField()))),
+            lesson_2_kz=Concat(
+                F('student_quizz__lesson_pair__lesson_2__name_kz'),
+                Value(' - '),
+                Max(Case(When(lesson__id=F(
+                    'student_quizz__lesson_pair__lesson_2_id'),
+                    then='score'), default=None,
+                    output_field=CharField()))),
+            lesson_2_en=Concat(
+                F('student_quizz__lesson_pair__lesson_2__name_en'),
+                Value(' - '),
+                Max(Case(When(lesson__id=F(
+                    'student_quizz__lesson_pair__lesson_2_id'),
+                    then='score'), default=None,
+                    output_field=CharField()))),
         )
-        queryset = super().get_queryset().prefetch_related(Prefetch(
-            'test_full_score',
-            queryset=test_full_score
-        ))
-        return queryset.order_by('-created')
 
 
 result_rating = ResultRatingView.as_view()

@@ -5,9 +5,10 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
+from src.accounts.api_views.serializers import UserBaseSerializer
 from src.common import abstract_serializer
 from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
-    CourseTypeQuizz
+    CourseTypeQuizz, BoughtPacket
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore, TestFullScore
@@ -19,7 +20,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(required=True),
         required=True, write_only=True
     )
-    quizz_type = serializers.CharField(default='full_test', write_only=True)
+
+    # quizz_type = serializers.CharField(default='full_test', write_only=True)
 
     class Meta:
         model = StudentQuizz
@@ -28,25 +30,29 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             'language',
             'lessons',
             'packet',
-            'quizz_type'
+            # 'quizz_type'
         )
 
     def create(self, validated_data):
         lessons = validated_data.pop("lessons")
-        quizz_type = validated_data.pop("quizz_type")
+        packet = validated_data.get("packet")
+        user = self.context["request"].user
+
+        # quizz_type = validated_data.pop("quizz_type")
 
         lesson_pair = LessonPair.objects.filter(
             Q(lesson_1=lessons[0], lesson_2=lessons[1]) |
             Q(lesson_1=lessons[1], lesson_2=lessons[0])
         ).first()
-        c = CourseTypeQuizz.objects.filter(
-            quizz_type__name_code=quizz_type).first()
+        # c = CourseTypeQuizz.objects.filter(
+        #     quizz_type__name_code=quizz_type).first()
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = c
+        validated_data["quizz_type"] = packet.quizz_type
         validated_data["course_type"] = CourseType.objects.get_ent()
         validated_data["lesson_pair"] = lesson_pair
-        validated_data["quizz_duration"] = c.course_type.quizz_duration
+        validated_data[
+            "quizz_duration"] = packet.quizz_type.quizz_type.quizz_duration
         student_quizz = super().create(validated_data)
         questions = []
         questions += Question.objects.get_history_full_test(language)
@@ -62,6 +68,12 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
             student_quizz=student_quizz
         ) for i, q in enumerate(questions)])
+
+        bought_packet = BoughtPacket.objects.filter(
+            user=user,
+            packet=packet,
+            status=True
+        ).update(status=False)
 
         return student_quizz
 
@@ -165,17 +177,39 @@ class TestFullScoreRatingSerializer(serializers.ModelSerializer):
 
 
 class StudentQuizzRatingSerializer(serializers.ModelSerializer):
-    # test_full_score = TestFullScoreRatingSerializer(many=True)
-    test_full_score = serializers.SerializerMethodField()
+    max_score = serializers.IntegerField(default=140)
+    total = serializers.IntegerField(default=0)
+    math = serializers.IntegerField(default=0)
+    literacy = serializers.IntegerField(default=0)
+    history = serializers.IntegerField(default=0)
+    city = serializers.CharField(source="student_quizz__user__city__name_ru",default="")
+    lesson_1_ru = serializers.CharField(default="0")
+    lesson_1_kz = serializers.CharField(default="0")
+    lesson_1_en = serializers.CharField(default="0")
+    lesson_2_ru = serializers.CharField(default="0")
+    lesson_2_kz = serializers.CharField(default="0")
+    lesson_2_en = serializers.CharField(default="0")
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
-        model = StudentQuizz
+        model = TestFullScore
         fields = (
-            'id',
-            # 'ddf',
-            'test_full_score'
+            # 'student_quizz',
+            'full_name',
+            'city',
+            'max_score',
+            'total',
+            'math',
+            'literacy',
+            'history',
+            'lesson_1_ru',
+            'lesson_1_kz',
+            'lesson_1_en',
+            'lesson_2_ru',
+            'lesson_2_kz',
+            'lesson_2_en',
         )
 
-    def get_test_full_score(self, obj):
-        return TestFullScoreRatingSerializer(obj.test_full_score.all(),
-                                             many=True).data
+    @staticmethod
+    def get_full_name(obj):
+        return f"{obj.get('student_quizz__user__first_name', '')} {obj.get('student_quizz__user__last_name', '')}"

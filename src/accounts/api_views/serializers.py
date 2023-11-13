@@ -26,6 +26,18 @@ class AuthMeSerializer(serializers.ModelSerializer):
         )
 
 
+class UserBaseSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(source='role.name', default=None)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+        )
+
+
 class OwnRefreshToken(RefreshToken):
 
     @classmethod
