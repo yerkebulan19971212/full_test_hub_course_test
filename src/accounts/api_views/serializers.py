@@ -230,7 +230,8 @@ class UpdateGooglePasswordUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
-            'password'
+            'password',
+            'password_2'
         )
 
     def update(self, instance, validated_data):
