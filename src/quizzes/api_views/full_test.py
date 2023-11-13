@@ -496,7 +496,7 @@ class ResultRatingView(generics.ListAPIView):
             'test_full_score',
             queryset=test_full_score
         ))
-        return queryset
+        return queryset.order_by('-created')
 
 
 result_rating = ResultRatingView.as_view()
