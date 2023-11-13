@@ -480,9 +480,10 @@ class ResultRatingView(generics.ListAPIView):
     serializer_class = serializers.StudentQuizzRatingSerializer
     queryset = StudentQuizz.objects.prefetch_related(
         'user'
-    ).filter(
-        quizz_type__quizz_type__name_code='rating'
-    )
+    ).all()
+        # .filter(
+        # quizz_type__quizz_type__name_code='rating'
+    # )
 
     def get_queryset(self):
         # StudentQuizz.objects.filter()
