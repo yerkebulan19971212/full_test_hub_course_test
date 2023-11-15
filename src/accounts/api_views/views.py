@@ -97,7 +97,7 @@ class TokenObtainPairByPhoneView(BaseTokenObtainPairView):
         phone = self.request.data.get("phone")
         user = User.objects.filter(phone=phone).first()
         if user is None:
-            return UserNotExistError()
+            raise UserNotExistError()
         if user.role.name_code != "student":
             raise IsNotStudentError()
         return super().post(request, *args, **kwargs)
@@ -113,7 +113,7 @@ class TokenObtainPairByEmailView(BaseTokenObtainPairView):
         email = self.request.data.get("email")
         user = User.objects.filter(email=email).first()
         if user is None:
-            return UserNotExistError()
+            raise UserNotExistError()
         if user.role.name_code != "student":
             raise IsNotStudentError()
         return super().post(request, *args, **kwargs)
