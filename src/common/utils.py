@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+
 def get_correct_answer_count(a, b):
     result = list(filter(lambda x: x in a, b))
     return len(result)
@@ -26,3 +29,11 @@ def get_multi_score(correct_p, answer_p):
                 correct_answer_count == len(correct_p) - 1):
             return 1
     return 0
+
+
+def get_monday_and_next_monday():
+    current_date = datetime.now()
+    days_to_monday = current_date.weekday() - 0  # Monday is represented by 0 in Python's datetime module
+    monday = current_date - timedelta(days=days_to_monday)
+    next_monday = monday + timedelta(days=6)
+    return monday.date(), next_monday.date()

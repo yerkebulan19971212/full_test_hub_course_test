@@ -140,7 +140,7 @@ class User(
     )
 
     def __str__(self):
-        return self.username
+        return str(self.username)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

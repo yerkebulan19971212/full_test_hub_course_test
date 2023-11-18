@@ -113,6 +113,20 @@ class Packet(
         db_table = 'common\".\"packet'
 
 
+class RatingTest(
+    abstract_models.UUID,
+    abstract_models.TimeStampedModel,
+):
+    start_time = models.DateField()
+    end_time = models.DateField()
+
+    class Meta:
+        db_table = 'common\".\"rating_test'
+
+    def __str__(self):
+        return f"{str(self.start_time)} - {str(self.end_time)}"
+
+
 class BoughtPacket(
     abstract_models.UUID,
     abstract_models.TimeStampedModel
@@ -126,6 +140,13 @@ class BoughtPacket(
     )
     packet = models.ForeignKey(
         'common.Packet',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='bought_packets'
+    )
+    rating_test = models.ForeignKey(
+        'common.RatingTest',
         on_delete=models.CASCADE,
         null=True,
         db_index=True,

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'celery',
 
     'storages',
 
@@ -203,3 +204,20 @@ AWS_LOCATION = os.getenv('AWS_LOCATION')
 MEDIA_ROOT = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CELERY_BROKER_URL = 'redis://86.107.199.59:6379/1'
+# CELERY_RESULT_BACKEND = 'redis://86.107.199.59:6379/1'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}

@@ -5,4 +5,5 @@ from .city import City
 from .country import Country
 from .school import School
 from .kaspi import KaspiPay
-from .quizz_type import QuizzType, CourseTypeQuizz, Packet, BoughtPacket
+from .quizz_type import (QuizzType, CourseTypeQuizz, Packet, BoughtPacket,
+                         RatingTest)

@@ -31,6 +31,13 @@ class StudentQuizz(
         related_name='student_quizzes',
         null=True
     )
+    bought_packet = models.ForeignKey(
+        'common.BoughtPacket',
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name='student_quizzes',
+        null=True
+    )
     status = models.CharField(
         max_length=12,
         choices=QuizzStatus.choices(),
