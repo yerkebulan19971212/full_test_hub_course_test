@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 
 from django.db import transaction
 from django.db.models import (Sum, Count, Q, Prefetch, Exists, OuterRef, Max,
-                              Case, When, IntegerField, F, Value, CharField)
+                              Case, When, IntegerField, F, Value, CharField,
+                              BooleanField)
 from django.db.models.functions import Concat, Coalesce
 
 from django.utils import timezone
@@ -478,7 +479,7 @@ get_result_question = ResultQuestionView.as_view()
 
 
 class ResultRatingView(generics.ListAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.StudentQuizzRatingSerializer
     queryset = TestFullScore.objects.all()
     pagination_class = SimplePagination
@@ -488,6 +489,7 @@ class ResultRatingView(generics.ListAPIView):
         return self.list(request, *args, **kwargs)
 
     def get_queryset(self):
+        user = self.request.user
         q = self.request.query_params.get("q")
         school_id = self.request.query_params.get("q")
         lesson_pair_id = self.request.query_params.get("q")
@@ -516,6 +518,10 @@ class ResultRatingView(generics.ListAPIView):
             'student_quizz__lesson_pair__lesson_2',
         ).annotate(
             total=Coalesce(Sum('score'), 0),
+            is_current=
+            Case(When(student_quizz__user_id=user.id, then=True),
+                 default=False,
+                 output_field=BooleanField()),
             math=Max(
                 Case(When(lesson__id=15, then='score'), default=None,
                      output_field=IntegerField())),
