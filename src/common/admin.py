@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (BoughtPacket, City, Country, CourseType, CourseTypeLesson,
                      CourseTypeQuizz, KaspiPay, Lesson, LessonPair, Packet,
-                     QuizzType)
+                     QuizzType, School)
 
 admin.site.register([
     BoughtPacket,
@@ -14,7 +14,8 @@ admin.site.register([
     KaspiPay,
     Lesson,
     LessonPair,
-    QuizzType
+    QuizzType,
+    School
 ])
 
 

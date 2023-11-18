@@ -20,5 +20,9 @@ class MyTestFilter(django_filters.FilterSet):
 class StudentQuizFileFilterSerializer(serializers.Serializer):
     file_type = serializers.CharField(default='full_test')
 
-# class StudentQuizFileFilterSerializer(serializers.Serializer):
-#     file_type = serializers.CharField(default='full_test')
+
+class RatingFilterSerializer(serializers.Serializer):
+    q = serializers.CharField(required=False)
+    school_id = serializers.IntegerField(required=False)
+    lesson_pair_id = serializers.IntegerField(required=False)
+    rating_period_id = serializers.IntegerField(required=False)

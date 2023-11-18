@@ -4,7 +4,7 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 
 from src.common.exception import NotEnoughBalance
-from src.common.models import CourseTypeQuizz, Packet, City, School
+from src.common.models import CourseTypeQuizz, Packet, City, School, RatingTest
 from src.common import filters, serializers
 
 
@@ -20,7 +20,7 @@ quizz_types_view = GetAllActiveQuizzTypes.as_view()
 
 class PacketListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Packet.objects.all().exclude(name_code='rating')
+    queryset = Packet.objects.all()
     serializer_class = serializers.PacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.PacketFilter
@@ -33,7 +33,7 @@ class PacketListView(generics.ListAPIView):
                 bought_packets__user=self.request.user,
                 bought_packets__status=True,
             )
-            return queryset | p
+            return queryset.union(p)
         return queryset
 
 
@@ -75,3 +75,12 @@ class GetAllSchoolView(generics.ListAPIView):
 
 
 get_all_school_view = GetAllSchoolView.as_view()
+
+
+class GetAllRatingTestView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny]
+    queryset = RatingTest.objects.all()
+    serializer_class = serializers.RatingTestSerializer
+
+
+get_all_rating_test_view = GetAllRatingTestView.as_view()

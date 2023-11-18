@@ -483,10 +483,31 @@ class ResultRatingView(generics.ListAPIView):
     queryset = TestFullScore.objects.all()
     pagination_class = SimplePagination
 
-    def get_queryset(self):
-        return TestFullScore.objects.filter(
+    @swagger_auto_schema(query_serializer=filters.RatingFilterSerializer)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-        ).values(
+    def get_queryset(self):
+        q = self.request.query_params.get("q")
+        school_id = self.request.query_params.get("q")
+        lesson_pair_id = self.request.query_params.get("q")
+        rating_period_id = self.request.query_params.get("q")
+        queryset = super().get_queryset()
+        if q:
+            print("q")
+        if school_id:
+            queryset = queryset.filter(
+                student_quizz__user__school_id=school_id
+            )
+        if lesson_pair_id:
+            queryset = queryset.filter(
+                student_quizz__lesson_pair_id=lesson_pair_id
+            )
+        if rating_period_id:
+            queryset = queryset.filter(
+                student_quizz__bought_packet__rating_test_id=rating_period_id
+            )
+        return queryset.values(
             'student_quizz',
             'student_quizz__user__city__name_ru',
             'student_quizz__user__first_name',

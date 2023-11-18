@@ -49,7 +49,6 @@ class PacketSerializer(serializers.ModelSerializer):
 
     def get_remainder(self, obj):
         user = self.context['request'].user
-        print(obj.id)
         packet = BoughtPacket.objects.filter(
             user=user,
             packet_id=obj.id,
@@ -111,4 +110,14 @@ class SchoolSerializer(serializers.ModelSerializer):
             'name_kz',
             'name_ru',
             'name_en',
+        )
+
+
+class RatingTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.RatingTest
+        fields = (
+            'id',
+            'start_time',
+            'end_time',
         )
