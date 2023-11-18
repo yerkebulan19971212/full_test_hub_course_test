@@ -9,7 +9,7 @@ from src.accounts.api_views.serializers import UserBaseSerializer
 from src.common import abstract_serializer
 from src.common.exception import UnexpectedError
 from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
-    CourseTypeQuizz, BoughtPacket
+    CourseTypeQuizz, BoughtPacket, Packet
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore, TestFullScore
@@ -21,8 +21,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(required=True),
         required=True, write_only=True
     )
-
-    # quizz_type = serializers.CharField(default='full_test', write_only=True)
+    quizz_type = serializers.CharField(default='full_test', write_only=True)
 
     class Meta:
         model = StudentQuizz
@@ -31,14 +30,17 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             'language',
             'lessons',
             'packet',
-            # 'quizz_type'
+            'quizz_type'
         )
 
     def create(self, validated_data):
 
         lessons = validated_data.pop("lessons")
+        quizz_type = validated_data.pop("quizz_type")
         packet = validated_data.get("packet")
         user = self.context["request"].user
+        if quizz_type == 'rating':
+            packet = Packet.objects.filter(name_code='quizz_type').first()
         bought_packet = BoughtPacket.objects.filter(
             user=user,
             packet=packet,
