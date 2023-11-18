@@ -484,7 +484,9 @@ class ResultRatingView(generics.ListAPIView):
     pagination_class = SimplePagination
 
     def get_queryset(self):
-        return TestFullScore.objects.values(
+        return TestFullScore.objects.filter(
+
+        ).values(
             'student_quizz',
             'student_quizz__user__city__name_ru',
             'student_quizz__user__first_name',

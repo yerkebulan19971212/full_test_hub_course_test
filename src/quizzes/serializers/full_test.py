@@ -7,6 +7,7 @@ from rest_framework import serializers
 
 from src.accounts.api_views.serializers import UserBaseSerializer
 from src.common import abstract_serializer
+from src.common.exception import UnexpectedError
 from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
     CourseTypeQuizz, BoughtPacket
 from src.common.utils import get_multi_score
@@ -34,10 +35,17 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+
         lessons = validated_data.pop("lessons")
         packet = validated_data.get("packet")
         user = self.context["request"].user
-
+        bought_packet = BoughtPacket.objects.filter(
+            user=user,
+            packet=packet,
+            status=True
+        ).first()
+        if not bought_packet:
+            raise UnexpectedError()
         # quizz_type = validated_data.pop("quizz_type")
 
         lesson_pair = LessonPair.objects.filter(
@@ -68,12 +76,12 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
             student_quizz=student_quizz
         ) for i, q in enumerate(questions)])
-
-        bought_packet = BoughtPacket.objects.filter(
-            user=user,
-            packet=packet,
-            status=True
-        ).update(status=False)
+        if bought_packet.remainder == 1:
+            bought_packet.status = False
+        bought_packet.remainder -= 1
+        bought_packet.save()
+        student_quizz.bought_packet = bought_packet
+        student_quizz.save()
 
         return student_quizz
 
@@ -182,7 +190,8 @@ class StudentQuizzRatingSerializer(serializers.ModelSerializer):
     math = serializers.IntegerField(default=0)
     literacy = serializers.IntegerField(default=0)
     history = serializers.IntegerField(default=0)
-    city = serializers.CharField(source="student_quizz__user__city__name_ru",default="")
+    city = serializers.CharField(source="student_quizz__user__city__name_ru",
+                                 default="")
     lesson_1_ru = serializers.CharField(default="0")
     lesson_1_kz = serializers.CharField(default="0")
     lesson_1_en = serializers.CharField(default="0")

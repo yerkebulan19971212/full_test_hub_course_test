@@ -3,6 +3,7 @@ from rest_framework import permissions, status
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 
+from src.common.exception import NotEnoughBalance
 from src.common.models import CourseTypeQuizz, Packet, City, School
 from src.common import filters, serializers
 
@@ -49,8 +50,7 @@ class BuyPacket(generics.CreateAPIView):
 
         user = self.request.user
         if user.balance < packet_obj.price:
-            return Response({"detail": "недостаточно баланс"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise NotEnoughBalance()
         return self.create(request, *args, **kwargs)
 
 
