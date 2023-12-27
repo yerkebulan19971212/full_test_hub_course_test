@@ -5,7 +5,7 @@ from django.db.models import Prefetch, Count, Q
 from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
-from src.common.constant import ChoiceType
+from src.common.constant import ChoiceType, QuestionType
 from src.common.models import QuizzType, CourseTypeQuizz, CourseTypeLesson
 from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
@@ -186,6 +186,17 @@ class Question(
     abstract_models.IsActive,
     abstract_models.TimeStampedModel
 ):
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="sub_questions"
+    )
+    question_type = models.CharField(
+        max_length=11,
+        choices=QuestionType.choices(),
+        default=QuestionType.DEFAULT
+    )
     common_question = models.ForeignKey(
         'quizzes.CommonQuestion',
         on_delete=models.CASCADE,

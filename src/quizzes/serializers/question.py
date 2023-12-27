@@ -27,12 +27,31 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
         )
 
 
+class SubFullQuizQuestionSerializer(serializers.ModelSerializer):
+    answer = AnswerSerializer(source='answers', many=True)
+    user_ans = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Question
+        fields = (
+            'id',
+            'question',
+            'user_ans',
+            'answer',
+            'order',
+        )
+
+    def get_user_ans(self, obj):
+        return [i.answer_id for i in obj.student_answers.all()]
+
+
 class FullQuizQuestionSerializer(serializers.ModelSerializer):
     answer = AnswerSerializer(source='answers', many=True)
     common_question = CommonQuestionSerializer(many=False)
     user_ans = serializers.SerializerMethodField()
     choice = serializers.IntegerField(
         source='lesson_question_level.question_level.choice')
+    sub_questions = SubFullQuizQuestionSerializer(many=True)
 
     class Meta:
         model = Question
@@ -41,10 +60,10 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
             'question',
             'common_question',
             'choice',
-            # 'number',
             'user_ans',
             'answer',
             'order',
+            'sub_questions'
         )
 
     def get_user_ans(self, obj):
@@ -147,4 +166,5 @@ class QuestionResultSerializer(serializers.ModelSerializer):
         return obj.lesson_question_level.test_type_lesson.lesson.name_kz
 
     def get_correct_answer(self, obj):
-        return [a.answer_sign.name_code for a in obj.answers.filter(correct=True)]
+        return [a.answer_sign.name_code for a in
+                obj.answers.filter(correct=True)]

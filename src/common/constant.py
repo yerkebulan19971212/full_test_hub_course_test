@@ -83,3 +83,8 @@ class QuizzStatus(str, Choice):
     CONTINUE = 'CONTINUE'
     PASSED = 'PASSED'
     EXPIRED = 'EXPIRED'
+
+
+class QuestionType(str, Choice):
+    DEFAULT = 'DEFAULT'
+    SELECT = 'SELECT'
