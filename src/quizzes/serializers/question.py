@@ -168,3 +168,7 @@ class QuestionResultSerializer(serializers.ModelSerializer):
     def get_correct_answer(self, obj):
         return [a.answer_sign.name_code for a in
                 obj.answers.filter(correct=True)]
+
+
+class ImportQuestionQuerySerializer(serializers.Serializer):
+    variant_id = serializers.IntegerField(required=True)

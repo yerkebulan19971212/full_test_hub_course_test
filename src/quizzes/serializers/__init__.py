@@ -4,7 +4,7 @@ from .answer import (AnswerSerializer, AnswerSignSerializer)
 from .question import (QuestionSerializer, FullQuizQuestionSerializer,
                        ResultScoreSerializer, TestFullScoreSerializer,
                        FullQuizQuestionQuerySerializer,
-                       QuestionResultSerializer)
+                       QuestionResultSerializer, ImportQuestionQuerySerializer)
 from .quizz_test import (QuizzTestSerializer, QuizTestPassAnswerSerializer)
 from .full_test import (FullQuizzSerializer, StudentQuizzInformationSerializer,
                         FullQuizLessonListSerializer,

@@ -1,5 +1,5 @@
 import random
-
+from django.template.defaultfilters import truncatechars
 from django.db import models
 from django.db.models import Prefetch, Count, Q
 from django.db.models.functions import Coalesce
@@ -225,3 +225,7 @@ class Question(
 
     def __str__(self):
         return f'{self.question}'
+
+    @property
+    def short_question(self):
+        return truncatechars(self.question, 100)

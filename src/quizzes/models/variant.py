@@ -30,7 +30,7 @@ class Variant(
         db_table = 'quizz\".\"variant'
 
     def __str__(self):
-        return f"{self.name_code}"
+        return f"{self.variant_title} - ID: {self.pk}"
 
 
 class VariantQuestion(
