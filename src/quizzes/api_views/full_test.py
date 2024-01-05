@@ -81,23 +81,6 @@ class StudentQuizzInformationView(generics.RetrieveAPIView):
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    # # def get_queryset(self):
-    # #     pk = self.kwargs.get('pk')
-    # #     user = self.request.user
-    # #     test_type = self.kwargs.get('test_type')
-    # #     queryset = self.queryset.filter(
-    # #         pk=pk,
-    # #         user=user,
-    #         variant__variant_lessons__lesson__test_type_lessons__type__name=test_type
-    #     # )
-    #     student_test = queryset.first()
-    #     test_start_time = student_test.test_start_time
-    #     duration = student_test.variant.duration
-    #     difference_duration = datetime.now() - localtime(
-    #         test_start_time).replace(tzinfo=None)
-    #     if duration < difference_duration:
-    #         finish_ent(student_test)
-    #     # return queryset.all()
 
 
 full_quizz_view = StudentQuizzInformationView.as_view()
@@ -184,7 +167,7 @@ full_quizz_lesson_view = FullQuizLessonListView.as_view()
 
 
 class FullQuizQuestionListView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.FullQuizQuestionSerializer
     queryset = Question.objects.select_related(
         'common_question',
@@ -193,7 +176,7 @@ class FullQuizQuestionListView(generics.ListAPIView):
     ).prefetch_related(
         'answers',
         'student_quizz_questions',
-        'sub_questions',
+        # 'sub_questions',
     ).filter(parent__isnull=True).distinct()
 
     @swagger_auto_schema(tags=["full-test"],
@@ -204,12 +187,18 @@ class FullQuizQuestionListView(generics.ListAPIView):
     def get_queryset(self):
         student_quizz_id = self.request.query_params.get('student_quizz_id')
         lesson_id = self.request.query_params.get('lesson_id')
+
         answer = StudentAnswer.objects.filter(
             student_quizz_id=student_quizz_id,
             status=True
         )
+        sub_questions = Question.objects.prefetch_related(
+            "answers",
+            Prefetch('student_answers', queryset=answer),
+        )
         return super().get_queryset().prefetch_related(
-            Prefetch('student_answers', queryset=answer)
+            Prefetch('student_answers', queryset=answer),
+            Prefetch('sub_questions', queryset=sub_questions),
         ).filter(
             student_quizz_questions__lesson_id=lesson_id,
             student_quizz_questions__student_quizz_id=student_quizz_id,
