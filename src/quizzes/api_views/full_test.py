@@ -306,6 +306,7 @@ class EntFinishView(views.APIView):
             ).count()
             question_full_score = StudentQuizzQuestion.objects.filter(
                 student_quizz=student_quizz,
+                question__parent__isnull=True,
                 lesson=lesson
             ).distinct().aggregate(
                 sum_score=Coalesce(
