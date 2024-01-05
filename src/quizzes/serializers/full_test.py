@@ -39,6 +39,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         quizz_type = validated_data.pop("quizz_type")
         packet = validated_data.get("packet")
         user = self.context["request"].user
+        validated_data['user'] = user
+
         if quizz_type == 'rating':
             packet = Packet.objects.filter(name_code='quizz_type').first()
         bought_packet = BoughtPacket.objects.filter(

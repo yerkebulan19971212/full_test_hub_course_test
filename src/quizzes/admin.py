@@ -45,6 +45,7 @@ class QuestionQuizzAdmin(admin.ModelAdmin):
     list_filter = [
         'variant',
         'lesson_question_level__question_level',
+        'lesson_question_level__test_type_lesson__lesson',
         'question_type',
     ]
     readonly_fields = ('pk', 'created', 'modified')

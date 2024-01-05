@@ -6,15 +6,12 @@ from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
 from src.common.constant import ChoiceType, QuestionType
-from src.common.models import QuizzType, CourseTypeQuizz, CourseTypeLesson
+from src.common.models import CourseTypeQuizz, CourseTypeLesson
 from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
 
 
-class CommonQuestion(
-    abstract_models.TimeStampedModel,
-    # abstract_models.AbstractBaseNameCode
-):
+class CommonQuestion(abstract_models.TimeStampedModel):
     name_code = models.CharField(
         max_length=255,
         # unique=True,
@@ -34,13 +31,23 @@ class CommonQuestion(
 
 
 class QuestionQuerySet(abstract_models.AbstractQuerySet):
+    @staticmethod
+    def get_active_variant_list():
+        return [v for v in
+                Variant.objects.filter(is_active=True).order_by('?')]
+
+    @staticmethod
+    def first_random(variants: list):
+        for i in range(random.randint(1, 5)):
+            random.shuffle(variants)
+        return variants[0]
 
     def get_questions_for_flash_card(
             self, lang: str, lesson: int, question_number: int):
         return self.filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson_id=lesson,
-            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+            question_type=QuestionType.DEFAULT,
         )[:question_number]
 
     def get_questions_with_answer(self):
@@ -60,7 +67,8 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return self.filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson_id=lesson,
-            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE,
+            question_type=QuestionType.DEFAULT,
         )[:question_number]
 
     def get_questions_with_correct_answer(self):
@@ -75,7 +83,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         ).filter(
             lesson_question_level__question_level__choice=ChoiceType.CHOICE,
             variant__language=student_quizz.language,
-            lesson_question_level__test_type_lesson__lesson=student_quizz.lesson
+            lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
         ).annotate(
             question_count=Coalesce(
                 Count(
@@ -95,6 +103,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         questions = list(self.select_related(
             'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
+            variant__is_active=True,
             lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'))
         for i in range(random.randint(1, 10)):
             random.shuffle(questions)
@@ -102,13 +111,12 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_reading_literacy_full_test(self, lang: str):
         questions_list = []
-        variants = [v for v in
-                    Variant.objects.filter(is_active=True).order_by('?')]
+        variants = self.get_active_variant_list()
         for i in range(random.randint(1, 5)):
             random.shuffle(variants)
         for q in QuestionLevel.objects.all().order_by('id')[:3]:
             random.shuffle(variants)
-            variant = variants[1]
+            variant = variants[0]
             questions = self.select_related(
                 'lesson_question_level__test_type_lesson'
             ).filter(
@@ -127,15 +135,15 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_history_full_test(self, lang: str):
         questions_list = []
-        variants = [v for v in
-                    Variant.objects.filter(is_active=True).order_by('?')]
+        variants = self.get_active_variant_list()
         for i in range(random.randint(1, 5)):
             random.shuffle(variants)
-        variant = variants[1]
+        variant = variants[0]
         for q in QuestionLevel.objects.all().order_by('id')[:4]:
             questions = self.select_related(
                 'lesson_question_level__test_type_lesson').filter(
                 variant__language=lang,
+                variant__is_active=True,
                 lesson_question_level__question_level=q,
                 lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan')
             if q.name_code == 'C':
@@ -153,20 +161,17 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_full_test(self, lang: str, lesson):
         questions_list = []
-        variants = [v for v in
-                    Variant.objects.filter(is_active=True).order_by('?')]
-        for i in range(random.randint(1, 5)):
-            random.shuffle(variants)
-        variant = variants[1]
         for q in QuestionLevel.objects.all().order_by('id'):
-            questions = self.select_related(
-                'lesson_question_level__test_type_lesson'
-            ).filter(
+            questions = self.filter(
+                variant__is_active=True,
                 variant__language=lang,
                 lesson_question_level__question_level=q,
-                lesson_question_level__test_type_lesson__lesson=lesson
+                lesson_question_level__test_type_lesson__lesson=lesson,
+                parent__isnull=True
             )
-            if q.name_code == 'E':
+            if q.name_code == 'F':
+                variants = self.get_active_variant_list()
+                variant = self.first_random(variants)
                 questions = questions.filter(variant=variant)
             else:
                 for i in range(random.randint(1, 10)):

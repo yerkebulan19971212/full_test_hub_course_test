@@ -64,9 +64,6 @@ class NewFullTest(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.FullQuizzSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
     @swagger_auto_schema(tags=["full-test"])
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)

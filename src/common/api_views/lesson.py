@@ -119,14 +119,40 @@ class ImportQuestionFromTestHubApp(APIView):
                                         question["parent"], None)
                                 )
                                 questions_objects[question["id"]] = q.id
-                                Answer.objects.bulk_create([
-                                    Answer(
-                                        answer_sign=answersign[i],
-                                        question=q,
-                                        answer=a["answer"],
-                                        correct=a["correct"],
-                                    ) for i, a in enumerate(question["answer"])
-                                ])
+                                if question_type == QuestionType.SELECT:
+                                    parent_url = f"http://127.0.0.1:8007/api/v1/quizzes/get-all-question-parent/?parent={question['id']}"
+                                    res_q_p = requests.get(parent_url)
+                                    for r in res_q_p.json():
+                                        question = r
+                                        qp = Question.objects.create(
+                                            order=order,
+                                            question_type=question_type,
+                                            lesson_question_level=lq,
+                                            common_question=common_q_o,
+                                            question=question["question"],
+                                            variant=variant,
+                                            parent_id=q.id
+                                        )
+                                        Answer.objects.bulk_create([
+                                            Answer(
+                                                answer_sign=answersign[i],
+                                                question=qp,
+                                                answer=a["answer"],
+                                                correct=a["correct"],
+                                                # order=a["order"],
+                                            ) for i, a in
+                                            enumerate(question["answer"])
+                                        ])
+                                elif question_type == QuestionType.DEFAULT:
+                                    Answer.objects.bulk_create([
+                                        Answer(
+                                            answer_sign=answersign[i],
+                                            question=q,
+                                            answer=a["answer"],
+                                            correct=a["correct"],
+                                            order=a["order"]
+                                        ) for i, a in enumerate(question["answer"])
+                                    ])
                                 question_l.append(VariantQuestion(
                                     variant=variant,
                                     question=q

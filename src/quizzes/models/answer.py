@@ -18,7 +18,10 @@ class AnswerSign(
         return f'{self.name_code}'
 
 
-class Answer(abstract_models.TimeStampedModel):
+class Answer(
+    abstract_models.TimeStampedModel,
+    abstract_models.Ordering
+):
     question = models.ForeignKey(
         'quizzes.Question',
         related_name='answers',

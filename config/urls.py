@@ -7,8 +7,10 @@ import debug_toolbar
 from src.accounts.urls import accounts_api_v1_urlpatterns
 from src.common.urls import api_v1_urlpatterns as common_url
 from src.quizzes.urls import urlpatterns as quizzes_url
+from src.services.views import utils_v
 
 urlpatterns = [
+    path('util/', utils_v),
     path('admin/', admin.site.urls),
     path('accounts/',
          include((accounts_api_v1_urlpatterns, 'accounts'),
