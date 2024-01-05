@@ -296,7 +296,6 @@ class EntFinishView(views.APIView):
         for lesson in lessons:
             index += 1
             question_score = StudentScore.objects.filter(
-                question__parent__isnull=True,
                 question__student_quizz_questions__lesson=lesson,
                 student_quizz=student_quizz,
                 status=True
