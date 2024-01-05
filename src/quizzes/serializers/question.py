@@ -62,6 +62,7 @@ class FullQuizQuestionSerializer(serializers.ModelSerializer):
             'choice',
             'user_ans',
             'answer',
+            'question_type',
             # 'order',
             'sub_questions'
         )

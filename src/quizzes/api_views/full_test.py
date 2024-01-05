@@ -167,7 +167,7 @@ full_quizz_lesson_view = FullQuizLessonListView.as_view()
 
 
 class FullQuizQuestionListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.FullQuizQuestionSerializer
     queryset = Question.objects.select_related(
         'common_question',
@@ -176,7 +176,6 @@ class FullQuizQuestionListView(generics.ListAPIView):
     ).prefetch_related(
         'answers',
         'student_quizz_questions',
-        # 'sub_questions',
     ).filter(parent__isnull=True).distinct()
 
     @swagger_auto_schema(tags=["full-test"],
