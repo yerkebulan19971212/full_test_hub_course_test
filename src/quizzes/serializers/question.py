@@ -108,6 +108,48 @@ class FullQuizQuestionQuerySerializer(serializers.Serializer):
     lesson_id = serializers.IntegerField(required=True)
 
 
+class SubQuestionResultSerializer(serializers.ModelSerializer):
+    answers = serializers.SerializerMethodField()
+    correct_answer = serializers.SerializerMethodField()
+    sub_questions = SubFullQuizQuestionSerializer(many=True)
+
+    class Meta:
+        model = Question
+        fields = (
+            'id',
+            'question',
+            'answers',
+            'correct_answer',
+            'sub_questions'
+        )
+
+
+    def get_answers(self, obj):
+        answers = obj.answers.all()
+        answers_data = AnswerSignSerializer(answers, many=True).data
+        student_quizz_id = self.context.get('view').kwargs.get(
+            'student_quizz_id')
+        for a in answers_data:
+            ans_exists = StudentAnswer.objects.filter(
+                student_quizz_id=student_quizz_id,
+                question=obj,
+                answer_id=a.get('id')
+            ).first()
+            if ans_exists:
+                if ans_exists.answer.correct:
+                    a["correct"] = "CORRECT"
+                else:
+                    a["correct"] = "WRONG"
+            else:
+                a["correct"] = "NOT_CHOOSE"
+        return answers_data
+
+
+    def get_correct_answer(self, obj):
+        return [a.answer_sign.name_code for a in
+                obj.answers.filter(correct=True)]
+
+
 class QuestionResultSerializer(serializers.ModelSerializer):
     answers = serializers.SerializerMethodField()
     common_question = CommonQuestionSerializer(many=False)
@@ -116,18 +158,21 @@ class QuestionResultSerializer(serializers.ModelSerializer):
     lesson = serializers.SerializerMethodField()
     order = serializers.SerializerMethodField()
     correct_answer = serializers.SerializerMethodField()
+    sub_questions = SubQuestionResultSerializer(many=True)
 
     class Meta:
         model = Question
         fields = (
             'id',
             'question',
+            'question_type',
             'common_question',
             'choice',
             'answers',
             'lesson',
             'order',
-            'correct_answer'
+            'correct_answer',
+            'sub_questions'
         )
 
     def get_order(self, obj):
