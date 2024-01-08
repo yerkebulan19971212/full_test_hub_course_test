@@ -347,17 +347,22 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
             ).annotate(
                 answered_correct=Exists(
                     StudentAnswer.objects.filter(
-                        student_quizz_id=student_quizz_id,
-                        question_id=OuterRef('pk'),
-                        answer__correct=True,
-                        status=True,
-                    )),
+                        Q(
+                            status=True,
+                            student_quizz_id=student_quizz_id,
+                            answer__correct=True
+                        ) & Q(
+                            Q(question_id=OuterRef('pk')) | Q(
+                                question__parent_id=OuterRef('pk'))
+                        ))),
                 answered=Exists(
-                    StudentAnswer.objects.filter(
+                    StudentAnswer.objects.filter(Q(
                         student_quizz_id=student_quizz_id,
-                        question_id=OuterRef('pk'),
-                        status=True,
-                    ))
+                        status=True) & Q(
+                        Q(question_id=OuterRef('pk')) | Q(
+                            question__parent_id=OuterRef('pk'))
+                    )
+                                                 ))
             ).order_by('student_quizz_questions__order')
             d['questions'] = []
             for q in questions:
