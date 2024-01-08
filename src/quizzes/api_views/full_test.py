@@ -16,6 +16,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from src.common.constant import ChoiceType
+from src.common.exception import PassedTestError
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.paginations import SimplePagination
 from src.common.utils import get_multi_score
@@ -277,6 +278,8 @@ class EntFinishView(views.APIView):
     @swagger_auto_schema(tags=["full-test"])
     def post(self, request, student_quizz):
         student_quizz = get_object_or_404(StudentQuizz, pk=student_quizz)
+        if student_quizz.status in ["PASSED"]:
+            return PassedTestError()
         student_quizz.status = "PASSED"
         student_quizz.quizz_end_time = datetime.now()
         student_quizz.save()
