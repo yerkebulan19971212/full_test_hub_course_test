@@ -191,7 +191,7 @@ class TestFullScoreRatingSerializer(serializers.ModelSerializer):
 class StudentQuizzRatingSerializer(serializers.ModelSerializer):
     is_current = serializers.BooleanField(default=False)
     max_score = serializers.IntegerField(default=140)
-    total = serializers.IntegerField(default=0)
+    total = serializers.IntegerField(source='total_count', default=0)
     math = serializers.IntegerField(default=0)
     literacy = serializers.IntegerField(default=0)
     history = serializers.IntegerField(default=0)

@@ -515,7 +515,7 @@ class ResultRatingView(generics.ListAPIView):
             'student_quizz__lesson_pair__lesson_1',
             'student_quizz__lesson_pair__lesson_2',
         ).annotate(
-            total=Coalesce(Sum('score'), 0),
+            total_count=Coalesce(Sum('score'), 0),
             is_current=
             Case(When(student_quizz__user_id=user.id, then=True),
                  default=False,
@@ -571,9 +571,9 @@ class ResultRatingView(generics.ListAPIView):
                     'student_quizz__lesson_pair__lesson_2_id'),
                     then='score'), default=None,
                     output_field=CharField()))),
-        )
+        ).order_by('-total_count')
 
-        return queryset.order_by('total')
+        return queryset
 
 
 result_rating = ResultRatingView.as_view()
