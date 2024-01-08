@@ -111,7 +111,6 @@ class FullQuizQuestionQuerySerializer(serializers.Serializer):
 class SubQuestionResultSerializer(serializers.ModelSerializer):
     answers = serializers.SerializerMethodField()
     correct_answer = serializers.SerializerMethodField()
-    sub_questions = SubFullQuizQuestionSerializer(many=True)
 
     class Meta:
         model = Question
@@ -120,7 +119,6 @@ class SubQuestionResultSerializer(serializers.ModelSerializer):
             'question',
             'answers',
             'correct_answer',
-            'sub_questions'
         )
 
 
