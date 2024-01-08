@@ -488,7 +488,13 @@ class ResultRatingView(generics.ListAPIView):
         rating_period_id = self.request.query_params.get("q")
         queryset = super().get_queryset()
         if q:
-            print("q")
+            queryset = queryset.filter(
+                Q(student_quizz__user__first_name__icontains=q) |
+                Q(student_quizz__user__last_name__icontains=q) |
+                Q(student_quizz__user__school__name_en__icontains=q) |
+                Q(student_quizz__user__school__name_ru__icontains=q) |
+                Q(student_quizz__user__school__name_kz__icontains=q)
+            )
         if school_id:
             queryset = queryset.filter(
                 student_quizz__user__school_id=school_id
@@ -501,7 +507,7 @@ class ResultRatingView(generics.ListAPIView):
             queryset = queryset.filter(
                 student_quizz__bought_packet__rating_test_id=rating_period_id
             )
-        return queryset.values(
+        queryset = queryset.values(
             'student_quizz',
             'student_quizz__user__city__name_ru',
             'student_quizz__user__first_name',
@@ -566,6 +572,8 @@ class ResultRatingView(generics.ListAPIView):
                     then='score'), default=None,
                     output_field=CharField()))),
         )
+
+        return queryset.order_by('total')
 
 
 result_rating = ResultRatingView.as_view()
