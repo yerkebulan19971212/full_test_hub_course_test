@@ -15,6 +15,14 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(7200.0, rating_quizz_full.s(),
                              name='add every 3600')
 
+    sender.add_periodic_task(7200.0, rating_quizz_full_2.s(),
+                             name='add every 3600')
+
+
+@celery_app.task
+def rating_quizz_full_2():
+    print('========')
+
 
 @celery_app.task
 def rating_quizz_full():
