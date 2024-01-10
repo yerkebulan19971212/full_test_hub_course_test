@@ -474,9 +474,11 @@ get_result_question = ResultQuestionView.as_view()
 
 
 class ResultRatingView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.StudentQuizzRatingSerializer
-    queryset = TestFullScore.objects.all()
+    queryset = TestFullScore.objects.filter(
+        student_quizz__bought_packet__rating_test__isnull=False
+    )
     pagination_class = SimplePagination
 
     @swagger_auto_schema(query_serializer=filters.RatingFilterSerializer)
@@ -485,10 +487,12 @@ class ResultRatingView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        print(self.request.query_params)
+        print("self.request.query_params")
         q = self.request.query_params.get("q")
-        school_id = self.request.query_params.get("q")
-        lesson_pair_id = self.request.query_params.get("q")
-        rating_period_id = self.request.query_params.get("q")
+        school_id = self.request.query_params.get("school_id")
+        lesson_pair_id = self.request.query_params.get("lesson_pair_id")
+        rating_period_id = self.request.query_params.get("rating_period_id")
         queryset = super().get_queryset()
         if q:
             queryset = queryset.filter(
@@ -506,6 +510,9 @@ class ResultRatingView(generics.ListAPIView):
             queryset = queryset.filter(
                 student_quizz__lesson_pair_id=lesson_pair_id
             )
+
+        print(rating_period_id)
+        print("rating_period_id")
         if rating_period_id:
             queryset = queryset.filter(
                 student_quizz__bought_packet__rating_test_id=rating_period_id
