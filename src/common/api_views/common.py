@@ -79,7 +79,7 @@ get_all_school_view = GetAllSchoolView.as_view()
 
 class GetAllRatingTestView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
-    queryset = RatingTest.objects.all().order_by('id')
+    queryset = RatingTest.objects.all().order_by('-id')
     serializer_class = serializers.RatingTestSerializer
 
 
