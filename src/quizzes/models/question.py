@@ -150,7 +150,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 questions = questions.filter(variant=variant)
             if q.name_code == 'D':
                 if len(variants) > 1:
-                    variant = variants[2]
+                    variant = variants[-1]
                 questions = questions.filter(variant=variant)
             else:
                 for i in range(random.randint(1, 10)):

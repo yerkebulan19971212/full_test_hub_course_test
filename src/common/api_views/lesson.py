@@ -139,7 +139,7 @@ class ImportQuestionFromTestHubApp(APIView):
                                                 question=qp,
                                                 answer=a["answer"],
                                                 correct=a["correct"],
-                                                # order=a["order"],
+                                                order=a["order"],
                                             ) for i, a in
                                             enumerate(question["answer"])
                                         ])
