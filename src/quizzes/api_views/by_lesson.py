@@ -159,8 +159,13 @@ class ByLessonQuizQuestionListView(generics.ListAPIView):
             student_quizz_id=student_quizz_id,
             status=True
         )
+        sub_questions = Question.objects.prefetch_related(
+            "answers",
+            Prefetch('student_answers', queryset=answer),
+        )
         return super().get_queryset().prefetch_related(
-            Prefetch('student_answers', queryset=answer)
+            Prefetch('student_answers', queryset=answer),
+            Prefetch('sub_questions', queryset=sub_questions),
         ).filter(
             student_quizz_questions__lesson_id=lesson_id,
             student_quizz_questions__student_quizz_id=student_quizz_id,
