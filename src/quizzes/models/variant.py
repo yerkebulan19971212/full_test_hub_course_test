@@ -33,6 +33,22 @@ class Variant(
         return f"{self.variant_title} - ID: {self.pk}"
 
 
+class VariantPacket(
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel
+):
+    packet = models.ForeignKey(
+        'common.Packet',
+        on_delete=models.CASCADE,
+        related_name='variant_packets'
+    )
+    variant = models.ForeignKey(
+        'quizzes.Variant',
+        on_delete=models.CASCADE,
+        related_name='variant_packets'
+    )
+
+
 class VariantQuestion(
     abstract_models.UUID,
     abstract_models.Ordering,

@@ -1,11 +1,11 @@
 from django.contrib import admin
 from .models import StudentQuizz, StudentQuizzFile, Question, QuestionLevel, \
     Variant
+from .models.variant import VariantPacket
 
 admin.site.register([
     QuestionLevel,
-    StudentQuizzFile,
-    Variant
+    StudentQuizzFile
 ])
 
 
@@ -53,4 +53,25 @@ class QuestionQuizzAdmin(admin.ModelAdmin):
         'question',
         'common_question__text',
         'common_question__name_code',
+    )
+
+
+class VariantPacketInline(admin.TabularInline):
+    model = VariantPacket
+    extra = 1
+
+
+@admin.register(Variant)
+class QuestionQuizzAdmin(admin.ModelAdmin):
+    inlines = [VariantPacketInline]
+    list_display = (
+        'variant_title', 'id', 'created',
+    )
+    list_filter = []
+    readonly_fields = ('pk', 'created', 'modified')
+    search_fields = (
+        'name_kz',
+        'name_ru',
+        'name_en',
+        'name_code',
     )

@@ -112,6 +112,9 @@ class Packet(
     class Meta:
         db_table = 'common\".\"packet'
 
+    def __str__(self):
+        return f'{self.name_code} - {self.name_ru}'
+
 
 class RatingTest(
     abstract_models.UUID,

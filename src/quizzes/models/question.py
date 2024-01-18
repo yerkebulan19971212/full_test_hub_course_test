@@ -99,17 +99,18 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         ).order_by('question_count', '?')
         return queryset
 
-    def get_mat_full_test(self, lang: str):
+    def get_mat_full_test(self, lang: str, packet):
         questions = list(self.select_related(
             'lesson_question_level__test_type_lesson').filter(
             variant__language=lang,
             variant__is_active=True,
+            variant__variant_packets__packet=packet,
             lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'))
         for i in range(random.randint(1, 10)):
             random.shuffle(questions)
         return questions[:10]
 
-    def get_reading_literacy_full_test(self, lang: str):
+    def get_reading_literacy_full_test(self, lang: str, packet):
         questions_list = []
         variants = self.get_active_variant_list()
         for i in range(random.randint(1, 5)):
@@ -122,6 +123,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             ).filter(
                 variant__language=lang,
                 variant=variant,
+                variant__variant_packets__packet=packet,
                 lesson_question_level__question_level=q,
                 lesson_question_level__test_type_lesson__lesson__name_code='reading_literacy'
             ).order_by('order')
@@ -133,7 +135,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 questions_list += [q for q in questions[:5]]
         return questions_list
 
-    def get_history_full_test(self, lang: str):
+    def get_history_full_test(self, lang: str, packet):
         questions_list = []
         variants = self.get_active_variant_list()
         for i in range(random.randint(1, 5)):
@@ -145,6 +147,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 variant__language=lang,
                 variant__is_active=True,
                 lesson_question_level__question_level=q,
+                variant__variant_packets__packet=packet,
                 lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan')
             if q.name_code == 'C':
                 questions = questions.filter(variant=variant)
@@ -159,13 +162,14 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             questions_list += [q for q in questions[:5]]
         return questions_list
 
-    def get_full_test(self, lang: str, lesson):
+    def get_full_test(self, lang: str, lesson, packet):
         questions_list = []
         for q in QuestionLevel.objects.all().order_by('id'):
             questions = self.filter(
                 variant__is_active=True,
                 variant__language=lang,
                 lesson_question_level__question_level=q,
+                variant__variant_packets__packet=packet,
                 lesson_question_level__test_type_lesson__lesson=lesson,
                 parent__isnull=True
             )
