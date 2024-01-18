@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (BoughtPacket, City, Country, CourseType, CourseTypeLesson,
                      CourseTypeQuizz, KaspiPay, Lesson, LessonPair, Packet,
                      QuizzType, School)
+from src.quizzes.admin import VariantPacketInline
 
 admin.site.register([
     BoughtPacket,
@@ -21,6 +22,8 @@ admin.site.register([
 
 @admin.register(Packet)
 class PacketAdmin(admin.ModelAdmin):
+    inlines = [VariantPacketInline]
+
     list_display = (
         'name_code',
         'pk',
