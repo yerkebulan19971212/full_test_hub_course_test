@@ -61,7 +61,7 @@ class ImportQuestionFromTestHubApp(APIView):
         questions_objects = {}
         variant_id = self.request.query_params.get("variant_id")
         lessons = Lesson.objects.get_all_active()
-        variant_list_url = f"http://127.0.0.1:8007/api/v1/super-admin/variant-list/?variant_id={str(variant_id)}"
+        variant_list_url = f"https://api-ent.testhub.kz/api/v1/super-admin/variant-list/?variant_id={str(variant_id)}"
         res = requests.get(variant_list_url)
         answersign = AnswerSign.objects.all()
         print(res)
@@ -79,7 +79,7 @@ class ImportQuestionFromTestHubApp(APIView):
                     print(variant)
                     print("variant")
                     for l in lessons:
-                        question_url = "http://127.0.0.1:8007/api/v1/quizzes/get-all-question-2-2/?"
+                        question_url = "https://api-ent.testhub.kz/api/v1/quizzes/get-all-question-2-2/?"
                         question_url += "variant_id=" + str(
                             v.get('id')) + "&lesson_code=" + l.name_code
                         res_q = requests.get(question_url)
@@ -120,7 +120,7 @@ class ImportQuestionFromTestHubApp(APIView):
                                 )
                                 questions_objects[question["id"]] = q.id
                                 if question_type == QuestionType.SELECT:
-                                    parent_url = f"http://127.0.0.1:8007/api/v1/quizzes/get-all-question-parent/?parent={question['id']}"
+                                    parent_url = f"https://api-ent.testhub.kz/api/v1/quizzes/get-all-question-parent/?parent={question['id']}"
                                     res_q_p = requests.get(parent_url)
                                     for r in res_q_p.json():
                                         question = r
