@@ -65,7 +65,7 @@ class VariantPacketInline(admin.TabularInline):
 class QuestionQuizzAdmin(admin.ModelAdmin):
     inlines = [VariantPacketInline]
     list_display = (
-        'variant_title', 'id', 'is_active', 'created',
+        'name_code', 'id', 'is_active', 'created',
     )
     list_filter = []
     readonly_fields = ('pk', 'created', 'modified')

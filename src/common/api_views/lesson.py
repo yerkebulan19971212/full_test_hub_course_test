@@ -74,7 +74,11 @@ class ImportQuestionFromTestHubApp(APIView):
                     question_l = []
                     variant = Variant.objects.create(
                         course_type=CourseType.objects.all().first(),
-                        variant_title=v["variant"]
+                        variant_title=v["variant"],
+                        name_ru=v["variant"],
+                        name_kz=v["variant"],
+                        name_en=v["variant"],
+                        name_code=v["variant"],
                     )
                     print(variant)
                     print("variant")

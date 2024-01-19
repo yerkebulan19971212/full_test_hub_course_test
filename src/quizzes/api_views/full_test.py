@@ -39,9 +39,6 @@ class MyTest(generics.ListAPIView):
 
     def get_queryset(self):
         current_time = timezone.now()
-        print(current_time)
-        print(current_time - F('quizz_duration'))
-        print("current_time")
         tests = super().get_queryset().filter(
             user=self.request.user,
             status=QuizzStatus.CONTINUE,
