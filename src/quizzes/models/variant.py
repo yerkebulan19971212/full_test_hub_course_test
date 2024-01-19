@@ -30,7 +30,7 @@ class Variant(
         db_table = 'quizz\".\"variant'
 
     def __str__(self):
-        return f"{self.variant_title} - ID: {self.pk}"
+        return f"{self.variant_title} - ID: {self.pk} - {str(self.is_active)}"
 
 
 class VariantPacket(

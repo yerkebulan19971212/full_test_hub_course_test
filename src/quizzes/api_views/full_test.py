@@ -15,7 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from src.common.constant import ChoiceType
+from src.common.constant import ChoiceType, QuizzStatus
 from src.common.exception import PassedTestError
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.paginations import SimplePagination
@@ -38,6 +38,16 @@ class MyTest(generics.ListAPIView):
     filterset_class = filters.MyTestFilter
 
     def get_queryset(self):
+        current_time = timezone.now()
+        tests = super().get_queryset().filter(
+            user=self.request.user,
+            status=QuizzStatus.CONTINUE,
+            quizz_start_time__gt=current_time - F('quizz_duration')
+        )
+        for test in tests:
+            test.status = QuizzStatus.PASSED
+            test.quizz_end_time = current_time
+            test.save()
         return super().get_queryset().filter(
             user=self.request.user
         ).annotate(
@@ -104,14 +114,13 @@ class FullQuizLessonListView(generics.ListAPIView):
         else:
             student_test.status = "CONTINUE"
             student_test.save()
-
+        current_time = timezone.now()
+        duration = (student_test.quizz_start_time + student_test.quizz_duration) - current_time
         if not student_test.quizz_start_time:
             student_test.quizz_start_time = datetime.now()
             # difference_duration = timedelta(seconds=0)
         else:
             test_start_time = student_test.quizz_start_time
-        duration = student_test.quizz_type.quizz_type.quizz_duration
-        duration_dif = timezone.now() - student_test.quizz_start_time
         if duration.total_seconds() <= 0:
             student_test.quizz_duration = timedelta(seconds=0)
             student_test.status = "PASSED"
@@ -122,7 +131,7 @@ class FullQuizLessonListView(generics.ListAPIView):
             student_test.quizz_duration = duration
         student_test.save()
         data = self.list(request, *args, **kwargs).data
-        duration = student_test.quizz_duration
+
         return Response({
             "lessons": data,
             "duration": {

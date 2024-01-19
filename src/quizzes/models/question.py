@@ -32,9 +32,12 @@ class CommonQuestion(abstract_models.TimeStampedModel):
 
 class QuestionQuerySet(abstract_models.AbstractQuerySet):
     @staticmethod
-    def get_active_variant_list():
+    def get_active_variant_list(packet):
         return [v for v in
-                Variant.objects.filter(is_active=True).order_by('?')]
+                Variant.objects.filter(
+                    is_active=True,
+                    variant_packets__packet=packet
+                ).order_by('?')]
 
     @staticmethod
     def first_random(variants: list):
@@ -112,7 +115,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_reading_literacy_full_test(self, lang: str, packet):
         questions_list = []
-        variants = self.get_active_variant_list()
+        variants = self.get_active_variant_list(packet)
         for i in range(random.randint(1, 5)):
             random.shuffle(variants)
         for q in QuestionLevel.objects.all().order_by('id')[:3]:
@@ -137,7 +140,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_history_full_test(self, lang: str, packet):
         questions_list = []
-        variants = self.get_active_variant_list()
+        variants = self.get_active_variant_list(packet)
         for i in range(random.randint(1, 5)):
             random.shuffle(variants)
         variant = variants[0]
@@ -174,7 +177,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 parent__isnull=True
             )
             if q.name_code == 'F':
-                variants = self.get_active_variant_list()
+                variants = self.get_active_variant_list(packet)
                 variant = self.first_random(variants)
                 questions = questions.filter(variant=variant)
             else:
