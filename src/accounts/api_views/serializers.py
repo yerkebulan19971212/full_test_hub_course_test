@@ -59,6 +59,8 @@ class OwnRefreshToken(RefreshToken):
 class TokenObtainPairSerializer(TokenObtainSerializer):
     @classmethod
     def get_token(cls, user):
+        user.login_count += 1
+        user.save()
         return OwnRefreshToken.for_user(user)
 
     def validate(self, attrs):

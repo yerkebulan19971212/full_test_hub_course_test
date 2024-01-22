@@ -164,7 +164,8 @@ class GoogleJWTView(APIView):
             user.role = Role.objects.filter(name_code='student').first()
             user.password = 'google'
             user.save()
-
+        user.login_count += 1
+        user.save()
         refresh = TokenObtainPairSerializer.get_token(user)
         data = {
             'refresh': str(refresh),

@@ -94,7 +94,7 @@ class OwnJWTAuthentication(JWTAuthentication):
                 code='bad_authorization_header',
             )
         user = self.get_user(validated_token)
-        user.login_count += 1
-        user.save()
+        # user.login_count += 1
+        # user.save()
 
         return user, validated_token
