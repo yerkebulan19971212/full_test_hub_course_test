@@ -93,5 +93,8 @@ class OwnJWTAuthentication(JWTAuthentication):
                 _('Authorization header must contain two space-delimited values'),
                 code='bad_authorization_header',
             )
+        user = self.get_user(validated_token)
+        user.login_count += 1
+        user.save()
 
-        return self.get_user(validated_token), validated_token
+        return user, validated_token

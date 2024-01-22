@@ -138,6 +138,7 @@ class User(
         unique=True,
         blank=True
     )
+    login_count = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.username)
