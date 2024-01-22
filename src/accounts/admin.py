@@ -16,3 +16,4 @@ class UserAdmin(admin.ModelAdmin):
         'phone',
         'login_count'
     )
+    search_fields = ['email', 'phone', 'id', 'username']
