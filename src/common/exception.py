@@ -88,3 +88,15 @@ class PassedTestError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("passed test")
     default_code = "passed_test"
+
+
+class PromoCodeNotExistsError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("promo code does not")
+    default_code = "promo_code_not_exists"
+
+
+class PromoCodeUsedError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("promo code used")
+    default_code = "promo_code_used"

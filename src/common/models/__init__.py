@@ -7,3 +7,4 @@ from .school import School
 from .kaspi import KaspiPay
 from .quizz_type import (QuizzType, CourseTypeQuizz, Packet, BoughtPacket,
                          RatingTest)
+from .promotion import PromoCode, UserPromoCode

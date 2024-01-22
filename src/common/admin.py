@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (BoughtPacket, City, Country, CourseType, CourseTypeLesson,
                      CourseTypeQuizz, KaspiPay, Lesson, LessonPair, Packet,
-                     QuizzType, School)
+                     QuizzType, School, PromoCode, UserPromoCode)
 from src.quizzes.admin import VariantPacketInline
 
 admin.site.register([
@@ -16,7 +16,9 @@ admin.site.register([
     Lesson,
     LessonPair,
     QuizzType,
-    School
+    School,
+    PromoCode,
+    UserPromoCode
 ])
 
 
