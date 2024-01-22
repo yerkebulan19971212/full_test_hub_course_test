@@ -7,11 +7,13 @@ from src.common.api_views import (get_all_active_lesson_view, packet_view,
                                   get_all_active_lesson_with_pairs_view,
                                   get_all_rating_test_view, promo_code_view)
 from src.common.api_views.lesson import import_question_from_test_hub_app
+from src.common.views import support_view
 
 app_name = 'common'
 
 urlpatterns = [
     path('promotion/promo-code/', promo_code_view),
+    path('support/', support_view),
     path('lessons/', get_all_active_lesson_view),
     path('import-q/', import_question_from_test_hub_app),
     path('lesson-pairs/', lesson_pair_list_view),

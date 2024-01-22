@@ -160,3 +160,17 @@ class PromoCodeSerializer(serializers.ModelSerializer):
             balance=promo_code_obj.first().bonus
         )
         return instance
+
+
+class SupportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Support
+        fields = (
+            'question',
+            'comment'
+        )
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['user'] = user
+        return super().create(validated_data)
