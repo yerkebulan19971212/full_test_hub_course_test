@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (BoughtPacket, City, Country, CourseType, CourseTypeLesson,
                      CourseTypeQuizz, KaspiPay, Lesson, LessonPair, Packet,
-                     QuizzType, School, PromoCode, UserPromoCode)
+                     QuizzType, School, PromoCode, Support, UserPromoCode)
 from src.quizzes.admin import VariantPacketInline
 
 admin.site.register([
@@ -20,6 +20,15 @@ admin.site.register([
     PromoCode,
     UserPromoCode
 ])
+
+
+@admin.register(Support)
+class SupportAdmin(admin.ModelAdmin):
+    list_display = [
+        'question',
+        'created',
+        'comment'
+    ]
 
 
 @admin.register(Packet)
