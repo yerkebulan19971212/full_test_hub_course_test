@@ -93,3 +93,4 @@ env
 conc.py
 .idea/
 logs/*
+staticfiles/*
