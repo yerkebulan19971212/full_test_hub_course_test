@@ -223,3 +223,13 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://:yerke1234@localhost:6379/1',  # Adjust the Redis server details as needed
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
