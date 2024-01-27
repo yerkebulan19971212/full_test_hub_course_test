@@ -25,10 +25,28 @@ admin.site.register([
 @admin.register(Support)
 class SupportAdmin(admin.ModelAdmin):
     list_display = [
-        'question',
+        'question_id',
         'created',
         'comment'
     ]
+    fields = [
+        'pk',
+        'question',
+        'user',
+        'comment',
+        'created',
+        'modified'
+    ]
+    raw_id_fields = ('user', 'question')
+    readonly_fields = (
+        'pk', 'uuid', 'created', 'modified'
+    )
+    list_select_related = ('user', 'question')
+    search_fields = (
+        'pk',
+        'uuid',
+        'question__question'
+    )
 
 
 @admin.register(Packet)

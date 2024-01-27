@@ -26,7 +26,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = getenv_bool('DEBUG')
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://api.testhub.kz']
+CSRF_TRUSTED_ORIGINS = [
+    'https://api.testhub.kz',
+    'http://127.0.0.1:8001',
+]
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
