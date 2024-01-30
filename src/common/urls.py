@@ -7,6 +7,7 @@ from src.common.api_views import (get_all_active_lesson_view, packet_view,
                                   get_all_active_lesson_with_pairs_view,
                                   get_all_rating_test_view, promo_code_view)
 from src.common.api_views.lesson import import_question_from_test_hub_app
+from src.common.super_admin_views import variant_list, variant_lesson_view
 from src.common.views import support_view
 
 app_name = 'common'
@@ -28,3 +29,7 @@ urlpatterns = [
 api_v1_urlpatterns = [
     path('api/v1/', include(urlpatterns)),
 ]
+
+api_v1_super_admin_urlpatterns = [
+    path('variant-list/', variant_list),
+    path('variant-lessons/<int:variant_id>/', variant_lesson_view),]
