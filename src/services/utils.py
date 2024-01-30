@@ -6,8 +6,7 @@ from datetime import datetime
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
-from src.quizzes.models import (TestFullScore, StudentQuizz, StudentScore, StudentQuizzQuestion)
-from src.common.models import CourseTypeLesson
+
 
 
 def getenv_bool(name: str, default: str = "False"):
@@ -16,6 +15,8 @@ def getenv_bool(name: str, default: str = "False"):
 
 
 def finish_full_test(student_quizz_id: int):
+    from src.quizzes.models import (TestFullScore, StudentQuizz, StudentScore, StudentQuizzQuestion)
+    from src.common.models import CourseTypeLesson
     try:
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
         test_full_score = TestFullScore.objects.filter(student_quizz=student_quizz)
