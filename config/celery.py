@@ -17,7 +17,7 @@ celery_app.autodiscover_tasks()
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(600.0, rating_quizz_full.s(), name='add every 3600')
+    sender.add_periodic_task(7200.0, rating_quizz_full.s(), name='add every 3600')
     sender.add_periodic_task(3600.0, auto_complete_finish_test.s(), name='auto complete every 3600')
 
 
