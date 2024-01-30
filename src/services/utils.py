@@ -7,8 +7,6 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
 
-
-
 def getenv_bool(name: str, default: str = "False"):
     raw = os.getenv(name, default).title()
     return ast.literal_eval(raw)
@@ -72,3 +70,113 @@ def finish_full_test(student_quizz_id: int):
             TestFullScore.objects.bulk_create(test_full_score)
     except Exception as e:
         print(e)
+
+
+def create_question(questions_texts: str, variant_id: int, lesson_id: int):
+    from src.common import constant
+    from src.quizzes.models import Question, Answer, CommonQuestion
+    if not questions_texts and 'new_line' not in questions_texts:
+        return None
+    questions_detail = questions_texts.split('new_line')
+    question_text = ''
+    choice = ''
+    point = 1
+    answer_start = 4
+    index_plus = 0
+    common_question = None
+    question_type = constant.QuestionType.DEFAULT
+    if "$SUB_QUESTION" in questions_texts and "$$SUB_QUESTION" in questions_texts:
+        question_type = constant.QuestionType.SELECT
+        answer_start += 2
+
+    if questions_detail[0][0] == "*":
+        common_question_text = questions_detail[0][1:].strip()
+        common_question_query = CommonQuestion.objects.filter(
+            text=common_question_text)
+        if common_question_query.exists():
+            common_question = common_question_query.first()
+        else:
+            common_question = CommonQuestion.objects.create(
+                text=common_question_text)
+
+        question_text = questions_detail[1][1:].strip()
+        index_plus = 1
+    elif questions_detail[0][0] == "#":
+        answer_start -= 1
+        question_text = questions_detail[0][1:].strip()
+
+    if 'point' in questions_detail[1 + index_plus]:
+        point = int(questions_detail[1 + index_plus].split(' ')[1].strip())
+    if 'ch' in questions_detail[2 + index_plus]:
+        choice = questions_detail[2 + index_plus].split(' ')[1]
+    answers = questions_detail[answer_start:-2]
+    if question_type == constant.QuestionType.DEFAULT:
+        correct_answers = list(map(int, questions_detail[-2].split(',')))
+        test_question = Question.objects.create(
+            question=question_text,
+            common_question=common_question,
+            quantity_correct_answers=len(correct_answers),
+            choice_type=choice,
+            point=point,
+            variant_id=variant_id
+        )
+        Answer.objects.bulk_create([
+            Answer(
+                order=i,
+                question=test_question,
+                answer=ans.strip(),
+                correct=True if (i + 1) in correct_answers else False
+            ) for i, ans in enumerate(answers)
+        ])
+        return test_question
+    else:
+        correct_answers = list(map(int, questions_detail[-2].split(',')))
+        test_question = Question.objects.create(
+            question=question_text,
+            common_question=common_question,
+            question_type=constant.QuestionType.SELECT,
+            quantity_correct_answers=len(correct_answers),
+            choice_type=constant.AnswerChoiceType.CHOICE,
+            point=0,
+            variant_id=variant_id
+        )
+        question_text2 = questions_detail[answer_start - 2][
+                         len("$SUB_QUESTION"):].strip()
+        sub_question1 = Question.objects.create(
+            parent=test_question,
+            question=question_text2,
+            question_type=constant.QuestionType.SELECT,
+            quantity_correct_answers=1,
+            choice_type=constant.AnswerChoiceType.CHOICE,
+            point=1,
+            variant_id=variant_id
+        )
+        question_text2 = questions_detail[answer_start - 1][
+                         len("$$SUB_QUESTION"):].strip()
+        sub_question2 = Question.objects.create(
+            parent=test_question,
+            question=question_text2,
+            question_type=constant.QuestionType.SELECT,
+            quantity_correct_answers=1,
+            choice_type=constant.AnswerChoiceType.CHOICE,
+            point=1,
+            variant_id=variant_id
+        )
+        Answer.objects.bulk_create([
+            Answer(
+                order=i,
+                question=sub_question1,
+                answer=ans.strip(),
+                correct=True if (i + 1) == correct_answers[0] else False
+            ) for i, ans in enumerate(answers)
+        ])
+        Answer.objects.bulk_create([
+            Answer(
+                order=i,
+                question=sub_question2,
+                answer=ans.strip(),
+                correct=True if (i + 1) == correct_answers[1] else False
+            ) for i, ans in enumerate(answers)
+        ])
+
+        return test_question

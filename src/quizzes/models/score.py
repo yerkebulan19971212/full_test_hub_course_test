@@ -32,11 +32,13 @@ class StudentScore(abstract_models.TimeStampedModel):
     student_quizz = models.ForeignKey(
         'quizzes.StudentQuizz',
         related_name='question_score',
+        db_index=True,
         on_delete=models.CASCADE
     )
     question = models.ForeignKey(
         'quizzes.Question',
         related_name='question_score',
+        db_index=True,
         on_delete=models.CASCADE
     )
     score = models.IntegerField(default=0)

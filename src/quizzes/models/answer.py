@@ -35,7 +35,8 @@ class Answer(
         'quizzes.AnswerSign',
         related_name='answers',
         on_delete=models.CASCADE,
-        db_index=True)
+        db_index=True
+    )
 
     class Meta:
         db_table = 'quizz\".\"answer'

@@ -7,7 +7,12 @@ from src.common.api_views import (get_all_active_lesson_view, packet_view,
                                   get_all_active_lesson_with_pairs_view,
                                   get_all_rating_test_view, promo_code_view)
 from src.common.api_views.lesson import import_question_from_test_hub_app
-from src.common.super_admin_views import variant_list, variant_lesson_view
+from src.common.super_admin_views import (
+    variant_list,
+    variant_lesson_view,
+    import_question_view,
+    check_add_question_view, common_question_list_view, add_question_view, question_list_view
+)
 from src.common.views import support_view
 
 app_name = 'common'
@@ -31,5 +36,11 @@ api_v1_urlpatterns = [
 ]
 
 api_v1_super_admin_urlpatterns = [
+    path('add-question/', add_question_view),
     path('variant-list/', variant_list),
-    path('variant-lessons/<int:variant_id>/', variant_lesson_view),]
+    path('common-question-list/<int:variant_id>/', common_question_list_view),
+    path('variant-lessons/<int:variant_id>/', variant_lesson_view),
+    path('check-variant/<int:variant_id>/<int:lesson_id>/', check_add_question_view),
+    path('question-list/<int:variant_id>/<int:lesson_id>/', question_list_view),
+    path('add/<int:variant_id>/<int:lesson_id>/', import_question_view),
+]

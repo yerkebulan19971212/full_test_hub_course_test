@@ -201,13 +201,16 @@ class Question(
     parent = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
+        db_index=True,
         related_name="sub_questions"
     )
     question_type = models.CharField(
         max_length=11,
         choices=QuestionType.choices(),
-        default=QuestionType.DEFAULT
+        default=QuestionType.DEFAULT,
+        db_index=True,
     )
     common_question = models.ForeignKey(
         'quizzes.CommonQuestion',
@@ -227,7 +230,8 @@ class Question(
     variant = models.ForeignKey(
         'quizzes.Variant',
         on_delete=models.CASCADE,
-        db_index=True
+        db_index=True,
+        related_name='questions'
     )
 
     objects = QuestionManager.from_queryset(QuestionQuerySet)()

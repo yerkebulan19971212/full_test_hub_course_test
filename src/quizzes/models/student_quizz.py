@@ -11,12 +11,14 @@ class StudentQuizz(
         'self',
         on_delete=models.SET_NULL,
         blank=True,
-        null=True
+        null=True,
+        db_index=True
     )
     user = models.ForeignKey(
         'accounts.User',
         related_name='student_quizzes',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        db_index=True
     )
     course_type = models.ForeignKey(
         'common.CourseType',
@@ -41,25 +43,29 @@ class StudentQuizz(
     status = models.CharField(
         max_length=12,
         choices=QuizzStatus.choices(),
-        default=QuizzStatus.NOT_PASSED
+        default=QuizzStatus.NOT_PASSED,
+        db_index=True
     )
     lesson = models.ForeignKey(
         'common.Lesson',
         on_delete=models.CASCADE,
         related_name='student_quizzes',
-        null=True
+        null=True,
+        db_index=True
     )
     lesson_pair = models.ForeignKey(
         'common.LessonPair',
         on_delete=models.CASCADE,
         related_name='student_quizzes',
-        null=True
+        null=True,
+        db_index=True
     )
     quizz_type = models.ForeignKey(
         'common.CourseTypeQuizz',
         on_delete=models.CASCADE,
         related_name='student_quizzes',
-        null=True
+        null=True,
+        db_index=True
     )
     language = models.CharField(
         max_length=64,
