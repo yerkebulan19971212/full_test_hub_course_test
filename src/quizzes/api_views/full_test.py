@@ -15,6 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from config.celery import finish_test
 from src.common.constant import ChoiceType, QuizzStatus
 from src.common.exception import PassedTestError
 from src.common.models import Lesson, CourseTypeLesson
@@ -48,6 +49,7 @@ class MyTest(generics.ListAPIView):
             test.status = QuizzStatus.PASSED
             test.quizz_end_time = current_time
             test.save()
+            finish_test.delay(test.id)
         return super().get_queryset().filter(
             user=self.request.user
         ).annotate(

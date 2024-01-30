@@ -1,7 +1,12 @@
 # celery.py
 from __future__ import absolute_import, unicode_literals
 import os
+
 from celery import Celery
+from django.db.models import F
+from django.utils import timezone
+
+from src.common.constant import QuizzStatus
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
@@ -12,13 +17,12 @@ celery_app.autodiscover_tasks()
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(600.0, rating_quizz_full.s(),
-                             name='add every 3600')
+    sender.add_periodic_task(600.0, rating_quizz_full.s(), name='add every 3600')
+    sender.add_periodic_task(3600.0, auto_complete_finish_test.s(), name='auto complete every 3600')
 
 
 @celery_app.task
 def rating_quizz_full():
-    print('==========')
     from src.accounts.models import User
     from src.common.models import RatingTest, BoughtPacket, Packet
     from src.common.utils import get_monday_and_next_monday
@@ -45,10 +49,28 @@ def rating_quizz_full():
             end_time=next_monday,
         )
         if created:
-            print("created")
             bought_packet.start_time = monday
             bought_packet.remainder = 1
             bought_packet.price = 0
             bought_packet.save()
         else:
             print("not created")
+
+
+@celery_app.task
+def finish_test(student_quizz_id):
+    from src.services.utils import finish_full_test
+    finish_full_test(student_quizz_id=student_quizz_id)
+
+
+@celery_app.task
+def auto_complete_finish_test():
+    from src.services.utils import finish_full_test
+    from src.quizzes.models import (StudentQuizz)
+    current_time = timezone.now()
+    student_quizzes = StudentQuizz.objects.filter(
+        status=QuizzStatus.CONTINUE,
+        quizz_start_time__lt=current_time - F('quizz_duration')
+    )
+    for s in student_quizzes:
+        finish_full_test(student_quizz_id=s.id)
