@@ -1,15 +1,14 @@
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Prefetch
 from drf_writable_nested import WritableNestedModelSerializer
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, serializers, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.common.models import CourseTypeLesson, Lesson
+from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage
 from src.common.paginations import SimplePagination
-from src.quizzes.models import Variant, Question, CommonQuestion, Answer
-from src.quizzes.serializers import AnswerSerializer
+from src.quizzes.models import Variant, Question, CommonQuestion, Answer, QuestionLevel
 from src.services.utils import create_question
 
 
@@ -224,6 +223,15 @@ class QuestionAdminSerializer(serializers.ModelSerializer):
         )
 
 
+class QuestionLevelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionLevel
+        fields = (
+            'id',
+            'name_code',
+        )
+
+
 class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, required=True)
     sub_questions = ChildQuestionAdminSerializer(many=True, required=False)
@@ -232,7 +240,8 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         model = Question
         fields = (
             'id',
-            # 'variant_lesson',
+            'variant',
+            'lesson_question_level',
             'common_question',
             'question',
             'question_type',
@@ -244,7 +253,6 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     def update(self, instance, validated_data):
         sub_questions_data = validated_data.pop('sub_questions', [])
-        print(sub_questions_data)
         instance = super().update(instance, validated_data)
         questions = Question.objects.filter(
             parent=instance
@@ -257,7 +265,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 if idfg:
                     sub_questions_data_s.append(q)
                 else:
-                    q["variant_lesson"] = validated_data.get("variant_lesson")
+                    q["variant"] = validated_data.get("variant")
                     q["parent"] = instance
                     sub_questions_data_c.append(q)
 
@@ -388,6 +396,19 @@ class CommonQuestionListView(generics.ListAPIView):
 common_question_list_view = CommonQuestionListView.as_view()
 
 
+class QuestionLevelListView(generics.ListAPIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    serializer_class = QuestionLevelSerializer
+    queryset = QuestionLevel.objects.all().order_by('-id')
+
+    @swagger_auto_schema(tags=["super_admin"])
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+question_level_list_view = QuestionLevelListView.as_view()
+
+
 class ImportQuestionsView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     @swagger_auto_schema(tags=["super_admin"])
@@ -455,3 +476,41 @@ class AddQuestionView(generics.CreateAPIView):
 
 
 add_question_view = AddQuestionView.as_view()
+
+
+class GetUpdateDestroyQuestionView(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    queryset = Question.objects.select_related(
+        'common_question'
+    ).prefetch_related(
+        'answers',
+        Prefetch(
+            'sub_questions',
+            queryset=Question.objects.order_by('id'))
+    ).all()
+    serializer_class = QuestionSerializer
+    lookup_field = 'pk'
+
+
+get_update_destroy_question_view = GetUpdateDestroyQuestionView.as_view()
+
+
+class QuestionAnswerImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionAnswerImage
+        fields = (
+            'upload',
+        )
+
+
+class SaveImageView(generics.CreateAPIView):
+    serializer_class = QuestionAnswerImageSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = self.create(request, *args, **kwargs).data
+        return Response(
+            data={"url": data.get('upload')},
+            status=status.HTTP_201_CREATED
+        )
+
+save_image_view = SaveImageView.as_view()

@@ -163,3 +163,7 @@ class BoughtPacket(
 
     class Meta:
         db_table = 'common\".\"bought_packet'
+
+
+class QuestionAnswerImage(abstract_models.TimeStampedModel):
+    upload = models.ImageField(upload_to='image/')

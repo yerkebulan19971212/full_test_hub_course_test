@@ -11,7 +11,8 @@ from src.common.super_admin_views import (
     variant_list,
     variant_lesson_view,
     import_question_view,
-    check_add_question_view, common_question_list_view, add_question_view, question_list_view
+    check_add_question_view, common_question_list_view, add_question_view, question_list_view,
+    get_update_destroy_question_view, question_level_list_view, save_image_view
 )
 from src.common.views import support_view
 
@@ -38,8 +39,11 @@ api_v1_urlpatterns = [
 api_v1_super_admin_urlpatterns = [
     path('add-question/', add_question_view),
     path('variant-list/', variant_list),
+    path('question-level/', question_level_list_view),
+    path('question-image/', save_image_view),
     path('common-question-list/<int:variant_id>/', common_question_list_view),
     path('variant-lessons/<int:variant_id>/', variant_lesson_view),
+    path('question/<int:variant_id>/', get_update_destroy_question_view),
     path('check-variant/<int:variant_id>/<int:lesson_id>/', check_add_question_view),
     path('question-list/<int:variant_id>/<int:lesson_id>/', question_list_view),
     path('add/<int:variant_id>/<int:lesson_id>/', import_question_view),
