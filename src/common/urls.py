@@ -51,5 +51,5 @@ api_v1_super_admin_urlpatterns = [
     path('question/<int:pk>/', get_update_destroy_question_view),
     path('check-variant/<int:variant_id>/<int:lesson_id>/', check_add_question_view),
     path('question-list/<int:variant_id>/<int:lesson_id>/', question_list_view),
-    path('add/<int:variant_id>/<int:lesson_id>/', import_question_view),
+    path('add-question/<int:variant_id>/<int:lesson_id>/', import_question_view),
 ]
