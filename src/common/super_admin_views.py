@@ -332,6 +332,7 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
         validated_data['name_code'] = name
         validated_data['variant_title'] = name
         validated_data['language'] = test_lang
+        validated_data['is_active'] = False
         validated_data['course_type'] = course_type
         variant = super().create(validated_data=validated_data)
         return variant
