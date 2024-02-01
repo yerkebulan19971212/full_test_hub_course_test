@@ -312,7 +312,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 class CreateVariantJuz40Serializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     test_lang = serializers.IntegerField(write_only=True)
-    name = serializers.IntegerField(write_only=True)
+    name = serializers.CharField(write_only=True)
 
     class Meta:
         model = Variant
@@ -325,13 +325,17 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
     def create(self, validated_data):
         name = validated_data.pop('name', None)
         test_lang = validated_data.pop('test_lang', None)
+        if test_lang == 0:
+            validated_data['language'] = 'kz'
+        else:
+            validated_data['language'] = 'ru'
+
         course_type = CourseType.objects.all().first()
         validated_data['name_kz'] = name
         validated_data['name_ru'] = name
         validated_data['name_en'] = name
         validated_data['name_code'] = name
         validated_data['variant_title'] = name
-        validated_data['language'] = test_lang
         validated_data['is_active'] = False
         validated_data['course_type'] = course_type
         variant = super().create(validated_data=validated_data)
