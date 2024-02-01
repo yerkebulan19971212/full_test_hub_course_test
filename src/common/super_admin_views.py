@@ -92,6 +92,23 @@ class AnswerSerializer2(serializers.ModelSerializer):
         ref_name = "AnswerSerializer_2"
 
 
+class AddCommonQuestionSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = CommonQuestion
+        fields = (
+            'id',
+            'name',
+            'text',
+        )
+
+    def create(self, validated_data):
+        name_code = validated_data.pop('name')
+        validated_data["name_code"] = name_code
+        return super().create(validated_data)
+
+
 class ListCommonQuestionSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_code')
 
@@ -606,3 +623,11 @@ class VariantDestroyJuz40View(generics.DestroyAPIView):
 
 
 destroy_variant = VariantDestroyJuz40View.as_view()
+
+
+class AddCommonQuestion(generics.CreateAPIView):
+    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission,)
+    serializer_class = AddCommonQuestionSerializer
+
+
+add_common_question_view = AddCommonQuestion.as_view()
