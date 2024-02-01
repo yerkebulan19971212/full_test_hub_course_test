@@ -2,13 +2,14 @@ from django.db import transaction
 from django.db.models import Max, Prefetch
 from drf_writable_nested import WritableNestedModelSerializer
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, serializers, permissions, status
+from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage
 from src.common.paginations import SimplePagination
-from src.quizzes.models import Variant, Question, CommonQuestion, Answer, QuestionLevel
+from src.quizzes.models import (Answer, CommonQuestion, Question,
+                                QuestionLevel, Variant, LessonQuestionLevel)
 from src.services.utils import create_question
 
 
@@ -235,13 +236,14 @@ class QuestionLevelSerializer(serializers.ModelSerializer):
 class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     answers = AnswerSerializer(many=True, required=True)
     sub_questions = ChildQuestionAdminSerializer(many=True, required=False)
+    lesson = serializers.IntegerField(default=0, write_only=True)
 
     class Meta:
         model = Question
         fields = (
             'id',
             'variant',
-            'lesson_question_level',
+            'lesson',
             'common_question',
             'question',
             'question_type',
@@ -252,6 +254,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         ref_name = "QuestionSerializer_1"
 
     def update(self, instance, validated_data):
+        validated_data.pop('lesson')
         sub_questions_data = validated_data.pop('sub_questions', [])
         instance = super().update(instance, validated_data)
         questions = Question.objects.filter(
@@ -280,35 +283,27 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         return instance
 
     def create(self, validated_data):
-        variant_lesson = validated_data.get('variant_lesson')
+        variant = validated_data.get('variant')
+        lesson = validated_data.pop('lesson')
+        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson=lesson).order_by('id')
         sub_questions_data = validated_data.pop('sub_questions', [])
-        answers = validated_data.get('answers')
-        quantity_correct = 0
-        for i in answers:
-            if i.get('correct'):
-                quantity_correct += 1
-        validated_data['quantity_correct_answers'] = quantity_correct
-
-        if len(answers) > 5:
-            validated_data['choice_type'] = 'MULTICHOICE'
-            validated_data['point'] = 2
-
-        number__max = Question.objects.filter(
-            variant_lesson_id=validated_data.get('variant_lesson')
-        ).aggregate(Max('number'))['number__max']
-        if number__max is None:
-            number__max = 0
-        validated_data['number'] = number__max + 1
+        question_count = Question.objects.filter(
+            variant=variant,
+            lesson_question_level__lesson=lesson
+        ).count()
+        index_lql = 0
+        if question_count >= 0:
+            index_lql = question_count // 5
+        validated_data['lesson_question_level'] = lql_list[index_lql]
         question = super().create(validated_data)
         sub_questions_serializer = self.fields['sub_questions']
         for s in sub_questions_data:
-            s["variant_lesson"] = variant_lesson
+            s["lesson_question_level"] = lql_list[index_lql]
+            s["lesson"] = lesson
+            s["variant"] = variant
             s["parent"] = question
         if sub_questions_data:
             sub_questions = sub_questions_serializer.create(sub_questions_data)
-        # question_obj = Question.objects.filter(
-        #     pk=question.id).prefetch_related(
-        #     "sub_questions").first()
         return question
 
 
@@ -512,5 +507,6 @@ class SaveImageView(generics.CreateAPIView):
             data={"url": data.get('upload')},
             status=status.HTTP_201_CREATED
         )
+
 
 save_image_view = SaveImageView.as_view()
