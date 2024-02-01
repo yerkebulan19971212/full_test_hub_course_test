@@ -6,7 +6,7 @@ from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage
+from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage, CourseType
 from src.common.paginations import SimplePagination
 from src.quizzes.models import (Answer, CommonQuestion, Question,
                                 QuestionLevel, Variant, LessonQuestionLevel)
@@ -308,6 +308,32 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             sub_questions = sub_questions_serializer.create(sub_questions_data)
         return question
 
+class CreateVariantJuz40Serializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    test_lang = serializers.IntegerField(read_only=True)
+    name = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Variant
+        fields = (
+            'id',
+            'test_lang',
+            'name'
+        )
+
+    def create(self, validated_data):
+        name = validated_data.pop('name', None)
+        test_lang = validated_data.pop('test_lang', None)
+        course_type = CourseType.objects.all().first()
+        validated_data['name_kz'] = name
+        validated_data['name_ru'] = name
+        validated_data['name_en'] = name
+        validated_data['name_code'] = name
+        validated_data['variant_title'] = name
+        validated_data['language'] = test_lang
+        validated_data['course_type'] = course_type
+        variant = super().create(validated_data=validated_data)
+        return variant
 
 # --------------------------- views ------------------------------
 class VariantView(generics.ListAPIView):
@@ -519,3 +545,19 @@ class SaveImageView(generics.CreateAPIView):
 
 
 save_image_view = SaveImageView.as_view()
+
+
+class CreateVariantJuz40View(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CreateVariantJuz40Serializer
+
+    def perform_create(self, serializer):
+        variant = Variant.objects.all().order_by('variant').last()
+        if variant is None:
+            variant = 0
+        else:
+            variant = variant.variant
+        serializer.save(variant=(variant + 1))
+
+
+create_variant_view = CreateVariantJuz40View.as_view()
