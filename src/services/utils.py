@@ -72,11 +72,13 @@ def finish_full_test(student_quizz_id: int):
         print(e)
 
 
-def create_question(questions_texts: str, variant_id: int, lesson_id: int):
+def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql):
     from src.common import constant
-    from src.quizzes.models import Question, Answer, CommonQuestion
+    from src.quizzes.models import AnswerSign, Question, Answer, CommonQuestion
     if not questions_texts and 'new_line' not in questions_texts:
         return None
+    answersign = AnswerSign.objects.all().order_by('id')
+
     questions_detail = questions_texts.split('new_line')
     question_text = ''
     choice = ''
@@ -115,9 +117,7 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int):
         test_question = Question.objects.create(
             question=question_text,
             common_question=common_question,
-            quantity_correct_answers=len(correct_answers),
-            choice_type=choice,
-            point=point,
+            lesson_question_level=lql,
             variant_id=variant_id
         )
         Answer.objects.bulk_create([
@@ -125,6 +125,7 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int):
                 order=i,
                 question=test_question,
                 answer=ans.strip(),
+                answer_sign=answersign[i],
                 correct=True if (i + 1) in correct_answers else False
             ) for i, ans in enumerate(answers)
         ])
@@ -135,10 +136,8 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int):
             question=question_text,
             common_question=common_question,
             question_type=constant.QuestionType.SELECT,
-            quantity_correct_answers=len(correct_answers),
-            choice_type=constant.AnswerChoiceType.CHOICE,
-            point=0,
-            variant_id=variant_id
+            variant_id=variant_id,
+            lesson_question_level=lql,
         )
         question_text2 = questions_detail[answer_start - 2][
                          len("$SUB_QUESTION"):].strip()
@@ -146,10 +145,8 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int):
             parent=test_question,
             question=question_text2,
             question_type=constant.QuestionType.SELECT,
-            quantity_correct_answers=1,
-            choice_type=constant.AnswerChoiceType.CHOICE,
-            point=1,
-            variant_id=variant_id
+            variant_id=variant_id,
+            lesson_question_level=lql,
         )
         question_text2 = questions_detail[answer_start - 1][
                          len("$$SUB_QUESTION"):].strip()
@@ -157,16 +154,15 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int):
             parent=test_question,
             question=question_text2,
             question_type=constant.QuestionType.SELECT,
-            quantity_correct_answers=1,
-            choice_type=constant.AnswerChoiceType.CHOICE,
-            point=1,
-            variant_id=variant_id
+            variant_id=variant_id,
+            lesson_question_level=lql,
         )
         Answer.objects.bulk_create([
             Answer(
                 order=i,
                 question=sub_question1,
                 answer=ans.strip(),
+                answer_sign=answersign[i],
                 correct=True if (i + 1) == correct_answers[0] else False
             ) for i, ans in enumerate(answers)
         ])
@@ -175,6 +171,7 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int):
                 order=i,
                 question=sub_question2,
                 answer=ans.strip(),
+                answer_sign=answersign[i],
                 correct=True if (i + 1) == correct_answers[1] else False
             ) for i, ans in enumerate(answers)
         ])

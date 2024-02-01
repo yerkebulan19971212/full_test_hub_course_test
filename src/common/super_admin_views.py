@@ -413,6 +413,8 @@ class ImportQuestionsView(APIView):
         variant_id = self.kwargs['variant_id']
         lesson_id = self.kwargs['lesson_id']
         variant = Variant.objects.get(pk=variant_id)
+        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson_id).order_by('id')
+
         with request.FILES['file'] as f:
             try:
                 with transaction.atomic():
@@ -421,11 +423,16 @@ class ImportQuestionsView(APIView):
                     count = 0
                     while True:
                         if not line.strip():
+                            index_lql = 0
+                            if count >= 0:
+                                index_lql = count // 5
+
                             count += 1
                             question = create_question(
                                 questions_texts=questions_texts,
                                 variant_id=variant_id,
                                 lesson_id=lesson_id,
+                                lql=lql_list[index_lql]
                             )
                             if question is None:
                                 return Response(
