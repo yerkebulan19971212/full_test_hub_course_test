@@ -284,3 +284,8 @@ class UpdateGooglePasswordUserSerializer(serializers.ModelSerializer):
         instance.set_password(password)
         instance.save()
         return instance
+
+
+class UserChangePasswordSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    password = serializers.CharField()

@@ -23,11 +23,13 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 ProfileUserSerializer,
                                                 UpdateLoginProfileUserSerializer,
                                                 UpdateGooglePasswordUserSerializer,
-                                                StaffTokenObtainPairSerializer)
+                                                StaffTokenObtainPairSerializer, UserChangePasswordSerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
                                   IsNotStaffError, UserNotExistError)
+from src.common.paginations import SimplePagination
+from src.services.permissions import SuperAdminPermission
 
 User = get_user_model()
 
@@ -247,3 +249,39 @@ class UpdateGooglePasswordView(generics.UpdateAPIView):
 
 
 update_google_password_view = UpdateGooglePasswordView.as_view()
+
+
+class AdminUpdateUserPasswordView(generics.UpdateAPIView):
+    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    queryset = User.objects.all()
+    serializer_class = UserChangePasswordSerializer
+    lookup_field = None
+    http_method_names = ['put']
+
+    def update(self, request, *args, **kwargs):
+        user_id = self.request.data.get('user_id')
+        password = self.request.data.get('password')
+        try:
+            user = self.queryset.get(user_id=user_id)
+            user.set_password(password)
+            user.save()
+            return Response(
+                {"status": True, "detail": "Пароль ауыстырылды"},
+                status=status.HTTP_200_OK)
+        except Exception:
+            return Response(
+                {"status": False, "detail": "что-то пошло не так"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+
+admin_update_password_view = AdminUpdateUserPasswordView.as_view()
+
+
+class UserListPasswordView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    queryset = User.objects.all()
+    serializer_class = AuthMeSerializer
+    pagination_class = SimplePagination
+
+
+user_list_view = UserListPasswordView.as_view()
