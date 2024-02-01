@@ -311,8 +311,8 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
 class CreateVariantJuz40Serializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    test_lang = serializers.IntegerField(read_only=True)
-    name = serializers.IntegerField(read_only=True)
+    test_lang = serializers.IntegerField(write_only=True)
+    name = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Variant
@@ -550,7 +550,7 @@ save_image_view = SaveImageView.as_view()
 
 
 class CreateVariantJuz40View(generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = CreateVariantJuz40Serializer
 
     def perform_create(self, serializer):
