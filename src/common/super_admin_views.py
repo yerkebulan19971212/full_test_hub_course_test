@@ -74,6 +74,8 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
             'text',
             'file'
         )
+        ref_name = "CommonQuestionSerializer"
+
 
 
 class AnswerSerializer2(serializers.ModelSerializer):
