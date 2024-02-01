@@ -277,11 +277,11 @@ class AdminUpdateUserPasswordView(generics.UpdateAPIView):
 admin_update_password_view = AdminUpdateUserPasswordView.as_view()
 
 
-class UserListPasswordView(generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+class UserListView(generics.ListAPIView):
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     queryset = User.objects.all()
     serializer_class = AuthMeSerializer
     pagination_class = SimplePagination
 
 
-user_list_view = UserListPasswordView.as_view()
+user_list_view = UserListView.as_view()

@@ -37,6 +37,5 @@ super_admin_api_v1_urlpatterns = [
     path('staff-login/', token_staff_view),
     path('me/', auth_me_view),
     path('password/', admin_update_password_view),
-    path('list/', user_list_view),
 
 ]

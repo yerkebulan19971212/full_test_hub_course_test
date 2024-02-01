@@ -1,5 +1,6 @@
 from django.urls import include, path
 
+from src.accounts.api_views.views import user_list_view
 from src.common.api_views import (buy_packet_view, get_all_active_lesson_view,
                                   get_all_active_lesson_with_pairs_view,
                                   get_all_cities_view,
@@ -39,6 +40,7 @@ api_v1_urlpatterns = [
 ]
 
 api_v1_super_admin_urlpatterns = [
+    path('get-all-students/', user_list_view),
     path('create-variant/', create_variant_view),
     path('add-question/', add_question_view),
     path('variant-list/', variant_list),
