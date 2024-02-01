@@ -6,6 +6,8 @@ from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from src.accounts.api_views.serializers import StudentInformationUpdateSerializer, StudentDetailUpdateSerializer
+from src.accounts.models import User
 from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage, CourseType
 from src.common.paginations import SimplePagination
 from src.quizzes.models import (Answer, CommonQuestion, Question,
@@ -76,7 +78,6 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
             'file'
         )
         ref_name = "CommonQuestionSerializer"
-
 
 
 class AnswerSerializer2(serializers.ModelSerializer):
@@ -309,6 +310,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             sub_questions = sub_questions_serializer.create(sub_questions_data)
         return question
 
+
 class CreateVariantJuz40Serializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     test_lang = serializers.IntegerField(write_only=True)
@@ -335,11 +337,11 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
         validated_data['name_ru'] = name
         validated_data['name_en'] = name
         validated_data['name_code'] = name
-        validated_data['variant_title'] = name
         validated_data['is_active'] = False
         validated_data['course_type'] = course_type
         variant = super().create(validated_data=validated_data)
         return variant
+
 
 # --------------------------- views ------------------------------
 class VariantView(generics.ListAPIView):
@@ -558,12 +560,49 @@ class CreateVariantJuz40View(generics.CreateAPIView):
     serializer_class = CreateVariantJuz40Serializer
 
     def perform_create(self, serializer):
-        variant = Variant.objects.all().order_by('variant').last()
+        variant = Variant.objects.all().order_by('variant_title').last()
         if variant is None:
             variant = 0
         else:
-            variant = variant.variant
-        serializer.save(variant=(variant + 1))
+            variant = variant.variant_title
+        serializer.save(variant_title=(variant + 1))
 
 
 create_variant_view = CreateVariantJuz40View.as_view()
+
+
+class StudentDetailView(generics.RetrieveDestroyAPIView):
+    # permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    serializer_class = StudentInformationUpdateSerializer
+    queryset = User.objects.filter(role__name_code='student')
+    lookup_field = 'pk'
+
+
+student_detail = StudentDetailView.as_view()
+
+
+class StudentDetailUpdateView(generics.UpdateAPIView):
+    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    serializer_class = StudentDetailUpdateSerializer
+    queryset = User.objects.filter(role__name_code='student')
+    lookup_field = 'pk'
+    http_method_names = ['patch']
+
+
+student_detail_update = StudentDetailUpdateView.as_view()
+
+
+class VariantDestroyJuz40View(generics.DestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    queryset = Variant.objects.all()
+    lookup_field = 'pk'
+
+    def delete(self, request, *args, **kwargs):
+        variant = self.get_object()
+        if variant.is_active:
+            return Response({"detail": 'Вы не можете удалить Варинт,'
+                                       ' пока активно'})
+        return self.destroy(request, *args, **kwargs)
+
+
+destroy_variant = VariantDestroyJuz40View.as_view()

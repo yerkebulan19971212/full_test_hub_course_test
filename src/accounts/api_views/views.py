@@ -23,7 +23,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 ProfileUserSerializer,
                                                 UpdateLoginProfileUserSerializer,
                                                 UpdateGooglePasswordUserSerializer,
-                                                StaffTokenObtainPairSerializer, UserChangePasswordSerializer)
+                                                StaffTokenObtainPairSerializer, UserChangePasswordSerializer,
+                                                AllStudentSerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -280,7 +281,7 @@ admin_update_password_view = AdminUpdateUserPasswordView.as_view()
 class UserListView(generics.ListAPIView):
     # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     queryset = User.objects.all()
-    serializer_class = AuthMeSerializer
+    serializer_class = AllStudentSerializer
     pagination_class = SimplePagination
 
 

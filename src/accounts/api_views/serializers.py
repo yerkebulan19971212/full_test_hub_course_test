@@ -289,3 +289,53 @@ class UpdateGooglePasswordUserSerializer(serializers.ModelSerializer):
 class UserChangePasswordSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     password = serializers.CharField()
+
+
+class AllStudentSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(source='role.name', default=None)
+
+    class Meta:
+        model = User
+        fields = (
+            'user_id',
+            'phone',
+            'id',
+            'uuid',
+            'role',
+            'first_name',
+            'last_name',
+            'balance',
+        )
+
+
+class StudentInformationUpdateSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(source='role.name', default=None)
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name',
+            'role',
+            'last_name',
+            'user_id',
+            'phone',
+            'balance',
+            'city',
+            'school'
+        )
+
+
+class StudentDetailUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'user_id',
+            'phone',
+            'balance',
+            'city',
+            'school'
+        )
