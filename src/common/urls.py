@@ -48,7 +48,7 @@ api_v1_super_admin_urlpatterns = [
     path('question-image/', save_image_view),
     path('common-question-list/<int:variant_id>/', common_question_list_view),
     path('variant-lessons/<int:variant_id>/', variant_lesson_view),
-    path('question/<int:variant_id>/', get_update_destroy_question_view),
+    path('question/<int:pk>/', get_update_destroy_question_view),
     path('check-variant/<int:variant_id>/<int:lesson_id>/', check_add_question_view),
     path('question-list/<int:variant_id>/<int:lesson_id>/', question_list_view),
     path('add/<int:variant_id>/<int:lesson_id>/', import_question_view),
