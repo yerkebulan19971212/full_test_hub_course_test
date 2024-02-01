@@ -10,6 +10,7 @@ from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage, Cou
 from src.common.paginations import SimplePagination
 from src.quizzes.models import (Answer, CommonQuestion, Question,
                                 QuestionLevel, Variant, LessonQuestionLevel)
+from src.services.permissions import SuperAdminPermission
 from src.services.utils import create_question
 
 
@@ -337,7 +338,7 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
 
 # --------------------------- views ------------------------------
 class VariantView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantListSerializer
     queryset = Variant.objects.all()
     pagination_class = SimplePagination
@@ -351,7 +352,7 @@ variant_list = VariantView.as_view()
 
 
 class VariantLessonView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantLessonSerializer
     queryset = CourseTypeLesson.objects.all()
 
@@ -368,7 +369,7 @@ variant_lesson_view = VariantLessonView.as_view()
 
 
 class CheckAddQuestion(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, variant_id, lesson_id):
         add_question_status = True
@@ -386,7 +387,7 @@ check_add_question_view = CheckAddQuestion.as_view()
 
 
 class QuestionListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionAdminSerializer
     queryset = Question.objects.all()
 
@@ -407,7 +408,7 @@ question_list_view = QuestionListView.as_view()
 
 
 class CommonQuestionListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = ListCommonQuestionSerializer
     queryset = CommonQuestion.objects.all().order_by('-id')
 
@@ -420,7 +421,7 @@ common_question_list_view = CommonQuestionListView.as_view()
 
 
 class QuestionLevelListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionLevelSerializer
     queryset = QuestionLevel.objects.all().order_by('-id')
 
@@ -433,7 +434,7 @@ question_level_list_view = QuestionLevelListView.as_view()
 
 
 class ImportQuestionsView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     @swagger_auto_schema(tags=["super_admin"])
     def post(self, request, *args, **kwargs):
         variant_id = self.kwargs['variant_id']
@@ -494,7 +495,7 @@ import_question_view = ImportQuestionsView.as_view()
 
 
 class AddQuestionView(generics.CreateAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionSerializer
 
     @swagger_auto_schema(tags=["super_admin"])
@@ -509,7 +510,7 @@ add_question_view = AddQuestionView.as_view()
 
 
 class GetUpdateDestroyQuestionView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     queryset = Question.objects.select_related(
         'common_question'
     ).prefetch_related(
@@ -548,7 +549,7 @@ save_image_view = SaveImageView.as_view()
 
 
 class CreateVariantJuz40View(generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = CreateVariantJuz40Serializer
 
     def perform_create(self, serializer):
