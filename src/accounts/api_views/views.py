@@ -22,7 +22,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UpdateUserSerializer,
                                                 ProfileUserSerializer,
                                                 UpdateLoginProfileUserSerializer,
-                                                UpdateGooglePasswordUserSerializer)
+                                                UpdateGooglePasswordUserSerializer,
+                                                StaffTokenObtainPairSerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -124,13 +125,14 @@ token_by_email_view = TokenObtainPairByEmailView.as_view()
 
 class StaffTokenObtainPairView(BaseTokenObtainPairView):
     """ логин для сотрудников """
-    serializer_class = TokenObtainPairSerializerByEmail
+    serializer_class = StaffTokenObtainPairSerializer
 
+    @swagger_auto_schema(tags=["super_admin"])
     def post(self, request, *args, **kwargs):
-        email = self.request.data.get("email")
-        user = User.objects.filter(email=email).first()
-        if user.role.name_code == "student":
-            raise IsNotStaffError()
+        # email = self.request.data.get("email")
+        # user = User.objects.filter(email=email).first()
+        # if user.role.name_code == "student":
+        #     raise IsNotStaffError()
         return super().post(request, *args, **kwargs)
 
 

@@ -32,3 +32,8 @@ accounts_api_v1_urlpatterns = [
     # path('super-admin/', include(admin_urlpatterns)),
     # path('quizzes/', include(urlpatterns))
 ]
+
+super_admin_api_v1_urlpatterns = [
+    path('staff-login/', token_staff_view),
+    path('me/', auth_me_view),
+]

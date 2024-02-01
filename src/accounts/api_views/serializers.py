@@ -1,12 +1,13 @@
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
+from django.contrib.auth import get_user_model, authenticate
+from rest_framework import serializers, exceptions
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from src.accounts.models import Role, TokenVersion
-from src.common.exception import PasswordNotCorrectError, \
-    EmailAlreadyExistError, PhoneAlreadyExistError, \
-    AccountDoesNotHavePasswordError, PasswordsDoNotMatchError
+from src.common.exception import (PasswordNotCorrectError,
+                                  EmailAlreadyExistError, PhoneAlreadyExistError,
+                                  AccountDoesNotHavePasswordError, PasswordsDoNotMatchError)
 
 User = get_user_model()
 
@@ -80,6 +81,32 @@ class TokenObtainPairSerializerByPhone(TokenObtainPairSerializer):
 
 class TokenObtainPairSerializerByEmail(TokenObtainPairSerializer):
     username_field = 'email'
+
+
+class StaffTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = 'iin'
+
+    def validate(self, attrs):
+        authenticate_kwargs = {
+            "phone": attrs[self.username_field],
+            "password": attrs["password"],
+        }
+        try:
+            authenticate_kwargs["request"] = self.context["request"]
+        except KeyError:
+            pass
+        self.user = authenticate(**authenticate_kwargs)
+        if not api_settings.USER_AUTHENTICATION_RULE(self.user):
+            raise exceptions.AuthenticationFailed(
+                self.error_messages["no_active_account"],
+                "no_active_account",
+            )
+        data = {}
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        return data
 
 
 class RegisterPhoneSerializer(serializers.ModelSerializer):
