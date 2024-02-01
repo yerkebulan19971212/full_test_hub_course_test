@@ -15,7 +15,7 @@ from src.common.super_admin_views import (add_question_view,
                                           import_question_view,
                                           question_level_list_view,
                                           question_list_view, save_image_view,
-                                          variant_lesson_view, variant_list)
+                                          variant_lesson_view, variant_list, create_variant_view)
 from src.common.views import support_view
 
 app_name = 'common'
@@ -39,6 +39,7 @@ api_v1_urlpatterns = [
 ]
 
 api_v1_super_admin_urlpatterns = [
+    path('create-variant/', create_variant_view),
     path('add-question/', add_question_view),
     path('variant-list/', variant_list),
     path('question-level/', question_level_list_view),
