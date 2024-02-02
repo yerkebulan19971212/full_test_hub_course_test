@@ -57,5 +57,4 @@ api_v1_super_admin_urlpatterns = [
     path('student/<int:pk>/', student_detail),
     path('student-update/<int:pk>/', student_detail_update),
     path('add-common-question/', add_common_question_view),
-
 ]

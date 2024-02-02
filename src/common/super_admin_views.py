@@ -364,7 +364,7 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
 class VariantView(generics.ListAPIView):
     # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantListSerializer
-    queryset = Variant.objects.all()
+    queryset = Variant.objects.all().order_by('id')
     pagination_class = SimplePagination
 
     @swagger_auto_schema(tags=["super_admin"])
@@ -378,7 +378,7 @@ variant_list = VariantView.as_view()
 class VariantLessonView(generics.ListAPIView):
     # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantLessonSerializer
-    queryset = CourseTypeLesson.objects.all()
+    queryset = CourseTypeLesson.objects.all().order_by('id')
 
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, *args, **kwargs):
@@ -413,7 +413,7 @@ check_add_question_view = CheckAddQuestion.as_view()
 class QuestionListView(generics.ListAPIView):
     # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionAdminSerializer
-    queryset = Question.objects.all()
+    queryset = Question.objects.all().order_by('id')
 
     def get_queryset(self):
         variant_id = self.kwargs['variant_id']
@@ -591,7 +591,7 @@ create_variant_view = CreateVariantJuz40View.as_view()
 class StudentDetailView(generics.RetrieveDestroyAPIView):
     # permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
     serializer_class = StudentInformationUpdateSerializer
-    queryset = User.objects.filter(role__name_code='student')
+    queryset = User.objects.filter(role__name_code='student').order_by('id')
     lookup_field = 'pk'
 
 
