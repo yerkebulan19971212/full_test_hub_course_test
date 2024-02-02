@@ -492,7 +492,13 @@ class ImportQuestionsView(APIView):
                             index_lql = 0
                             if count >= 0:
                                 index_lql = count // 5
-
+                            print(f'{count}=========================')
+                            print(len(questions_texts))
+                            print(type(questions_texts))
+                            print(line)
+                            print(len(line))
+                            print(questions_texts)
+                            print("questions_texts")
                             count += 1
                             question = create_question(
                                 questions_texts=questions_texts,
@@ -507,7 +513,7 @@ class ImportQuestionsView(APIView):
                                 )
                             questions_texts = ""
                         elif line == 'end' or line == 'End':
-                            pass
+                            break
                             # if variant_lesson.variant.variant_type == VariantType.FULL:
                             #     # if count != variant_lesson.number_of_questions:
                             #     #     transaction.rollback()
