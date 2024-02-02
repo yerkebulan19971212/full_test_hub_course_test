@@ -55,8 +55,8 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class VariantLessonSerializer(serializers.ModelSerializer):
-    sum_of_question = serializers.IntegerField(source='questions_number', default=40)
-    number_of_questions = serializers.IntegerField(default=0)
+    sum_of_question = serializers.IntegerField(default=0)
+    number_of_questions = serializers.IntegerField(source='questions_number', default=40)
     lesson = LessonSerializer()
 
     class Meta:
@@ -362,7 +362,7 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
 
 # --------------------------- views ------------------------------
 class VariantView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantListSerializer
     queryset = Variant.objects.all().order_by('id')
     pagination_class = SimplePagination
@@ -376,13 +376,13 @@ variant_list = VariantView.as_view()
 
 
 class VariantLessonView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantLessonSerializer
     queryset = CourseTypeLesson.objects.all().order_by('id')
 
     def get_queryset(self):
         queryset = super().get_queryset().annotate(
-            number_of_questions=Count(
+            sum_of_question=Count(
                 'lesson_question_level__questions',
                 filter=Q(
                     lesson_question_level__questions__parent__isnull=True,
@@ -408,7 +408,7 @@ variant_lesson_view = VariantLessonView.as_view()
 
 
 class CheckAddQuestion(APIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, variant_id, lesson_id):
         add_question_status = True
@@ -426,7 +426,7 @@ check_add_question_view = CheckAddQuestion.as_view()
 
 
 class QuestionListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionAdminSerializer
     queryset = Question.objects.filter(parent__isnull=True).order_by('id')
 
@@ -447,7 +447,7 @@ question_list_view = QuestionListView.as_view()
 
 
 class CommonQuestionListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = ListCommonQuestionSerializer
     queryset = CommonQuestion.objects.all().order_by('-id')
 
@@ -460,7 +460,7 @@ common_question_list_view = CommonQuestionListView.as_view()
 
 
 class QuestionLevelListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionLevelSerializer
     queryset = QuestionLevel.objects.all().order_by('-id')
 
@@ -473,7 +473,7 @@ question_level_list_view = QuestionLevelListView.as_view()
 
 
 class ImportQuestionsView(APIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     @swagger_auto_schema(tags=["super_admin"])
     def post(self, request, *args, **kwargs):
         variant_id = self.kwargs['variant_id']
@@ -534,7 +534,7 @@ import_question_view = ImportQuestionsView.as_view()
 
 
 class AddQuestionView(generics.CreateAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionSerializer
 
     @swagger_auto_schema(tags=["super_admin"])
@@ -549,7 +549,7 @@ add_question_view = AddQuestionView.as_view()
 
 
 class GetUpdateDestroyQuestionView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     queryset = Question.objects.select_related(
         'common_question'
     ).prefetch_related(
@@ -588,7 +588,7 @@ save_image_view = SaveImageView.as_view()
 
 
 class CreateVariantJuz40View(generics.CreateAPIView):
-    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = CreateVariantJuz40Serializer
 
     def perform_create(self, serializer):
@@ -604,7 +604,7 @@ create_variant_view = CreateVariantJuz40View.as_view()
 
 
 class StudentDetailView(generics.RetrieveDestroyAPIView):
-    # permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
     serializer_class = StudentInformationUpdateSerializer
     queryset = User.objects.filter(role__name_code='student').order_by('id')
     lookup_field = 'pk'
