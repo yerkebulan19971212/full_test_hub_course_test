@@ -492,13 +492,6 @@ class ImportQuestionsView(APIView):
                             index_lql = 0
                             if count >= 0:
                                 index_lql = count // 5
-                            print(f'{count}=========================')
-                            print(len(questions_texts))
-                            print(type(questions_texts))
-                            print(line)
-                            print(len(line))
-                            print(questions_texts)
-                            print("questions_texts")
                             count += 1
                             question = create_question(
                                 questions_texts=questions_texts,
