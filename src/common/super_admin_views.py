@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Max, Prefetch
+from django.db.models import Max, Prefetch, Sum, Q, Count
 from drf_writable_nested import WritableNestedModelSerializer
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, serializers, status
@@ -55,7 +55,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class VariantLessonSerializer(serializers.ModelSerializer):
-    sum_of_question = serializers.IntegerField(default=40)
+    sum_of_question = serializers.IntegerField(source='questions_number', default=40)
     number_of_questions = serializers.IntegerField(default=0)
     lesson = LessonSerializer()
 
@@ -380,6 +380,21 @@ class VariantLessonView(generics.ListAPIView):
     serializer_class = VariantLessonSerializer
     queryset = CourseTypeLesson.objects.all().order_by('id')
 
+    def get_queryset(self):
+        queryset = super().get_queryset().annotate(
+            number_of_questions=Count(
+                'lesson_question_level__questions',
+                filter=Q(
+                    lesson_question_level__questions__parent__isnull=True,
+                    lesson_question_level__questions__variant_id=self.kwargs['variant_id'],
+                ),
+                distinct=True
+            ),
+        )
+        print(queryset.query)
+        print("queryset.query")
+        return queryset
+
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, *args, **kwargs):
         variant_id = self.kwargs['variant_id']
@@ -413,7 +428,7 @@ check_add_question_view = CheckAddQuestion.as_view()
 class QuestionListView(generics.ListAPIView):
     # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionAdminSerializer
-    queryset = Question.objects.all().order_by('id')
+    queryset = Question.objects.filter(parent__isnull=True).order_by('id')
 
     def get_queryset(self):
         variant_id = self.kwargs['variant_id']
