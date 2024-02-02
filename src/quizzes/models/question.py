@@ -177,6 +177,20 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 parent__isnull=True
             )
             if q.name_code == 'F':
+                common_questions = list(
+                    CommonQuestion.objects.filter(
+                        questions__variant__is_active=True,
+                        questions__variant__language=lang,
+                        questions__lesson_question_level__question_level=q,
+                        questions__variant__variant_packets__packet=packet,
+                        questions__lesson_question_level__test_type_lesson__lesson=lesson,
+                        questions__parent__isnull=True
+                    )
+                )
+                random.shuffle(common_questions)
+                random.shuffle(common_questions)
+                random.shuffle(common_questions)
+
                 variants = self.get_active_variant_list(packet)
                 variant = self.first_random(variants)
                 questions = questions.filter(variant=variant)
@@ -217,7 +231,8 @@ class Question(
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        db_index=True
+        db_index=True,
+        related_name='questions'
     )
     lesson_question_level = models.ForeignKey(
         'quizzes.LessonQuestionLevel',
