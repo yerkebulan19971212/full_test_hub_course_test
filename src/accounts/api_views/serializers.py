@@ -4,7 +4,7 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from src.accounts.models import Role, TokenVersion
+from src.accounts.models import Role, TokenVersion, BalanceHistory
 from src.common.exception import (PasswordNotCorrectError,
                                   EmailAlreadyExistError, PhoneAlreadyExistError,
                                   AccountDoesNotHavePasswordError, PasswordsDoNotMatchError)
@@ -339,3 +339,21 @@ class StudentDetailUpdateSerializer(serializers.ModelSerializer):
             'city',
             'school'
         )
+
+
+class BalanceHistorySerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(default=6001)
+
+    class Meta:
+        model = BalanceHistory
+        fields = (
+            'id',
+            'user_id',
+            'balance'
+        )
+
+    def create(self, validated_data):
+        user_id = validated_data.pop("user_id")
+        user = User.objects.filter(is_superuser=True).first()
+        validated_data['user'] = user
+        return super().create(validated_data)

@@ -178,6 +178,7 @@ class TokenHistory(abstract_models.UUID, abstract_models.TimeStampedModel):
     )
     token = models.CharField(max_length=255)
 
+
 # class EmailOTP(TimeStampedModel):
 #     email = models.EmailField(max_length=128)
 #     otp = models.CharField(max_length=40, editable=False)
@@ -273,3 +274,16 @@ class TokenHistory(abstract_models.UUID, abstract_models.TimeStampedModel):
 #
 #     class Meta:
 #         db_table = 'accounts\".\"user_test_type'
+
+class BalanceHistory(abstract_models.UUID, abstract_models.TimeStampedModel):
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='student_balance_histories'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='admin_balance_histories'
+    )
+    balance = models.IntegerField()

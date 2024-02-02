@@ -24,7 +24,7 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UpdateLoginProfileUserSerializer,
                                                 UpdateGooglePasswordUserSerializer,
                                                 StaffTokenObtainPairSerializer, UserChangePasswordSerializer,
-                                                AllStudentSerializer)
+                                                AllStudentSerializer, BalanceHistorySerializer)
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -286,3 +286,19 @@ class UserListView(generics.ListAPIView):
 
 
 user_list_view = UserListView.as_view()
+
+
+class BalanceHistoryView(generics.CreateAPIView):
+    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    serializer_class = BalanceHistorySerializer
+
+    def perform_create(self, serializer):
+        user_id = self.request.data.get("user_id")
+        student = User.objects.filter(user_id=user_id).first()
+        serializer.save(
+            user=self.request.user,
+            student=student
+        )
+
+
+add_balance_history = BalanceHistoryView.as_view()

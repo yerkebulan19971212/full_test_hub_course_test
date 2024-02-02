@@ -8,7 +8,7 @@ from src.accounts.api_views.views import (auth_me_view, token_by_phone_view,
                                           update_profile_view,
                                           update_login_profile_view,
                                           update_google_password_view,
-                                          profile_view, admin_update_password_view, user_list_view)
+                                          profile_view, admin_update_password_view, user_list_view, add_balance_history)
 
 app_name = 'accounts'
 urlpatterns = [
@@ -37,5 +37,6 @@ super_admin_api_v1_urlpatterns = [
     path('staff-login/', token_staff_view),
     path('me/', auth_me_view),
     path('password/', admin_update_password_view),
+    path('add-balance/', add_balance_history),
 
 ]
