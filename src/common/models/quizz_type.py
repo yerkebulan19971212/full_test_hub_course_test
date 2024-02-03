@@ -167,3 +167,7 @@ class BoughtPacket(
 
 class QuestionAnswerImage(abstract_models.TimeStampedModel):
     upload = models.ImageField(upload_to='image/')
+
+    class Meta:
+        db_table = 'common\".\"question_answer_image'
+
