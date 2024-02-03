@@ -7,11 +7,17 @@ from src.quizzes.models import Question, CommonQuestion, StudentQuizz, \
 
 class MyTestSerializer(serializers.ModelSerializer):
     quantity_question = serializers.IntegerField(default=120)
+    name_kz = serializers.CharField(source='packet.name_kz', default="", read_only=True)
+    name_ru = serializers.CharField(source='packet.name_ru', default="", read_only=True)
+    name_en = serializers.CharField(source='packet.name_en', default="", read_only=True)
 
     class Meta:
         model = StudentQuizz
         fields = (
             'id',
+            'name_kz',
+            'name_ru',
+            'name_en',
             'quizz_start_time',
             'quizz_end_time',
             'status',
