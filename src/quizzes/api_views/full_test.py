@@ -42,10 +42,11 @@ class MyTest(generics.ListAPIView):
         current_time = timezone.now()
         tests = super().get_queryset().filter(
             user=self.request.user,
-            status__in=[QuizzStatus.CONTINUE, QuizzStatus.PASSED],
+            status__in=[QuizzStatus.CONTINUE, QuizzStatus.NOT_PASSED],
             quizz_start_time__lt=current_time - F('quizz_duration')
         )
         for test in tests:
+
             test.status = QuizzStatus.PASSED
             test.quizz_end_time = current_time
             test.save()
