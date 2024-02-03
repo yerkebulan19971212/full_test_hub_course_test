@@ -67,13 +67,13 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             "quizz_duration"] = packet.quizz_type.quizz_type.quizz_duration
         student_quizz = super().create(validated_data)
         questions = []
-        questions += Question.objects.get_history_full_test(language, packet)
-        questions += Question.objects.get_reading_literacy_full_test(language, packet)
-        questions += Question.objects.get_mat_full_test(language, packet)
-        questions += Question.objects.get_full_test(language,
-                                                    lesson_pair.lesson_1, packet)
-        questions += Question.objects.get_full_test(language,
-                                                    lesson_pair.lesson_2, packet)
+        questions += Question.objects.get_history_full_test_v2(language, packet, user)
+        questions += Question.objects.get_reading_literacy_full_test_v2(language, packet, user)
+        questions += Question.objects.get_mat_full_test_v2(language, packet, user)
+        questions += Question.objects.get_full_test_v2(language,
+                                                       lesson_pair.lesson_1, packet, user)
+        questions += Question.objects.get_full_test_v2(language,
+                                                       lesson_pair.lesson_2, packet, user)
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,
             question=q,

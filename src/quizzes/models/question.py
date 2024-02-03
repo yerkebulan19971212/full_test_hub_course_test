@@ -11,6 +11,35 @@ from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
 
 
+class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
+    def get_common_question(self, lang, q, packet, lesson, user):
+        print(lang, q, packet, lesson, user)
+        print(lang, q, packet, lesson, user)
+        common_questions = list(
+            self.filter(
+                questions__variant__is_active=True,
+                questions__variant__language=lang,
+                questions__lesson_question_level__question_level=q,
+                questions__variant__variant_packets__packet=packet,
+                questions__lesson_question_level__test_type_lesson__lesson__name_code=lesson,
+                questions__parent__isnull=True
+            ).annotate(
+                user_question_count=Count(
+                    'questions__student_quizz_questions',
+                    filter=Q(questions__student_quizz_questions__student_quizz__user=user)
+                )
+            ).order_by('user_question_count')
+        )
+        random.shuffle(common_questions)
+        random.shuffle(common_questions)
+        random.shuffle(common_questions)
+        return common_questions[0]
+
+
+class CommonQuestionManager(models.Manager):
+    pass
+
+
 class CommonQuestion(abstract_models.TimeStampedModel):
     name_code = models.CharField(
         max_length=255,
@@ -20,6 +49,7 @@ class CommonQuestion(abstract_models.TimeStampedModel):
     )
     text = models.TextField(blank=True, null=True)
     file = models.FileField(blank=True, null=True)
+    objects = CommonQuestionManager.from_queryset(CommonQuestionQuerySet)()
 
     class Meta:
         db_table = 'quizz\".\"common_question'
@@ -202,6 +232,106 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
         return questions_list
 
+    def get_mat_full_test_v2(self, lang: str, packet, user):
+        questions = list(
+            self.filter(
+                variant__language=lang,
+                variant__is_active=True,
+                variant__variant_packets__packet=packet,
+                lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'
+            ).annotate(
+                user_question_count=Count(
+                    'student_quizz_questions',
+                    filter=Q(student_quizz_questions__student_quizz__user=user)
+                )
+            ).order_by('user_question_count')
+        )
+        return questions[:10]
+
+    def get_reading_literacy_full_test_v2(self, lang: str, packet, user):
+        questions_list = []
+        for q in QuestionLevel.objects.all().order_by('id')[:3]:
+            common_question = CommonQuestion.objects.get_common_question(
+                lang=lang, q=q,
+                packet=packet,
+                lesson='reading_literacy',
+                user=user
+            )
+            questions = self.filter(common_question=common_question)
+            question_index = 2
+            if q.name_code == 'B':
+                question_index = 3
+            elif q.name_code == 'C':
+                question_index = 5
+            questions_list += [q for q in questions[:question_index]]
+        return questions_list
+
+    def get_history_full_test_v2(self, lang: str, packet, user):
+        questions_list = []
+        for q in QuestionLevel.objects.all().order_by('id')[:4]:
+            if q.name_code == 'C' or q.name_code == 'D':
+                common_question = CommonQuestion.objects.get_common_question(
+                    lang=lang, q=q,
+                    packet=packet,
+                    lesson='history_of_kazakhstan',
+                    user=user
+                )
+                questions = self.filter(common_question=common_question)
+                questions_list += [q for q in questions[:5]]
+                continue
+            questions = self.select_related(
+                'lesson_question_level__test_type_lesson').filter(
+                variant__language=lang,
+                variant__is_active=True,
+                lesson_question_level__question_level=q,
+                variant__variant_packets__packet=packet,
+                lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan'
+            ).annotate(
+                user_question_count=Count(
+                    'student_quizz_questions',
+                    filter=Q(student_quizz_questions__student_quizz__user=user)
+                )
+            ).order_by('user_question_count')
+            if q.name_code == 'C' or q.name_code == 'D':
+                common_question = CommonQuestion.objects.get_common_question(
+                    lang=lang, q=q,
+                    packet=packet,
+                    lesson='history_of_kazakhstan',
+                    user=user
+                )
+                questions = self.filter(common_question=common_question)
+            questions_list += [q for q in questions[:5]]
+        return questions_list
+
+    def get_full_test_v2(self, lang: str, lesson, packet, user):
+        questions_list = []
+        for q in QuestionLevel.objects.all().order_by('id'):
+            if q.name_code == 'F':
+                common_question = CommonQuestion.objects.get_common_question(
+                    lang=lang, q=q,
+                    packet=packet,
+                    lesson=lesson.name_code,
+                    user=user
+                )
+                questions = self.filter(common_question=common_question)
+                questions_list += [q for q in questions[:5]]
+                continue
+            questions = self.filter(
+                variant__is_active=True,
+                variant__language=lang,
+                lesson_question_level__question_level=q,
+                variant__variant_packets__packet=packet,
+                lesson_question_level__test_type_lesson__lesson=lesson,
+                parent__isnull=True
+            ).annotate(
+                user_question_count=Count(
+                    'student_quizz_questions',
+                    filter=Q(student_quizz_questions__student_quizz__user=user)
+                )
+            ).order_by('user_question_count')
+            questions_list += [q for q in questions[:5]]
+        return questions_list
+
 
 class QuestionManager(models.Manager):
     pass
@@ -260,3 +390,7 @@ class Question(
     @property
     def short_question(self):
         return truncatechars(self.question, 100)
+
+    @property
+    def level_name(self):
+        return self.lesson_question_level.question_level.name_code

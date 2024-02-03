@@ -34,6 +34,8 @@ class StudentQuizzAdmin(admin.ModelAdmin):
 @admin.register(Question)
 class QuestionQuizzAdmin(admin.ModelAdmin):
     list_display = (
+        'level_name',
+        # 'lesson_question_level__question_level__name_code',
         'short_question', 'question_type', 'id',
     )
     # fields = (

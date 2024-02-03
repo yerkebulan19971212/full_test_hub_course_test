@@ -13,34 +13,67 @@ from src.quizzes.models import Question, Answer, QuestionLevel, \
 
 class UtilsView(APIView):
     def get(self, request, *args, **kwargs):
-        # t = TestFullScore.objects.values(
-        #     "student_quizz", "lesson", "score"
-        # ).annotate(scdf=Count("id")).filter(
-        #     scdf__gt=1
-        # )
-        # for b in t:
-        #     print(b.get("student_quizz"), " - ", b.get("lesson"), " - ",
-        #           b.get("score"), " - ", b.get("scdf"))
-        #     print("======")
-        #     cc = TestFullScore.objects.filter(
-        #         student_quizz_id=b.get("student_quizz"),
-        #         lesson_id=b.get("lesson"),
-        #         score=b.get("score"),
-        #     )
-        #     for c in range(len(cc)-1):
-        #         print(cc[c].id)
-        #         print("cc[c]")
-        #         TestFullScore.objects.filter(
-        #             pk=cc[c].pk
-        #         ).delete()
-
-        from src.services.utils import finish_full_test
-        from src.quizzes.models import (StudentQuizz)
-        student_quizzes = StudentQuizz.objects.filter(
-            status=QuizzStatus.PASSED,
-        )
-        for s in student_quizzes:
-            finish_full_test(student_quizz_id=s.id)
+        # print('====++++++===')
+        # a = QuestionLevel.objects.filter(name_code='A').first()
+        # b = QuestionLevel.objects.filter(name_code='B').first()
+        # c = QuestionLevel.objects.filter(name_code='C').first()
+        # d = QuestionLevel.objects.filter(name_code='D').first()
+        # e = QuestionLevel.objects.filter(name_code='E').first()
+        # f = QuestionLevel.objects.filter(name_code='F').first()
+        # g = QuestionLevel.objects.filter(name_code='G').first()
+        # h = QuestionLevel.objects.filter(name_code='H').first()
+        # for v in [76, 77, 78]:
+        #     cs = CourseTypeLesson.objects.filter(main=False)
+        #     for df in cs:
+        #         questions = list(
+        #             Question.objects.filter(
+        #                 variant_id=v,
+        #                 lesson_question_level__test_type_lesson=df
+        #             ).order_by('id')
+        #         )
+        #         print('======-==-=-')
+        #         for i,q in enumerate(questions):
+        #             lql = q.lesson_question_level
+        #             lesson = lql.test_type_lesson
+        #             ql = lql.question_level
+        #             if q.common_question is not None:
+        #                 print(f'common-questions {lesson.id}')
+        #                 lql_o = LessonQuestionLevel.objects.filter(
+        #                     question_level=f,
+        #                     test_type_lesson=lesson
+        #                 ).first()
+        #                 q.lesson_question_level = lql_o
+        #                 q.save()
+        #                 continue
+        #             answer_count = Answer.objects.filter(question=q).count()
+        #             if answer_count == 6:
+        #                 print('answer-count')
+        #                 lql_o = LessonQuestionLevel.objects.filter(
+        #                     question_level=h,
+        #                     test_type_lesson=lesson
+        #                 ).first()
+        #                 q.lesson_question_level = lql_o
+        #                 q.save()
+        #                 continue
+        #             print('==========')
+        #             print(i)
+        #             question_level = a
+        #             if i>4:
+        #                 question_level = b
+        #             if i>9:
+        #                 question_level = c
+        #             if i>14:
+        #                 question_level = d
+        #             if i>19:
+        #                 question_level = e
+        #             print(question_level)
+        #             print("question_level")
+        #             lql_o = LessonQuestionLevel.objects.filter(
+        #                 question_level=question_level,
+        #                 test_type_lesson=lesson
+        #             ).first()
+        #             q.lesson_question_level = lql_o
+        #             q.save()
         return Response("")
 
 
