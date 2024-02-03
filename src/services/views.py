@@ -8,11 +8,12 @@ from rest_framework.views import APIView
 from src.common.constant import QuizzStatus
 from src.common.models import CourseTypeLesson
 from src.quizzes.models import Question, Answer, QuestionLevel, \
-    LessonQuestionLevel, TestFullScore
+    LessonQuestionLevel, TestFullScore, Variant, CommonQuestion
 
 
 class UtilsView(APIView):
     def get(self, request, *args, **kwargs):
+
         # print('====++++++===')
         # a = QuestionLevel.objects.filter(name_code='A').first()
         # b = QuestionLevel.objects.filter(name_code='B').first()
@@ -22,16 +23,17 @@ class UtilsView(APIView):
         # f = QuestionLevel.objects.filter(name_code='F').first()
         # g = QuestionLevel.objects.filter(name_code='G').first()
         # h = QuestionLevel.objects.filter(name_code='H').first()
-        # for v in [76, 77, 78]:
-        #     cs = CourseTypeLesson.objects.filter(main=False)
-        #     for df in cs:
-        #         questions = list(
-        #             Question.objects.filter(
-        #                 variant_id=v,
-        #                 lesson_question_level__test_type_lesson=df
-        #             ).order_by('id')
-        #         )
-        #         print('======-==-=-')
+        for v in Variant.objects.all():
+            cs = CourseTypeLesson.objects.all()
+            for df in cs:
+                c_questions = CommonQuestion.objects.filter(
+                    questions__variant=v,
+                    questions__lesson_question_level__test_type_lesson=df
+                ).order_by('id').distinct()
+                for index_d,c in enumerate(c_questions):
+                    c.name_code = f'{v.name_kz}-{df.lesson.name_kz}-{str(index_d+1)}'
+                    c.save()
+                print('======-==-=-')
         #         for i,q in enumerate(questions):
         #             lql = q.lesson_question_level
         #             lesson = lql.test_type_lesson

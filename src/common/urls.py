@@ -48,7 +48,6 @@ api_v1_super_admin_urlpatterns = [
     path('add-question/', add_question_view),
     path('variant-list/', variant_list),
     path('question-level/', question_level_list_view),
-    path('question-image/', save_image_view),
     path('common-question-list/<int:variant_id>/', common_question_list_view),
     path('common-question/<int:pk>/', get_update_common_view),
     path('variant-lessons/<int:variant_id>/', variant_lesson_view),
@@ -59,4 +58,7 @@ api_v1_super_admin_urlpatterns = [
     path('student/<int:pk>/', student_detail),
     path('student-update/<int:pk>/', student_detail_update),
     path('add-common-question/', add_common_question_view),
+]
+api_v1_quizzes = [
+    path('question-image/', save_image_view),
 ]
