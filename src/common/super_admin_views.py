@@ -109,6 +109,18 @@ class AddCommonQuestionSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class GetUpdateCommonQuestionSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='name_code')
+
+    class Meta:
+        model = CommonQuestion
+        fields = (
+            'id',
+            'name',
+            'text',
+        )
+
+
 class ListCommonQuestionSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='name_code')
 
@@ -409,6 +421,7 @@ variant_lesson_view = VariantLessonView.as_view()
 
 class CheckAddQuestion(APIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, variant_id, lesson_id):
         add_question_status = True
@@ -474,6 +487,7 @@ question_level_list_view = QuestionLevelListView.as_view()
 
 class ImportQuestionsView(APIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+
     @swagger_auto_schema(tags=["super_admin"])
     def post(self, request, *args, **kwargs):
         variant_id = self.kwargs['variant_id']
@@ -645,3 +659,13 @@ class AddCommonQuestion(generics.CreateAPIView):
 
 
 add_common_question_view = AddCommonQuestion.as_view()
+
+
+class GetUpdateCommonQuestionView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    queryset = CommonQuestion.objects.all()
+    serializer_class = GetUpdateCommonQuestionSerializer
+    lookup_field = 'pk'
+
+
+get_update_common_view = GetUpdateCommonQuestionView.as_view()
