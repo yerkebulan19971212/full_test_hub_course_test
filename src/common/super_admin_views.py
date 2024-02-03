@@ -93,7 +93,7 @@ class AnswerSerializer2(serializers.ModelSerializer):
 
 
 class AddCommonQuestionSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(read_only=True)
+    name = serializers.CharField(source='name_code')
 
     class Meta:
         model = CommonQuestion
@@ -102,11 +102,6 @@ class AddCommonQuestionSerializer(serializers.ModelSerializer):
             'name',
             'text',
         )
-
-    def create(self, validated_data):
-        name_code = validated_data.pop('name')
-        validated_data["name_code"] = name_code
-        return super().create(validated_data)
 
 
 class GetUpdateCommonQuestionSerializer(serializers.ModelSerializer):
