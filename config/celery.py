@@ -69,7 +69,7 @@ def auto_complete_finish_test():
     from src.quizzes.models import (StudentQuizz)
     current_time = timezone.now()
     student_quizzes = StudentQuizz.objects.filter(
-        status=QuizzStatus.CONTINUE,
+        status_in=[QuizzStatus.CONTINUE, QuizzStatus.NOT_PASSED],
         quizz_start_time__lt=current_time - F('quizz_duration')
     )
     for s in student_quizzes:
