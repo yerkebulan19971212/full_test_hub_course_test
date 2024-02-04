@@ -35,6 +35,7 @@ class Answer(
         'quizzes.AnswerSign',
         related_name='answers',
         on_delete=models.CASCADE,
+        null=True,
         db_index=True
     )
 
