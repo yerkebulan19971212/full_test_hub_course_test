@@ -372,7 +372,7 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
 class VariantView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantListSerializer
-    queryset = Variant.objects.all().order_by('-variant_title')
+    queryset = Variant.objects.all().order_by('-order')
     pagination_class = SimplePagination
 
     @swagger_auto_schema(tags=["super_admin"])
