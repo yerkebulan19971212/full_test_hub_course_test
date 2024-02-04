@@ -81,6 +81,7 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
 
 
 class AnswerSerializer2(serializers.ModelSerializer):
+    id = serializers.IntegerField(write_only=True)
     class Meta:
         model = Answer
         fields = [
@@ -174,6 +175,9 @@ class ChildQuestionAdminSerializer(serializers.ModelSerializer):
         answers_data = validated_data.get('answers')
         ansids = [i.id for i in Answer.objects.filter(question=instance)]
         old_ans_ids = []
+        print(ansids)
+        print(answers_data[0])
+        print("answers_data")
         if answers_data is not None:
             for a in answers_data:
                 ans_id = a.get("id")
@@ -283,6 +287,8 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     def update(self, instance, validated_data):
         validated_data.pop('lesson')
+        print(validated_data)
+        print("validated_data=======")
         sub_questions_data = validated_data.pop('sub_questions', [])
         instance = super().update(instance, validated_data)
         questions = Question.objects.filter(
@@ -371,7 +377,7 @@ class CreateVariantJuz40Serializer(serializers.ModelSerializer):
 class VariantView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = VariantListSerializer
-    queryset = Variant.objects.all().order_by('id')
+    queryset = Variant.objects.all().order_by('-variant_title')
     pagination_class = SimplePagination
 
     @swagger_auto_schema(tags=["super_admin"])
