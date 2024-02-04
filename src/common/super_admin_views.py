@@ -602,11 +602,13 @@ class CreateVariantJuz40View(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         variant = Variant.objects.all().order_by('variant_title').last()
+        order = Variant.objects.all().order_by('order').last()
         if variant is None:
             variant = 0
         else:
             variant = variant.variant_title
-        serializer.save(variant_title=(variant + 1))
+        serializer.save(
+            variant_title=(variant + 1), order=(order.order + 1))
 
 
 create_variant_view = CreateVariantJuz40View.as_view()
