@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import \
     TokenObtainPairView as BaseTokenObtainPairView
 from rest_framework import permissions
+from django_filters.rest_framework import DjangoFilterBackend
 
 from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 TokenObtainPairSerializer,
@@ -25,6 +26,7 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UpdateGooglePasswordUserSerializer,
                                                 StaffTokenObtainPairSerializer, UserChangePasswordSerializer,
                                                 AllStudentSerializer, BalanceHistorySerializer)
+from src.accounts.filters import UserStudentFilter
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
@@ -283,6 +285,8 @@ class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = AllStudentSerializer
     pagination_class = SimplePagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserStudentFilter
 
 
 user_list_view = UserListView.as_view()

@@ -14,6 +14,7 @@ from src.quizzes.models import Question, Answer, QuestionLevel, \
 class UtilsView(APIView):
     def get(self, request, *args, **kwargs):
 
+
         # print('====++++++===')
         # a = QuestionLevel.objects.filter(name_code='A').first()
         # b = QuestionLevel.objects.filter(name_code='B').first()
