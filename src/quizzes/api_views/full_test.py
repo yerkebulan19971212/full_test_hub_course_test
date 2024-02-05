@@ -46,7 +46,6 @@ class MyTest(generics.ListAPIView):
             quizz_start_time__lt=current_time - F('quizz_duration')
         )
         for test in tests:
-
             test.status = QuizzStatus.PASSED
             test.quizz_end_time = current_time
             test.save()
@@ -126,7 +125,7 @@ class FullQuizLessonListView(generics.ListAPIView):
             test_start_time = student_test.quizz_start_time
         if duration.total_seconds() <= 0:
             student_test.quizz_duration = timedelta(seconds=0)
-            student_test.status = "PASSED"
+
             student_test.save()
             return Response({"detail": "Вы уже прошли этот тест"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -292,9 +291,7 @@ class EntFinishView(views.APIView):
         student_quizz = get_object_or_404(StudentQuizz, pk=student_quizz)
         if student_quizz.status in ["PASSED"]:
             return PassedTestError()
-        student_quizz.status = "PASSED"
-        student_quizz.quizz_end_time = datetime.now()
-        student_quizz.save()
+
         if student_quizz.lesson_pair:
             test_type_lessons = CourseTypeLesson.objects.filter(
                 main=True, course_type__name_code='ent'
@@ -340,6 +337,9 @@ class EntFinishView(views.APIView):
                     accuracy=100 * score / question_full_score
                 ))
         TestFullScore.objects.bulk_create(test_full_score)
+        student_quizz.status = "PASSED"
+        student_quizz.quizz_end_time = datetime.now()
+        student_quizz.save()
         return Response({"detail": "success"}, status=status.HTTP_201_CREATED)
 
 

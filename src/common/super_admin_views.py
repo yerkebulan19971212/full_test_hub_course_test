@@ -5,11 +5,15 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import django_filters
 
+from django_filters import rest_framework as filters
+
+from django_filters.rest_framework import DjangoFilterBackend
 from src.accounts.api_views.serializers import StudentInformationUpdateSerializer, StudentDetailUpdateSerializer
 from src.accounts.models import User
 from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage, CourseType
-from src.common.paginations import SimplePagination
+from src.common.paginations import SimplePagination, SimplePaginationV2
 from src.quizzes.models import (Answer, CommonQuestion, Question,
                                 QuestionLevel, Variant, LessonQuestionLevel)
 from src.services.permissions import SuperAdminPermission
@@ -82,6 +86,7 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
 
 class AnswerSerializer2(serializers.ModelSerializer):
     id = serializers.IntegerField(write_only=True)
+
     class Meta:
         model = Answer
         fields = [
@@ -237,6 +242,7 @@ class QuestionAdminSerializer(serializers.ModelSerializer):
     number = serializers.IntegerField(default=0)
     answers = AnswerSerializer(many=True)
     common_question = CommonQuestionSerializer()
+    question_level = serializers.CharField(source="lesson_question_level.question_level.name_code")
     sub_questions = ChildQuestionAdminSerializer(many=True)
 
     class Meta:
@@ -245,6 +251,7 @@ class QuestionAdminSerializer(serializers.ModelSerializer):
             'id',
             'number',
             'question_type',
+            'question_level',
             # 'variant_lesson',
             'common_question',
             'question',
@@ -437,7 +444,9 @@ check_add_question_view = CheckAddQuestion.as_view()
 class QuestionListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionAdminSerializer
-    queryset = Question.objects.filter(parent__isnull=True).order_by('id')
+    queryset = Question.objects.filter(parent__isnull=True).select_related(
+        'lesson_question_level__question_level'
+    ).order_by('id')
 
     def get_queryset(self):
         variant_id = self.kwargs['variant_id']
@@ -453,6 +462,42 @@ class QuestionListView(generics.ListAPIView):
 
 
 question_list_view = QuestionListView.as_view()
+
+
+class QuestionFilter(django_filters.FilterSet):
+    question_level = filters.NumberFilter(
+        field_name="lesson_question_level__question_level_id")
+    class Meta:
+        model = Question
+        fields = (
+            'question_level',
+        )
+
+
+class QuestionItemsListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    serializer_class = QuestionAdminSerializer
+    queryset = Question.objects.filter(parent__isnull=True).select_related(
+        'lesson_question_level__question_level'
+    ).order_by('id')
+    pagination_class = SimplePaginationV2
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = QuestionFilter
+
+    def get_queryset(self):
+        variant_id = self.kwargs['variant_id']
+        lesson_id = self.kwargs['lesson_id']
+        return super().get_queryset().filter(
+            variant_id=variant_id,
+            lesson_question_level__test_type_lesson_id=lesson_id
+        )
+
+    @swagger_auto_schema(tags=["super_admin"])
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+question_items_list_view = QuestionItemsListView.as_view()
 
 
 class CommonQuestionListView(generics.ListAPIView):
@@ -471,7 +516,7 @@ common_question_list_view = CommonQuestionListView.as_view()
 class QuestionLevelListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     serializer_class = QuestionLevelSerializer
-    queryset = QuestionLevel.objects.all().order_by('-id')
+    queryset = QuestionLevel.objects.all().order_by('id')
 
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, *args, **kwargs):

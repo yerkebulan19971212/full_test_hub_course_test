@@ -20,3 +20,7 @@ class SimplePagination(PageNumberPagination):
                 'data': data,
             }
         )
+
+
+class SimplePaginationV2(SimplePagination):
+    page_size = 40
