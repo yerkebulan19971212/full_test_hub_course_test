@@ -273,6 +273,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     answers = AnswerSerializer(many=True, required=True)
     sub_questions = ChildQuestionAdminSerializer(many=True, required=False)
     lesson = serializers.IntegerField(default=0, write_only=True)
+    question_level = serializers.IntegerField(default=0, write_only=True, required=False)
 
     class Meta:
         model = Question
@@ -285,12 +286,14 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             'question_type',
             'sub_questions',
             'answers',
+            'question_level',
             # 'number'
         )
         ref_name = "QuestionSerializer_1"
 
     def update(self, instance, validated_data):
         validated_data.pop('lesson')
+        question_level = validated_data.pop('question_level', None)
         sub_questions_data = validated_data.pop('sub_questions', [])
         instance = super().update(instance, validated_data)
         questions = Question.objects.filter(
@@ -321,7 +324,14 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     def create(self, validated_data):
         variant = validated_data.get('variant')
         lesson = validated_data.pop('lesson')
-        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson=lesson).order_by('id')
+        question_level = validated_data.pop('question_level', None)
+        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson).order_by('id')
+        if question_level:
+            question_level_obj = LessonQuestionLevel.objects.filter(
+                test_type_lesson=lesson,
+                question_level_id=question_level
+            )
+            lql_list = [question_level_obj for i in range(len(lql_list))]
         sub_questions_data = validated_data.pop('sub_questions', [])
         question_count = Question.objects.filter(
             variant=variant,
@@ -467,6 +477,7 @@ question_list_view = QuestionListView.as_view()
 class QuestionFilter(django_filters.FilterSet):
     question_level = filters.NumberFilter(
         field_name="lesson_question_level__question_level_id")
+
     class Meta:
         model = Question
         fields = (
@@ -526,16 +537,27 @@ class QuestionLevelListView(generics.ListAPIView):
 question_level_list_view = QuestionLevelListView.as_view()
 
 
-class ImportQuestionsView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+class ImportQuestionSerializer(serializers.Serializer):
+    file = serializers.FileField()
+    question_level = serializers.IntegerField(required=False)
+
+
+class ImportQuestionsView(generics.CreateAPIView):
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    serializer_class = ImportQuestionSerializer
 
     @swagger_auto_schema(tags=["super_admin"])
     def post(self, request, *args, **kwargs):
         variant_id = self.kwargs['variant_id']
         lesson_id = self.kwargs['lesson_id']
-        variant = Variant.objects.get(pk=variant_id)
+        question_level = self.request.data.get('question_level', None)
         lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson_id).order_by('id')
-
+        if question_level:
+            question_level_obj = LessonQuestionLevel.objects.filter(
+                test_type_lesson_id=lesson_id,
+                question_level_id=question_level
+            )
+            lql_list = [question_level_obj for i in range(len(lql_list))]
         with request.FILES['file'] as f:
             try:
                 with transaction.atomic():
