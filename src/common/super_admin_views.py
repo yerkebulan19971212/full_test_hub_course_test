@@ -273,7 +273,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     answers = AnswerSerializer(many=True, required=True)
     sub_questions = ChildQuestionAdminSerializer(many=True, required=False)
     lesson = serializers.IntegerField(default=0, write_only=True)
-    question_level = serializers.IntegerField(default=0, write_only=True, required=False)
+    question_level = serializers.IntegerField(source='lesson_question_level.question_level.id', default=0, required=False)
 
     class Meta:
         model = Question
@@ -293,7 +293,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     def update(self, instance, validated_data):
         lesson = validated_data.pop('lesson')
-        question_level = validated_data.pop('question_level', None)
+        question_level = validated_data.pop('question_level_id', None)
         if question_level:
             question_level_obj = LessonQuestionLevel.objects.filter(
                 test_type_lesson=lesson,
@@ -633,7 +633,8 @@ add_question_view = AddQuestionView.as_view()
 class GetUpdateDestroyQuestionView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
     queryset = Question.objects.select_related(
-        'common_question'
+        'common_question',
+        'lesson_question_level__question_level',
     ).prefetch_related(
         'answers',
         Prefetch(
