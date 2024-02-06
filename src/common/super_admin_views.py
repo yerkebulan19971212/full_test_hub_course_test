@@ -292,8 +292,14 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         ref_name = "QuestionSerializer_1"
 
     def update(self, instance, validated_data):
-        validated_data.pop('lesson')
+        lesson = validated_data.pop('lesson')
         question_level = validated_data.pop('question_level', None)
+        if question_level:
+            question_level_obj = LessonQuestionLevel.objects.filter(
+                test_type_lesson=lesson,
+                question_level_id=question_level
+            )
+            validated_data['lesson_question_level'] = question_level_obj[0]
         sub_questions_data = validated_data.pop('sub_questions', [])
         instance = super().update(instance, validated_data)
         questions = Question.objects.filter(
