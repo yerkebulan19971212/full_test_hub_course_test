@@ -13,8 +13,6 @@ from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
 
 class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
     def get_common_question(self, lang, q, packet, lesson, user):
-        print(lang, q, packet, lesson, user)
-        print(lang, q, packet, lesson, user)
         common_questions = list(
             self.filter(
                 questions__variant__is_active=True,
@@ -33,6 +31,8 @@ class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
         random.shuffle(common_questions)
         random.shuffle(common_questions)
         random.shuffle(common_questions)
+        if len(common_questions) == 0:
+            return None
         return common_questions[0]
 
 

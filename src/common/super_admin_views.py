@@ -273,7 +273,13 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     answers = AnswerSerializer(many=True, required=True)
     sub_questions = ChildQuestionAdminSerializer(many=True, required=False)
     lesson = serializers.IntegerField(default=0, write_only=True)
-    question_level = serializers.IntegerField(source='lesson_question_level.question_level.id', default=0, required=False)
+    question_level = serializers.SerializerMethodField()
+
+    # question_level = serializers.IntegerField(
+    #     source='lesson_question_level.question_level.id',
+    #     default=0,
+    #     required=False
+    # )
 
     class Meta:
         model = Question
@@ -291,15 +297,20 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         )
         ref_name = "QuestionSerializer_1"
 
+    def get_question_level(self, obj):
+        # For retrieve action, return the ID of the question_level
+        if self.context['request'].method == 'GET':
+            return obj.lesson_question_level.question_level.id
+
     def update(self, instance, validated_data):
         lesson = validated_data.pop('lesson')
-        question_level = validated_data.pop('question_level_id', None)
-        if question_level:
+        question_level = self.context['request'].data.get('question_level', None)
+        if question_level is not None:
             question_level_obj = LessonQuestionLevel.objects.filter(
                 test_type_lesson=lesson,
                 question_level_id=question_level
             )
-            validated_data['lesson_question_level'] = question_level_obj[0]
+            validated_data['lesson_question_level'] = question_level_obj.first()
         sub_questions_data = validated_data.pop('sub_questions', [])
         instance = super().update(instance, validated_data)
         questions = Question.objects.filter(

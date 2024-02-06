@@ -53,8 +53,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         # quizz_type = validated_data.pop("quizz_type")
 
         lesson_pair = LessonPair.objects.filter(
-            Q(lesson_1=lessons[0], lesson_2=lessons[1]) |
-            Q(lesson_1=lessons[1], lesson_2=lessons[0])
+            Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
+            Q(lesson_1=lessons[-1], lesson_2=lessons[0])
         ).first()
         # c = CourseTypeQuizz.objects.filter(
         #     quizz_type__name_code=quizz_type).first()
