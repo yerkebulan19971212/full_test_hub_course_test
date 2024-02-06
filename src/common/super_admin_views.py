@@ -563,7 +563,9 @@ class ImportQuestionsView(generics.CreateAPIView):
                 test_type_lesson_id=lesson_id,
                 question_level_id=question_level
             )
-            lql_list = [question_level_obj for i in range(len(lql_list))]
+            lql_list = [question_level_obj.first() for i in range(len(lql_list))]
+        print(lql_list)
+        print("lql_list")
         with request.FILES['file'] as f:
             try:
                 with transaction.atomic():
@@ -600,6 +602,7 @@ class ImportQuestionsView(generics.CreateAPIView):
                             questions_texts += line.strip() + "new_line"
                         line = f.readline().decode().strip()
             except Exception as e:
+                print(count)
                 # if count != variant_lesson.number_of_questions:
                 #     return Response(
                 #         {"detail": "Неверное количество"},
