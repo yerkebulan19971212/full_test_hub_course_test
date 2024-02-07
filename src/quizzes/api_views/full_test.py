@@ -158,7 +158,7 @@ class FullQuizLessonListView(generics.ListAPIView):
             course_type_lessons__main=True,
         ).order_by('course_type_lessons__main', 'id')
         if student_quizz.lesson_pair.lesson_1.name_code == "creative_exam":
-            main_lessons = main_lessons.exclude(name_code="creative_exam")
+            main_lessons = main_lessons.exclude(name_code="mathematical_literacy")
         if student_quizz.lesson_pair and not student_quizz.lesson_pair.lesson_1.name_ru == "Творческий экзамен":
             other_lessons = queryset.filter(
                 course_type_lessons__course_type__name_code="ent",
@@ -303,7 +303,7 @@ class EntFinishView(views.APIView):
                 lessons.append(lesson_pair.lesson_1)
                 lessons.append(lesson_pair.lesson_2)
             else:
-                test_type_lessons = test_type_lessons.exclude(lesson__name_code='creative_exam')
+                test_type_lessons = test_type_lessons.exclude(lesson__name_code='mathematical_literacy')
                 lessons = [test_type_lesson.lesson for test_type_lesson in
                            test_type_lessons]
         else:
