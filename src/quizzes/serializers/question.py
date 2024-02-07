@@ -121,7 +121,6 @@ class SubQuestionResultSerializer(serializers.ModelSerializer):
             'correct_answer',
         )
 
-
     def get_answers(self, obj):
         answers = obj.answers.all()
         answers_data = AnswerSignSerializer(answers, many=True).data
@@ -141,7 +140,6 @@ class SubQuestionResultSerializer(serializers.ModelSerializer):
             else:
                 a["correct"] = "NOT_CHOOSE"
         return answers_data
-
 
     def get_correct_answer(self, obj):
         return [a.answer_sign.name_code for a in
@@ -170,7 +168,9 @@ class QuestionResultSerializer(serializers.ModelSerializer):
             'lesson',
             'order',
             'correct_answer',
-            'sub_questions'
+            'sub_questions',
+            'answer_question',
+            'answer_url',
         )
 
     def get_order(self, obj):

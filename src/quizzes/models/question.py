@@ -378,6 +378,8 @@ class Question(
         db_index=True,
         related_name='questions'
     )
+    answer_question = models.TextField(null=True, blank=True)
+    answer_url = models.URLField(null=True, blank=True)
 
     objects = QuestionManager.from_queryset(QuestionQuerySet)()
 
