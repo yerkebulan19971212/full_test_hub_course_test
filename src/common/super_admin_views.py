@@ -352,7 +352,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         sub_questions_data = validated_data.pop('sub_questions', [])
         question_count = Question.objects.filter(
             variant=variant,
-            lesson_question_level__lesson_id=lesson
+            lesson_question_level__test_type_lesson_id=lesson
         ).count()
         index_lql = 0
         if question_count >= 0:
