@@ -299,8 +299,9 @@ class EntFinishView(views.APIView):
             lessons = [test_type_lesson.lesson for test_type_lesson in
                        test_type_lessons]
             lesson_pair = student_quizz.lesson_pair
-            lessons.append(lesson_pair.lesson_1)
-            lessons.append(lesson_pair.lesson_2)
+            if lesson_pair.lesson_1.name_code != 'creative_exam':
+                lessons.append(lesson_pair.lesson_1)
+                lessons.append(lesson_pair.lesson_2)
         else:
             lessons = [student_quizz.lesson]
         index = 0
