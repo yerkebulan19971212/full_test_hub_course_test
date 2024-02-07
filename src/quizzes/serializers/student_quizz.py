@@ -33,9 +33,11 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
         course_type = CourseType.objects.get_ent()
         validated_data["course_type"] = course_type
         student_quizz = super().create(validated_data)
-        questions = Question.objects.get_questions_by_lesson(lang=language,
-                                                             lesson=lesson,
-                                                             course_type=course_type.name_code)
+        questions = Question.objects.get_questions_by_lesson(
+            lang=language,
+            lesson=lesson,
+            user=self.context["request"].user
+        )
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             question=q,
             lesson=lesson,
