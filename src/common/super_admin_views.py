@@ -85,7 +85,7 @@ class CommonQuestionSerializer(serializers.ModelSerializer):
 
 
 class AnswerSerializer2(serializers.ModelSerializer):
-    id = serializers.IntegerField(write_only=True)
+    id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Answer
@@ -209,13 +209,11 @@ class ChildQuestionAdminSerializer(serializers.ModelSerializer):
         question = Question.objects.create(
             parent=validated_data.get("parent"),
             question=validated_data.get("question"),
-            variant_lesson=validated_data.get("variant_lesson"),
+            variant=validated_data.get("variant"),
+            lesson_question_level=validated_data.get("lesson_question_level"),
         )
         answers = []
         for a in validated_data.get("answers"):
-            print(a)
-            print(a.get("order"))
-            print('a.get("order")')
             answers.append(
                 Answer(
                     question=question,
@@ -252,7 +250,6 @@ class QuestionAdminSerializer(serializers.ModelSerializer):
             'number',
             'question_type',
             'question_level',
-            # 'variant_lesson',
             'common_question',
             'question',
             'sub_questions',
@@ -274,12 +271,6 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     sub_questions = ChildQuestionAdminSerializer(many=True, required=False)
     lesson = serializers.IntegerField(default=0, write_only=True)
     question_level = serializers.SerializerMethodField()
-
-    # question_level = serializers.IntegerField(
-    #     source='lesson_question_level.question_level.id',
-    #     default=0,
-    #     required=False
-    # )
 
     class Meta:
         model = Question
@@ -455,12 +446,6 @@ class CheckAddQuestion(APIView):
     @swagger_auto_schema(tags=["super_admin"])
     def get(self, request, variant_id, lesson_id):
         add_question_status = True
-        user = request.user
-        # question = variant_lesson.questions.filter(parent__isnull=True)
-        # question_count = question.count()
-        # if variant_lesson.number_of_questions <= question_count:
-        #     add_question_status = False
-        # number = question_count + 1
         number = 0 + 1
         return Response({'status': add_question_status, 'number': number})
 
@@ -603,22 +588,10 @@ class ImportQuestionsView(generics.CreateAPIView):
                             questions_texts = ""
                         elif line == 'end' or line == 'End':
                             break
-                            # if variant_lesson.variant.variant_type == VariantType.FULL:
-                            #     # if count != variant_lesson.number_of_questions:
-                            #     #     transaction.rollback()
-                            #     break
-                            # else:
-                            #     break
                         else:
                             questions_texts += line.strip() + "new_line"
                         line = f.readline().decode().strip()
             except Exception as e:
-                print(count)
-                # if count != variant_lesson.number_of_questions:
-                #     return Response(
-                #         {"detail": "Неверное количество"},
-                #         status=status.HTTP_400_BAD_REQUEST
-                #     )
                 return Response(
                     {"detail": str(e)},
                     status=status.HTTP_400_BAD_REQUEST
