@@ -69,7 +69,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         questions = []
         questions += Question.objects.get_history_full_test_v2(language, packet, user)
         questions += Question.objects.get_reading_literacy_full_test_v2(language, packet, user)
-        if lesson_pair.lesson_1.lesson.name_code != 'creative_exam':
+        if lesson_pair.lesson_1.name_code != 'creative_exam':
             questions += Question.objects.get_mat_full_test_v2(language, packet, user)
             questions += Question.objects.get_full_test_v2(language,
                                                            lesson_pair.lesson_1, packet, user)
