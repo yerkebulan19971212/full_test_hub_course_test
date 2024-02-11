@@ -103,6 +103,7 @@ class Packet(
     )
     days = models.IntegerField(default=0)
     price = models.IntegerField(default=0)
+    img = models.FileField(null=True, blank=True)
     packet_type = models.CharField(
         choices=PacketType.choices(),
         default=PacketType.ONE_TIME

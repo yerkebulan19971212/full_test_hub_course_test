@@ -42,6 +42,7 @@ class PacketSerializer(serializers.ModelSerializer):
             'name_ru',
             'name_en',
             'days',
+            'img',
             'price',
             'packet_type',
             'quantity',

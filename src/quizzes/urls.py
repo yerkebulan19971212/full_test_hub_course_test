@@ -49,7 +49,6 @@ by_lesson_quizz = [
     path('questions/', by_lesson_quizz_question_view),
     path('pass-answer/', by_lesson_pass_answer_view),
     path('finish/<int:student_quizz>/', by_lesson_finish_view),
-
     path('result/<int:pk>/', by_lesson_result_view),
     path('result-lesson/<int:pk>/', get_by_lesson_full_score_result_view),
     path('task-progress/<int:pk>/', by_lesson_result_task_progress_view),
