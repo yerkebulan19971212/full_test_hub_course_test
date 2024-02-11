@@ -111,6 +111,8 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             Prefetch('answers', queryset=answer_queryset)
         ).filter(
             lesson_question_level__question_level__choice=ChoiceType.CHOICE,
+            question_type=QuestionType.DEFAULT,
+            common_question__isnull=True,
             variant__language=student_quizz.language,
             lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
         ).annotate(

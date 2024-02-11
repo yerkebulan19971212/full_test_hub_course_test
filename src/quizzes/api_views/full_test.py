@@ -46,9 +46,6 @@ class MyTest(generics.ListAPIView):
             quizz_start_time__lt=current_time - F('quizz_duration')
         )
         for test in tests:
-            test.status = QuizzStatus.PASSED
-            test.quizz_end_time = current_time
-            test.save()
             finish_test.delay(test.id)
         return super().get_queryset().filter(
             user=self.request.user
