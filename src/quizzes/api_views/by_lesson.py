@@ -12,7 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from src.common.constant import ChoiceType
+from src.common.constant import ChoiceType, QuestionType
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.utils import get_multi_score
 from src.quizzes.models import (Question, Answer, StudentScore, StudentAnswer,
@@ -397,12 +397,14 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
     def get(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('pk')
         questions = Question.objects.filter(
-            student_quizz_questions__student_quizz_id=student_quizz_id
+            student_quizz_questions__student_quizz_id=student_quizz_id,
         )
         score = StudentScore.objects.filter(student_quizz_id=student_quizz_id)
 
         choice_questions = questions.filter(
-            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+            question_type=QuestionType.DEFAULT,
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE,
+            parent__isnull=True
         )
         choice_score = score.filter(
             question_id__in=[q.id for q in choice_questions]
@@ -414,6 +416,7 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
         ).get("sum_score")
 
         multi_choice_questions = questions.filter(
+            question_type=QuestionType.DEFAULT,
             lesson_question_level__question_level__choice=ChoiceType.MULTI_CHOICE
         )
         multi_choice = multi_choice_questions.aggregate(sum_score=Coalesce(
@@ -426,13 +429,28 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
         ).get("sum_score")
 
         common_question = questions.filter(
-            common_question__isnull=False
+            question_type=QuestionType.DEFAULT,
+            common_question__isnull=False,
+            parent__isnull=True
         )
         common = common_question.aggregate(sum_score=Coalesce(
             Sum('lesson_question_level__question_level__point'), 0)
         ).get("sum_score")
         common_score = score.filter(
             question_id__in=[q.id for q in common_question]
+        ).aggregate(sum_score=Coalesce(
+            Sum('score'), 0)
+        ).get("sum_score")
+
+        match_choice_questions = questions.filter(
+            question_type=QuestionType.SELECT,
+            parent__isnull=True
+        )
+        match_choice = match_choice_questions.aggregate(sum_score=Coalesce(
+            Sum('lesson_question_level__question_level__point'), 0)
+        ).get("sum_score")
+        match_choice_score = score.filter(
+            question_id__in=[q.id for q in match_choice_questions]
         ).aggregate(sum_score=Coalesce(
             Sum('score'), 0)
         ).get("sum_score")
@@ -443,6 +461,8 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
             "common_score": common_score,
             "multi_choice": multi_choice,
             "multi_choice_score": multi_choice_score,
+            "match_choice": match_choice,
+            "match_choice_score": match_choice_score,
         })
 
 
