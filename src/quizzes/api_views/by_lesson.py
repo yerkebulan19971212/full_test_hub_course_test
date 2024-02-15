@@ -253,6 +253,13 @@ class ByLessonFinishView(views.APIView):
             aggregate(sum_score=Coalesce(Sum('score'), 0))
         quantity_question = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz).count()
+        ans_quantity_question = StudentScore.objects.filter(
+            status=True,
+            student_quizz=student_quizz,
+            score__gt=0
+        ).values('question').annotate(
+            count=Count('question')
+        ).count()
         question_full_score = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz,
         ).distinct().aggregate(sum_score=Coalesce(
@@ -264,7 +271,7 @@ class ByLessonFinishView(views.APIView):
                 student_quizz=student_quizz,
                 lesson=student_quizz.lesson,
                 score=score,
-                unattem=quantity_question - score,
+                unattem=quantity_question - ans_quantity_question,
                 number_of_score=question_full_score,
                 number_of_question=quantity_question,
                 accuracy=100 * score / question_full_score))
