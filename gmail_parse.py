@@ -96,7 +96,7 @@ def main(sc):
                 as_read_message(message['id'])
     if not messages:
         print('No messages found')
-    s.enter(120, 1, main, (sc,))
+    # s.enter(120, 1, main, (sc,))
 
 
 if __name__ == '__main__':
