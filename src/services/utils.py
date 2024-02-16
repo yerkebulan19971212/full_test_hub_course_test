@@ -260,7 +260,6 @@ def add_balance():
                 user_id='me',
                 msg_id=message['id']
             )
-            print(msg)
             id_msg = re.search(r"= \d\d\d\d\d\d", msg)
             price_msg = re.search(r"у: \d+\.\d+", msg)
             if id_msg is None:
@@ -268,15 +267,12 @@ def add_balance():
             user_id = id_msg.group(0).split(' ')[-1].strip()
             price = str(price_msg.group(0)).split(' ')[-1].strip()
             user = User.objects.filter(user_id=int(user_id)).first()
-            print(user_id, price)
-            print(user)
-            print("user")
             if user is not None:
                 BalanceHistory.objects.create(
                     student=user,
                     balance=int(float(price)),
                     data=msg
                 )
-            # as_read_message(message['id'])
+            as_read_message(message['id'])
     if not messages:
         print('No messages found')
