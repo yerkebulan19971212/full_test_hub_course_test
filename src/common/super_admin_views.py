@@ -555,7 +555,7 @@ class ImportQuestionsView(generics.CreateAPIView):
         variant_id = self.kwargs['variant_id']
         lesson_id = self.kwargs['lesson_id']
         question_level = self.request.data.get('question_level', None)
-        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson_id).order_by('question_level__name_code')
+        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson_id).order_by('question_level__id')
         if question_level:
             if str(question_level).isnumeric():
                 question_level_obj = LessonQuestionLevel.objects.filter(
