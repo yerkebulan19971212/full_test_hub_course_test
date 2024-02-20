@@ -557,11 +557,12 @@ class ImportQuestionsView(generics.CreateAPIView):
         question_level = self.request.data.get('question_level', None)
         lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson_id).order_by('id')
         if question_level:
-            question_level_obj = LessonQuestionLevel.objects.filter(
-                test_type_lesson_id=lesson_id,
-                question_level_id=question_level
-            )
-            lql_list = [question_level_obj.first() for i in range(len(lql_list))]
+            if str(question_level).isnumeric():
+                question_level_obj = LessonQuestionLevel.objects.filter(
+                    test_type_lesson_id=lesson_id,
+                    question_level_id=question_level
+                )
+                lql_list = [question_level_obj.first() for i in range(len(lql_list))]
         print(lql_list)
         print("lql_list")
         with request.FILES['file'] as f:
