@@ -555,50 +555,56 @@ class ImportQuestionsView(generics.CreateAPIView):
         variant_id = self.kwargs['variant_id']
         lesson_id = self.kwargs['lesson_id']
         question_level = self.request.data.get('question_level', None)
+        print(question_level)
+        print("question_level")
         lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson_id).order_by('question_level__id')
         if question_level:
             if str(question_level).isnumeric():
+                print("================")
                 question_level_obj = LessonQuestionLevel.objects.filter(
                     test_type_lesson_id=lesson_id,
                     question_level_id=question_level
                 )
-                lql_list = [question_level_obj.first() for i in range(len(lql_list))]
+                lql_list = [question_level_obj.first()]
         print(lql_list)
         print("lql_list")
+        print("lql_list")
         with request.FILES['file'] as f:
-            try:
-                with transaction.atomic():
-                    line = f.readline().decode().strip()
-                    questions_texts = ""
-                    count = 0
-                    while True:
-                        if not line.strip():
-                            index_lql = 0
-                            if count >= 0:
-                                index_lql = count // 5
-                            count += 1
-                            question = create_question(
-                                questions_texts=questions_texts,
-                                variant_id=variant_id,
-                                lesson_id=lesson_id,
-                                lql=lql_list[index_lql]
+            # try:
+            with transaction.atomic():
+                line = f.readline().decode().strip()
+                questions_texts = ""
+                count = 0
+                while True:
+                    if not line.strip():
+                        index_lql = 0
+                        if count >= 0 and len(lql_list) > 1:
+                            index_lql = count // 5
+                        count += 1
+                        question = create_question(
+                            questions_texts=questions_texts,
+                            variant_id=variant_id,
+                            lesson_id=lesson_id,
+                            lql=lql_list[index_lql]
+                        )
+                        print(questions_texts)
+                        print("questions_texts")
+                        if question is None:
+                            return Response(
+                                {"detail": "Что то не так"},
+                                status=status.HTTP_400_BAD_REQUEST
                             )
-                            if question is None:
-                                return Response(
-                                    {"detail": "Что то не так"},
-                                    status=status.HTTP_400_BAD_REQUEST
-                                )
-                            questions_texts = ""
-                        elif line == 'end' or line == 'End':
-                            break
-                        else:
-                            questions_texts += line.strip() + "new_line"
-                        line = f.readline().decode().strip()
-            except Exception as e:
-                return Response(
-                    {"detail": str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                        questions_texts = ""
+                    elif line == 'end' or line == 'End':
+                        break
+                    else:
+                        questions_texts += line.strip() + "new_line"
+                    line = f.readline().decode().strip()
+            # except Exception as e:
+            #     return Response(
+            #         {"detail": str(e)},
+            #         status=status.HTTP_400_BAD_REQUEST
+            #     )
         return Response({"detail": "created"}, status=status.HTTP_201_CREATED)
 
 
