@@ -40,7 +40,7 @@ class GetQuizTestQuestion(generics.RetrieveAPIView):
         student_quizz = self.kwargs['student_quizz']
         question = self.filter_queryset(
             queryset=Question.objects.get_question_for_quizz(
-                self.kwargs['student_quizz'])
+                self.kwargs['student_quizz']),
         ).first()
         StudentQuizzQuestion.objects.create(
             student_quizz_id=student_quizz,

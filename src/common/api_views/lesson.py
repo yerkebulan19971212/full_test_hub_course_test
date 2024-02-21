@@ -24,26 +24,6 @@ class GetAllActiveLesson(generics.ListAPIView):
     filterset_class = filters.LessonFilter
 
     def get(self, request, *args, **kwargs):
-        # lessons = Lesson.objects.get_all_active()
-        # course_type = CourseType.objects.all().first()
-        # df = []
-        # for l in lessons:
-        #     df.append(CourseTypeLesson(
-        #         course_type=course_type,lesson=l,questions_number=35,order=0,
-        #     ))
-        # CourseTypeLesson.objects.bulk_create(df)
-        # lessons = CourseTypeLesson.objects.all()
-        # q = QuestionLevel.objects.all()
-        # dfg = []
-        # for l in lessons:
-        #     for r in q:
-        #         dfg.append(LessonQuestionLevel(
-        #             order=r.order,
-        #             is_active=True,
-        #             test_type_lesson=l,
-        #             question_level=r
-        #         ))
-        # LessonQuestionLevel.objects.bulk_create(dfg)
         return self.list(request, *args, **kwargs)
 
 

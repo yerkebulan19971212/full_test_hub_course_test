@@ -12,7 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from src.common.constant import ChoiceType
+from src.common.constant import ChoiceType, QuestionType
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.utils import get_multi_score
 from src.quizzes.models import (Question, Answer, StudentScore, StudentAnswer,
@@ -220,11 +220,12 @@ class ByLessonPassAnswerView(generics.CreateAPIView):
                         student_quizz_id=student_quizz_id,
                         question=question
                     ).update(status=False)
-                    StudentScore.objects.filter(
+                    StudentScore.objects.get_or_create(
                         student_quizz_id=student_quizz_id,
                         question=question,
-                        score=score
-                    ).update(status=False)
+                        score=score,
+                        status=True
+                    )
 
             except Exception as e:
                 print(e)
@@ -252,6 +253,13 @@ class ByLessonFinishView(views.APIView):
             aggregate(sum_score=Coalesce(Sum('score'), 0))
         quantity_question = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz).count()
+        ans_quantity_question = StudentScore.objects.filter(
+            status=True,
+            student_quizz=student_quizz,
+            score__gt=0
+        ).values('question').annotate(
+            count=Count('question')
+        ).count()
         question_full_score = StudentQuizzQuestion.objects.filter(
             student_quizz=student_quizz,
         ).distinct().aggregate(sum_score=Coalesce(
@@ -263,7 +271,7 @@ class ByLessonFinishView(views.APIView):
                 student_quizz=student_quizz,
                 lesson=student_quizz.lesson,
                 score=score,
-                unattem=quantity_question - score,
+                unattem=quantity_question - ans_quantity_question,
                 number_of_score=question_full_score,
                 number_of_question=quantity_question,
                 accuracy=100 * score / question_full_score))
@@ -397,12 +405,14 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
     def get(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('pk')
         questions = Question.objects.filter(
-            student_quizz_questions__student_quizz_id=student_quizz_id
+            student_quizz_questions__student_quizz_id=student_quizz_id,
         )
         score = StudentScore.objects.filter(student_quizz_id=student_quizz_id)
 
         choice_questions = questions.filter(
-            lesson_question_level__question_level__choice=ChoiceType.CHOICE
+            question_type=QuestionType.DEFAULT,
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE,
+            parent__isnull=True
         )
         choice_score = score.filter(
             question_id__in=[q.id for q in choice_questions]
@@ -414,6 +424,7 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
         ).get("sum_score")
 
         multi_choice_questions = questions.filter(
+            question_type=QuestionType.DEFAULT,
             lesson_question_level__question_level__choice=ChoiceType.MULTI_CHOICE
         )
         multi_choice = multi_choice_questions.aggregate(sum_score=Coalesce(
@@ -426,13 +437,28 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
         ).get("sum_score")
 
         common_question = questions.filter(
-            common_question__isnull=False
+            question_type=QuestionType.DEFAULT,
+            common_question__isnull=False,
+            parent__isnull=True
         )
         common = common_question.aggregate(sum_score=Coalesce(
             Sum('lesson_question_level__question_level__point'), 0)
         ).get("sum_score")
         common_score = score.filter(
             question_id__in=[q.id for q in common_question]
+        ).aggregate(sum_score=Coalesce(
+            Sum('score'), 0)
+        ).get("sum_score")
+
+        match_choice_questions = questions.filter(
+            question_type=QuestionType.SELECT,
+            parent__isnull=True
+        )
+        match_choice = match_choice_questions.aggregate(sum_score=Coalesce(
+            Sum('lesson_question_level__question_level__point'), 0)
+        ).get("sum_score")
+        match_choice_score = score.filter(
+            question_id__in=[q.id for q in match_choice_questions]
         ).aggregate(sum_score=Coalesce(
             Sum('score'), 0)
         ).get("sum_score")
@@ -443,6 +469,8 @@ class ByLessonQuestionByTypeProgressView(views.APIView):
             "common_score": common_score,
             "multi_choice": multi_choice,
             "multi_choice_score": multi_choice_score,
+            "match_choice": match_choice,
+            "match_choice_score": match_choice_score,
         })
 
 

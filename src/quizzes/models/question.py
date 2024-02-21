@@ -6,7 +6,7 @@ from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
 from src.common.constant import ChoiceType, QuestionType
-from src.common.models import CourseTypeQuizz, CourseTypeLesson
+from src.common.models import CourseTypeQuizz, CourseTypeLesson, Packet
 from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
 
@@ -89,20 +89,16 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         )
 
     def get_questions_by_lesson(
-            self, lang: str, lesson: int, course_type: str):
-        question_number = 0
-        course_types = CourseTypeLesson.objects.filter(
-            lesson=lesson,
-            course_type__name_code=course_type
-        )
-        if course_types:
-            question_number = course_types.first().questions_number
-        return self.filter(
-            variant__language=lang,
-            lesson_question_level__test_type_lesson__lesson_id=lesson,
-            lesson_question_level__question_level__choice=ChoiceType.CHOICE,
-            question_type=QuestionType.DEFAULT,
-        )[:question_number]
+            self, lang: str, lesson, user):
+        packet = Packet.objects.filter(name_code='subject').first()
+        if lesson.name_code == 'reading_literacy':
+            return self.get_reading_literacy_full_test_v2(lang=lang, packet=packet, user=user)
+        elif lesson.name_code == 'history_of_kazakhstan':
+            return self.get_history_full_test_v2(lang=lang, packet=packet, user=user)
+        elif lesson.name_code == 'mathematical_literacy':
+            return self.get_mat_full_test_v2(lang=lang, packet=packet, user=user)
+        else:
+            return self.get_full_test_v2(lang=lang, lesson=lesson, packet=packet, user=user)
 
     def get_questions_with_correct_answer(self):
         queryset = quizzes_models.Answer.objects.filter(correct=True)
@@ -115,6 +111,8 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             Prefetch('answers', queryset=answer_queryset)
         ).filter(
             lesson_question_level__question_level__choice=ChoiceType.CHOICE,
+            question_type=QuestionType.DEFAULT,
+            common_question__isnull=True,
             variant__language=student_quizz.language,
             lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
         ).annotate(

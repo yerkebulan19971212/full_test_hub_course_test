@@ -80,6 +80,7 @@ class PacketAdmin(admin.ModelAdmin):
         'quizz_type',
         'days',
         'price',
+        'img',
         'packet_type',
         'quantity',
         'is_active',

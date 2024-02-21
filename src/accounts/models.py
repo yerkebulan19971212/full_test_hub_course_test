@@ -1,18 +1,8 @@
-import hashlib
-import os
-
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.core.mail import EmailMultiAlternatives, send_mail
-from django.core.validators import FileExtensionValidator, MinLengthValidator
 from django.db import models
 
 from src.common import abstract_models
 from src.common.constant import TestLang
-
-
-# from base.constant import TestLang
-# from base.service import validate_mb_image, validate_size_image
 
 
 class Role(
@@ -179,111 +169,18 @@ class TokenHistory(abstract_models.UUID, abstract_models.TimeStampedModel):
     token = models.CharField(max_length=255)
 
 
-# class EmailOTP(TimeStampedModel):
-#     email = models.EmailField(max_length=128)
-#     otp = models.CharField(max_length=40, editable=False)
-#     forgot = models.BooleanField(default=False)
-#     timestamp = models.DateTimeField(auto_now_add=True, editable=False)
-#     attempts = models.IntegerField(default=0)
-#     used = models.BooleanField(default=False)
-#
-#     class Meta:
-#         verbose_name = "Email OTP Token"
-#         verbose_name_plural = "Email OTP Tokens"
-#         db_table = 'accounts\".\"email_otp'
-#
-#     def __str__(self):
-#         return "{} - {}".format(self.email, self.otp)
-#
-#     @classmethod
-#     def create_otp_for_email(cls, email, forgot=False):
-#         otp = cls.generate_otp(
-#             length=getattr(settings, 'EMAIL_LOGIN_OTP_LENGTH', 6))
-#         email_otp = EmailOTP.objects.create(email=email,
-#                                             otp=otp,
-#                                             forgot=forgot)
-#         if forgot:
-#             text = ": " + str(otp) + "\n" + "."
-#         print(email, otp)
-#         print(otp, email)
-#         return email_otp
-#
-#     @classmethod
-#     def generate_otp(cls, length=6):
-#         m = hashlib.sha256()
-#         m.update(getattr(settings, 'SECRET_KEY', None).encode('utf-8'))
-#         m.update(os.urandom(16))
-#         otp = str(int(m.hexdigest(), 16))[-length:]
-#         return otp
-#
-#
-# class PhoneOTP(TimeStampedModel):
-#     phone = models.CharField(max_length=11,
-#                              unique=True,
-#                              validators=[
-#                                  MinLengthValidator(
-#                                      limit_value=11
-#                                  )
-#                              ],
-#                              blank=True
-#                              )
-#     otp = models.CharField(max_length=40, editable=False)
-#     forgot = models.BooleanField(default=False)
-#     timestamp = models.DateTimeField(auto_now_add=True, editable=False)
-#     attempts = models.IntegerField(default=0)
-#     used = models.BooleanField(default=False)
-#
-#     class Meta:
-#         verbose_name = "Phone OTP Token"
-#         verbose_name_plural = "Phone OTP Tokens"
-#         db_table = 'accounts\".\"phone_otp'
-#
-#     def __str__(self):
-#         return "{} - {}".format(self.phone, self.otp)
-#
-#     @classmethod
-#     def create_otp_for_phone(cls, phone, forgot=False):
-#         otp = cls.generate_otp(length=getattr(settings,
-#                                               'EMAIL_LOGIN_OTP_LENGTH', 6))
-#         phone_otp = EmailOTP.objects.create(phone=phone,
-#                                             otp=otp,
-#                                             forgot=forgot)
-#         if forgot:
-#             text = ": " + str(otp) + "\n" + "."
-#         print(otp, phone)
-#         return phone_otp
-#
-#     @classmethod
-#     def generate_otp(cls, length=6):
-#         m = hashlib.sha256()
-#         m.update(getattr(settings, 'SECRET_KEY', None).encode('utf-8'))
-#         m.update(os.urandom(16))
-#         otp = str(int(m.hexdigest(), 16))[-length:]
-#         return otp
-#
-#
-# class UserTestType(TimeStampedModel):
-#     user = models.ForeignKey(
-#         'accounts.User',
-#         related_name='user_test_types',
-#         on_delete=models.CASCADE)
-#     test_type = models.ForeignKey(
-#         'quizzes.TestType',
-#         related_name='user_test_types',
-#         on_delete=models.CASCADE)
-#
-#     class Meta:
-#         db_table = 'accounts\".\"user_test_type'
-
 class BalanceHistory(abstract_models.UUID, abstract_models.TimeStampedModel):
     student = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='student_balance_histories'
+        related_name='student_balance_histories',
+        null=True, blank=True
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='admin_balance_histories'
+        related_name='admin_balance_histories',
+        null=True, blank=True
     )
     balance = models.IntegerField()
+    data = models.TextField(null=True, blank=True)
