@@ -82,6 +82,7 @@ class PacketAdmin(admin.ModelAdmin):
         'price',
         'packet_type',
         'quantity',
+        'is_active',
         'created',
         'modified'
     )

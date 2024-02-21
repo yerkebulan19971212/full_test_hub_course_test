@@ -20,7 +20,7 @@ quizz_types_view = GetAllActiveQuizzTypes.as_view()
 
 class PacketListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Packet.objects.all()
+    queryset = Packet.objects.filter(is_active=True)
     serializer_class = serializers.PacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.PacketFilter
