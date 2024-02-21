@@ -1,10 +1,21 @@
 from django.contrib import admin
 
-from .models import Role, User, TokenVersion, TokenHistory
+from .models import Role, User, TokenVersion, TokenHistory, BalanceHistory
 
 admin.site.register([
-    Role, TokenVersion, TokenHistory
+    Role, TokenVersion, TokenHistory, BalanceHistory
 ])
+
+
+@admin.register(BalanceHistory)
+class BalanceHistoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'balance',
+        'student',
+        'id',
+        'created',
+    )
+    search_fields = ['student__email', 'student__phone', 'student__username']
 
 
 @admin.register(User)
