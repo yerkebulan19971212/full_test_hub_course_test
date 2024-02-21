@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Role, User, TokenVersion, TokenHistory, BalanceHistory
 
 admin.site.register([
-    Role, TokenVersion, TokenHistory, BalanceHistory
+    Role, TokenVersion, TokenHistory
 ])
 
 
