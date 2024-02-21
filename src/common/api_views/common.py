@@ -33,7 +33,7 @@ class PacketListView(generics.ListAPIView):
                 bought_packets__user=self.request.user,
                 bought_packets__status=True,
             )
-            return queryset.union(p)
+            return queryset.union(p).order_by('order')
         return queryset.order_by('order')
 
 
