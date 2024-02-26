@@ -43,6 +43,7 @@ class FullQuizzSerializer(serializers.ModelSerializer):
 
         if quizz_type == 'rating':
             packet = Packet.objects.filter(name_code='quizz_type').first()
+            quizz_type = 1
         bought_packet = BoughtPacket.objects.filter(
             user=user,
             packet=packet,
@@ -50,17 +51,13 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         ).first()
         if not bought_packet:
             raise UnexpectedError()
-        # quizz_type = validated_data.pop("quizz_type")
-
         lesson_pair = LessonPair.objects.filter(
             Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
             Q(lesson_1=lessons[-1], lesson_2=lessons[0])
         ).first()
-        # c = CourseTypeQuizz.objects.filter(
-        #     quizz_type__name_code=quizz_type).first()
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = packet.quizz_type
+        validated_data["quizz_type"] = CourseTypeQuizz.objects.get(quizz_type__name_code=quizz_type)
         validated_data["course_type"] = CourseType.objects.get_ent()
         validated_data["lesson_pair"] = lesson_pair
         validated_data[
