@@ -52,5 +52,22 @@ class MyProgressSerializer(serializers.ModelSerializer):
         fields = (
             'date',
             'score_sum',
+        )
 
+
+class MyLessonProgressSerializer(serializers.ModelSerializer):
+    name_kz = serializers.CharField(source='lesson__name_kz')
+    name_ru = serializers.CharField(source='lesson__name_ru')
+    name_en = serializers.CharField(source='lesson__name_en')
+    main = serializers.BooleanField(source='lesson__course_type_lessons__main')
+    score_sum = serializers.IntegerField()
+
+    class Meta:
+        model = TestFullScore
+        fields = (
+            'main',
+            'name_kz',
+            'name_ru',
+            'name_en',
+            'score_sum',
         )

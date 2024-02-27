@@ -607,7 +607,6 @@ class MyProgressView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = TestFullScore.objects.all().filter()
     serializer_class = serializers.MyProgressSerializer
-    filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
         return super().get_queryset().filter(
@@ -626,7 +625,7 @@ class MyProgressView(generics.ListAPIView):
         average_score = 0
         score_sum = sum(entry["score_sum"] for entry in data)
         if score_sum > 0:
-            average_score = score_sum / len(data)
+            average_score = score_sum // len(data)
         return Response({
             "tests": data,
             "average_score": average_score
@@ -634,3 +633,40 @@ class MyProgressView(generics.ListAPIView):
 
 
 my_progress_view = MyProgressView.as_view()
+
+
+class MyLessonProgressView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = TestFullScore.objects.all()
+    serializer_class = serializers.MyLessonProgressSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            student_quizz__user=self.request.user,
+            student_quizz__quizz_type__quizz_type__name_code='full_test',
+            student_quizz__status=QuizzStatus.PASSED,
+        ).values(
+            'lesson__course_type_lessons__main',
+            'lesson__name_kz',
+            'lesson__name_ru',
+            'lesson__name_en',
+        ).annotate(
+            score_sum=Sum('score')
+        ).filter(score_sum__gte=1).distinct()[:10]
+
+    def get(self, request, *args, **kwargs):
+        data = self.list(request, *args, **kwargs).data
+        main = []
+        not_main = []
+        for d in data:
+            if d.get('main'):
+                main.append(d)
+            else:
+                not_main.append(d)
+        return Response({
+            "main": main,
+            "not_main": not_main,
+        })
+
+
+my_lesson_progress_view = MyLessonProgressView.as_view()

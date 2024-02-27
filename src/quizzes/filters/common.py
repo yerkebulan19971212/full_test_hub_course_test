@@ -26,3 +26,16 @@ class RatingFilterSerializer(serializers.Serializer):
     school_id = serializers.IntegerField(required=False)
     lesson_pair_id = serializers.IntegerField(required=False)
     rating_period_id = serializers.IntegerField(required=False)
+
+
+class MyLessonProgressFilter(django_filters.FilterSet):
+    main = filters.BooleanFilter(
+        field_name="lesson__course_type_lessons__main",
+        required=True
+    )
+
+    class Meta:
+        model = models.TestFullScore
+        fields = (
+            'main',
+        )
