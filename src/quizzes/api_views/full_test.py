@@ -621,14 +621,20 @@ class MyProgressView(generics.ListAPIView):
         ).order_by('-student_quizz')[:10]
 
     def get(self, request, *args, **kwargs):
-        data = self.list(request, *args, **kwargs).data
         average_score = 0
-        score_sum = sum(entry["score_sum"] for entry in data)
-        if score_sum > 0:
-            average_score = score_sum // len(data)
+        min_score = 0
+        max_score = 0
+        data = self.list(request, *args, **kwargs).data
+        score_values = [d['score_sum'] for d in data]
+        if score_values:
+            average_score = sum(score_values) / len(score_values)
+            min_score = min(score_values)
+            max_score = max(score_values)
         return Response({
             "tests": data,
-            "average_score": average_score
+            "average_score": average_score,
+            "min_score": min_score,
+            "max_score": max_score,
         })
 
 
@@ -650,6 +656,7 @@ class MyLessonProgressView(generics.ListAPIView):
             'lesson__name_kz',
             'lesson__name_ru',
             'lesson__name_en',
+            'lesson__icon',
         ).annotate(
             score_sum=Sum('score')
         ).filter(score_sum__gte=1).distinct()[:10]

@@ -59,6 +59,7 @@ class MyLessonProgressSerializer(serializers.ModelSerializer):
     name_kz = serializers.CharField(source='lesson__name_kz')
     name_ru = serializers.CharField(source='lesson__name_ru')
     name_en = serializers.CharField(source='lesson__name_en')
+    icon = serializers.CharField(source='lesson__icon')
     main = serializers.BooleanField(source='lesson__course_type_lessons__main')
     score_sum = serializers.IntegerField()
 
@@ -69,5 +70,6 @@ class MyLessonProgressSerializer(serializers.ModelSerializer):
             'name_kz',
             'name_ru',
             'name_en',
+            'icon',
             'score_sum',
         )
