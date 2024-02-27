@@ -601,3 +601,36 @@ class ResultRatingView(generics.ListAPIView):
 
 
 result_rating = ResultRatingView.as_view()
+
+
+class MyProgressView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = TestFullScore.objects.all().filter()
+    serializer_class = serializers.MyProgressSerializer
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            student_quizz__user=self.request.user,
+            student_quizz__quizz_type__quizz_type__name_code='full_test',
+            student_quizz__status=QuizzStatus.PASSED,
+        ).values(
+            'student_quizz',
+            'student_quizz__created'
+        ).annotate(
+            score_sum=Sum('score')
+        ).order_by('-student_quizz')[:10]
+
+    def get(self, request, *args, **kwargs):
+        data = self.list(request, *args, **kwargs).data
+        average_score = 0
+        score_sum = sum(entry["score_sum"] for entry in data)
+        if score_sum > 0:
+            average_score = score_sum / len(data)
+        return Response({
+            "tests": data,
+            "average_score": average_score
+        })
+
+
+my_progress_view = MyProgressView.as_view()

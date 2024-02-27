@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
 from src.quizzes.models import Question, CommonQuestion, StudentQuizz, \
-    StudentQuizzFile
+    StudentQuizzFile, TestFullScore
 
 
 class MyTestSerializer(serializers.ModelSerializer):
@@ -41,3 +41,16 @@ class StudentQuizzFileSerializer(serializers.ModelSerializer):
 
     def get_size(self, obj):
         return obj.file.size / 1024 / 1024
+
+
+class MyProgressSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(source='student_quizz__created')
+    score_sum = serializers.IntegerField()
+
+    class Meta:
+        model = TestFullScore
+        fields = (
+            'date',
+            'score_sum',
+
+        )
