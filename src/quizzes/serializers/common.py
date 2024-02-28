@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 
 from src.quizzes.serializers import AnswerSerializer
@@ -59,7 +60,7 @@ class MyLessonProgressSerializer(serializers.ModelSerializer):
     name_kz = serializers.CharField(source='lesson__name_kz')
     name_ru = serializers.CharField(source='lesson__name_ru')
     name_en = serializers.CharField(source='lesson__name_en')
-    icon = serializers.CharField(source='lesson__icon')
+    icon = serializers.SerializerMethodField()
     main = serializers.BooleanField(source='lesson__course_type_lessons__main')
     score_sum = serializers.IntegerField()
 
@@ -73,3 +74,8 @@ class MyLessonProgressSerializer(serializers.ModelSerializer):
             'icon',
             'score_sum',
         )
+
+    def get_icon(self, obj):
+        if obj.get('lesson__icon'):  # Check if icon exists
+            return "/".join([settings.MEDIA_ROOT, 'media', obj.get('lesson__icon')])
+        return None
