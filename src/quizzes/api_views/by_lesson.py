@@ -25,9 +25,6 @@ class NewByLessonQuiz(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.ByLessonQuizzSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
     @swagger_auto_schema(tags=["by-lesson"])
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)

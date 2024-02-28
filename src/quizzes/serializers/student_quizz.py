@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from src.common import abstract_serializer
 from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
-    CourseTypeQuizz
+    CourseTypeQuizz, BoughtPacket
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore
@@ -15,18 +15,23 @@ from src.quizzes.models.student_quizz import StudentQuizzQuestion
 
 
 class ByLessonQuizzSerializer(serializers.ModelSerializer):
+    quiz_type = serializers.CharField(write_only=True)
+
     class Meta:
         model = StudentQuizz
         fields = (
             'id',
             'language',
             'lesson',
-            'quizz_type'
+            'quiz_type'
         )
 
     def create(self, validated_data):
         language = validated_data.get("language")
         lesson = validated_data.get("lesson")
+        packet = validated_data.pop("quiz_type", None)
+        user = self.context["request"].user
+        validated_data['user'] = user
         validated_data["quizz_start_time"] = datetime.datetime.now()
         validated_data["quizz_type"] = CourseTypeQuizz.objects.filter(
             quizz_type__name_code='by_lesson').first()
@@ -43,5 +48,17 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
             lesson=lesson,
             student_quizz=student_quizz
         ) for q in questions])
+        if packet is not None:
+            bought_packet = BoughtPacket.objects.filter(
+                user=user,
+                packet=packet,
+                status=True
+            ).first()
+            if bought_packet.remainder == 1:
+                bought_packet.status = False
+            bought_packet.remainder -= 1
+            bought_packet.save()
+            student_quizz.bought_packet = bought_packet
+            student_quizz.save()
 
         return student_quizz
