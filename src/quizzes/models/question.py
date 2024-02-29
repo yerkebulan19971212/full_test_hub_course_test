@@ -244,6 +244,12 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 )
             ).order_by('user_question_count')
         )
+        if len(questions) >= 20:
+            questions = questions[:len(questions) // 2]
+            for i in range(random.randint(1, 5)):
+                random.shuffle(questions)
+        else:
+            random.shuffle(questions)
         return questions[:10]
 
     def get_reading_literacy_full_test_v2(self, lang: str, packet, user):
@@ -255,13 +261,14 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 lesson='reading_literacy',
                 user=user
             )
-            questions = self.filter(common_question=common_question)
             question_index = 2
             if q.name_code == 'B':
                 question_index = 3
             elif q.name_code == 'C':
                 question_index = 5
-            questions_list += [q for q in questions[:question_index]]
+            questions = list(self.filter(common_question=common_question))[:question_index]
+            random.shuffle(questions)
+            questions_list += questions
         return questions_list
 
     def get_history_full_test_v2(self, lang: str, packet, user):
@@ -290,6 +297,13 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     filter=Q(student_quizz_questions__student_quizz__user=user)
                 )
             ).order_by('user_question_count')
+            questions = list(questions)
+            if len(questions) >= 10:
+                questions = questions[:len(questions) // 2]
+                for i in range(random.randint(1, 5)):
+                    random.shuffle(questions)
+            else:
+                random.shuffle(questions)
             if q.name_code == 'C' or q.name_code == 'D':
                 common_question = CommonQuestion.objects.get_common_question(
                     lang=lang, q=q,
@@ -297,8 +311,9 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     lesson='history_of_kazakhstan',
                     user=user
                 )
-                questions = self.filter(common_question=common_question)
-            questions_list += [q for q in questions[:5]]
+                questions = list(self.filter(common_question=common_question))
+                random.shuffle(questions)
+            questions_list += questions[:5]
         return questions_list
 
     def get_full_test_v2(self, lang: str, lesson, packet, user):
@@ -311,10 +326,11 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     lesson=lesson.name_code,
                     user=user
                 )
-                questions = self.filter(common_question=common_question)
-                questions_list += [q for q in questions[:5]]
+                questions = list(self.filter(common_question=common_question))
+                random.shuffle(questions)
+                questions_list += questions
                 continue
-            questions = self.filter(
+            questions = list(self.filter(
                 variant__is_active=True,
                 variant__language=lang,
                 lesson_question_level__question_level=q,
@@ -326,8 +342,14 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     'student_quizz_questions',
                     filter=Q(student_quizz_questions__student_quizz__user=user)
                 )
-            ).order_by('user_question_count')
-            questions_list += [q for q in questions[:5]]
+            ).order_by('user_question_count'))
+            if len(questions) >= 10:
+                questions = questions[:len(questions) // 2]
+                for i in range(random.randint(1, 5)):
+                    random.shuffle(questions)
+            else:
+                random.shuffle(questions)
+            questions_list += questions[:5]
         return questions_list
 
 
