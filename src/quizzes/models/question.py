@@ -43,9 +43,10 @@ class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
         #     ).order_by('user_question_count').query)
         # print('=================')
         # print(lesson)
-        random.shuffle(common_questions)
-        random.shuffle(common_questions)
-        random.shuffle(common_questions)
+        if len(common_questions) >= 2:
+            common_questions = common_questions[:len(common_questions) // 2]
+            for i in range(random.randint(1, 5)):
+                random.shuffle(common_questions)
         if len(common_questions) == 0:
             return None
         return common_questions[0]
