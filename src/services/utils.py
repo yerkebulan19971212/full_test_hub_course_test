@@ -54,6 +54,7 @@ def finish_full_test(student_quizz_id: int):
                 index += 1
                 question_score = StudentScore.objects.filter(
                     question__student_quizz_questions__lesson=lesson,
+                    question__student_quizz_questions__student_quizz=student_quizz,
                     student_quizz=student_quizz,
                     status=True
                 ).distinct().aggregate(sum_score=Coalesce(Sum('score'), 0))

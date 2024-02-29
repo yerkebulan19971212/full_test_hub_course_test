@@ -29,6 +29,7 @@ from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, \
     StudentQuizz, StudentQuizzFile
 from src.quizzes.serializers import FullQuizQuestionQuerySerializer
+from src.services.utils import finish_full_test
 
 
 class MyTest(generics.ListAPIView):
@@ -113,11 +114,13 @@ class FullQuizLessonListView(generics.ListAPIView):
         else:
             student_test.status = "CONTINUE"
             student_test.save()
-        current_time = timezone.now()
-        duration = (student_test.quizz_start_time + student_test.quizz_duration) - current_time
+
         if not student_test.quizz_start_time:
             student_test.quizz_start_time = datetime.now()
+            student_test.save()
             # difference_duration = timedelta(seconds=0)
+        current_time = timezone.now()
+        duration = (student_test.quizz_start_time + student_test.quizz_duration) - current_time
         if duration.total_seconds() <= 0:
             student_test.quizz_duration = timedelta(seconds=0)
             student_test.save()
@@ -281,62 +284,8 @@ class EntFinishView(views.APIView):
     def post(self, request, student_quizz):
         student_quizz = get_object_or_404(StudentQuizz, pk=student_quizz)
         if student_quizz.status in ["PASSED"]:
-            return PassedTestError()
-
-        if student_quizz.lesson_pair:
-            test_type_lessons = CourseTypeLesson.objects.filter(
-                main=True, course_type__name_code='ent'
-            )
-
-            lesson_pair = student_quizz.lesson_pair
-            if lesson_pair.lesson_1.name_code != 'creative_exam':
-                lessons = [test_type_lesson.lesson for test_type_lesson in
-                           test_type_lessons]
-                lessons.append(lesson_pair.lesson_1)
-                lessons.append(lesson_pair.lesson_2)
-            else:
-                test_type_lessons = test_type_lessons.exclude(lesson__name_code='mathematical_literacy')
-                lessons = [test_type_lesson.lesson for test_type_lesson in
-                           test_type_lessons]
-        else:
-            lessons = [student_quizz.lesson]
-        index = 0
-        test_full_score = []
-        for lesson in lessons:
-            index += 1
-            question_score = StudentScore.objects.filter(
-                question__student_quizz_questions__lesson=lesson,
-                student_quizz=student_quizz,
-                status=True
-            ).distinct().aggregate(sum_score=Coalesce(Sum('score'), 0))
-            quantity_question = StudentQuizzQuestion.objects.filter(
-                student_quizz=student_quizz,
-                lesson=lesson
-            ).count()
-            question_full_score = StudentQuizzQuestion.objects.filter(
-                student_quizz=student_quizz,
-                question__parent__isnull=True,
-                lesson=lesson
-            ).distinct().aggregate(
-                sum_score=Coalesce(
-                    Sum('question__lesson_question_level__question_level__point'),
-                    0)
-            ).get("sum_score")
-            score = question_score.get('sum_score', 0)
-            test_full_score.append(
-                TestFullScore(
-                    student_quizz=student_quizz,
-                    lesson=lesson,
-                    score=score,
-                    unattem=quantity_question - score,
-                    number_of_score=question_full_score,
-                    number_of_question=quantity_question,
-                    accuracy=100 * score / question_full_score
-                ))
-        TestFullScore.objects.bulk_create(test_full_score)
-        student_quizz.status = "PASSED"
-        student_quizz.quizz_end_time = datetime.now()
-        student_quizz.save()
+            raise PassedTestError()
+        finish_full_test(student_quizz.id)
         return Response({"detail": "success"}, status=status.HTTP_201_CREATED)
 
 
@@ -368,13 +317,15 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
                                 question__parent_id=OuterRef('pk'))
                         ))),
                 answered=Exists(
-                    StudentAnswer.objects.filter(Q(
-                        student_quizz_id=student_quizz_id,
-                        status=True) & Q(
-                        Q(question_id=OuterRef('pk')) | Q(
-                            question__parent_id=OuterRef('pk'))
-                    )
-                                                 ))
+                    StudentAnswer.objects.filter(
+                        Q(
+                            student_quizz_id=student_quizz_id,
+                            status=True
+                        ) & Q(
+                            Q(question_id=OuterRef('pk'))
+                            | Q(question__parent_id=OuterRef('pk'))
+                        )
+                    ))
             ).order_by('student_quizz_questions__order')
             d['questions'] = []
             for q in questions:
@@ -395,24 +346,6 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
 
 
 get_full_test_full_score_result_view = GetTestFullScoreResultListView.as_view()
-
-
-# class GetResultListView(generics.ListAPIView):
-#     permission_classes = [permissions.IsAuthenticated]
-#     serializer_class = serializers.ResultScoreSerializer
-#     queryset = Question.objects.all().annotate(
-#         sum_score=Sum('question_score__score',
-#                       filter=Q(question_score__status=True))
-#     ).order_by('student_quizz_questions__order')
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_class = filters.FullQuizzQuestionFilter
-#
-#     @swagger_auto_schema(tags=["full-test"])
-#     def get(self, request, *args, **kwargs):
-#         return super().get(request, *args, **kwargs)
-#
-#
-# get_full_test_result_view = GetResultListView.as_view()
 
 
 class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
@@ -496,8 +429,6 @@ class ResultRatingView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        print(self.request.query_params)
-        print("self.request.query_params")
         q = self.request.query_params.get("q")
         school_id = self.request.query_params.get("school_id")
         lesson_pair_id = self.request.query_params.get("lesson_pair_id")
