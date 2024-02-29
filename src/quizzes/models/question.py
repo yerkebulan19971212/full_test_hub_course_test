@@ -28,6 +28,21 @@ class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
                 )
             ).order_by('user_question_count')
         )
+        # print(self.filter(
+        #         questions__variant__is_active=True,
+        #         questions__variant__language=lang,
+        #         questions__lesson_question_level__question_level=q,
+        #         questions__variant__variant_packets__packet=packet,
+        #         questions__lesson_question_level__test_type_lesson__lesson__name_code=lesson,
+        #         questions__parent__isnull=True
+        #     ).annotate(
+        #         user_question_count=Count(
+        #             'questions__student_quizz_questions',
+        #             filter=Q(questions__student_quizz_questions__student_quizz__user=user)
+        #         )
+        #     ).order_by('user_question_count').query)
+        # print('=================')
+        # print(lesson)
         random.shuffle(common_questions)
         random.shuffle(common_questions)
         random.shuffle(common_questions)
