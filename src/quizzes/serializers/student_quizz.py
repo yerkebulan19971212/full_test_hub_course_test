@@ -41,8 +41,11 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
         questions = Question.objects.get_questions_by_lesson(
             lang=language,
             lesson=lesson,
-            user=self.context["request"].user
+            user=self.context["request"].user,
+            packet=packet
         )
+        print(packet)
+        print("packet")
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             question=q,
             lesson=lesson,
