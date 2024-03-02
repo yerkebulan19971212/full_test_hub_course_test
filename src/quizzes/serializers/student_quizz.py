@@ -44,8 +44,6 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
             user=self.context["request"].user,
             packet=packet
         )
-        print(packet)
-        print("packet")
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             question=q,
             lesson=lesson,
@@ -57,9 +55,6 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
                 packet=packet,
                 status=True
             ).first()
-            print(bought_packet)
-            print("bought_packet")
-            print("bought_packet========")
             if bought_packet.remainder == 1:
                 bought_packet.status = False
             bought_packet.remainder -= 1

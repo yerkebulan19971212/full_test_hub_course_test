@@ -301,7 +301,12 @@ class ByLessonFinishInfoListView(generics.RetrieveAPIView):
         total_score = TestFullScore.objects.filter(
             student_quizz_id=student_quizz_id
         ).aggregate(total_score=Coalesce(Sum('score'), 0)).get("total_score")
-        total_bal = 140
+        total_bal = Question.objects.filter(
+            parent__isnull=True,
+            student_quizz_questions__student_quizz_id=student_quizz_id,
+        ).aggregate(
+            sum_point=Coalesce(Sum('lesson_question_level__question_level__point'), 0)
+        ).get('sum_point')
         answered_questions_parent_true = StudentAnswer.objects.filter(
             student_quizz=student_quizz_id,
             status=True,
