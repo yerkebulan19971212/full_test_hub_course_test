@@ -91,7 +91,6 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_questions_by_lesson(
             self, lang: str, lesson, user, packet):
-        packet = Packet.objects.filter(pk=int(packet)).first()
         if lesson.name_code == 'reading_literacy':
             return self.get_reading_literacy_full_test_v2(lang=lang, packet=packet, user=user)
         elif lesson.name_code == 'history_of_kazakhstan':

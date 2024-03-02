@@ -30,7 +30,9 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
         language = validated_data.get("language")
         lesson = validated_data.get("lesson")
         packet_id = validated_data.pop("quiz_type", None)
-        packet = Packet.objects.filter(id=packet_id).first()
+        print(packet_id)
+        print("packet_id")
+        packet = Packet.objects.filter(id=int(packet_id)).first()
         validated_data[
             "quizz_duration"] = packet.quizz_type.quizz_type.quizz_duration
         user = self.context["request"].user
