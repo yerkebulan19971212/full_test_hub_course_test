@@ -387,7 +387,7 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
             student_quizz=student_quizz
         ).count()
         if answered_questions > 0:
-            correct_question_percent = 100 * quantity_question / answered_questions
+            correct_question_percent = 100 * answered_questions / quantity_question
         else:
             correct_question_percent = 0
         return Response({
