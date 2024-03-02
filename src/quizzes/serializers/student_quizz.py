@@ -62,6 +62,7 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
             bought_packet.remainder -= 1
             bought_packet.save()
             student_quizz.bought_packet = bought_packet
+            student_quizz.packet = packet
             student_quizz.save()
 
         return student_quizz
