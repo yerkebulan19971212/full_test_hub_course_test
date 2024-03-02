@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from src.common import abstract_serializer
 from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
-    CourseTypeQuizz, BoughtPacket
+    CourseTypeQuizz, BoughtPacket, Packet
 from src.common.utils import get_multi_score
 from src.quizzes.models import StudentQuizz, Question, Answer, StudentAnswer, \
     StudentScore
@@ -29,7 +29,10 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         language = validated_data.get("language")
         lesson = validated_data.get("lesson")
-        packet = validated_data.pop("quiz_type", None)
+        packet_id = validated_data.pop("quiz_type", None)
+        packet = Packet.objects.filter(id=packet_id).first()
+        validated_data[
+            "quizz_duration"] = packet.quizz_type.quizz_type.quizz_duration
         user = self.context["request"].user
         validated_data['user'] = user
         validated_data["quizz_start_time"] = datetime.datetime.now()
@@ -60,7 +63,7 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
             bought_packet.remainder -= 1
             bought_packet.save()
             student_quizz.bought_packet = bought_packet
-            student_quizz.packet_id = packet
+            student_quizz.packet = packet
             student_quizz.save()
 
         return student_quizz
