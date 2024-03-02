@@ -15,7 +15,7 @@ from googleapiclient.discovery import build
 
 from datetime import datetime
 
-from django.db.models import Sum
+from django.db.models import Sum, Q, F
 from django.db.models.functions import Coalesce
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -33,7 +33,7 @@ def finish_full_test(student_quizz_id: int):
     try:
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
         test_full_score = TestFullScore.objects.filter(student_quizz=student_quizz)
-        if not test_full_score.exists():
+        if test_full_score.exists():
             student_quizz.status = "PASSED"
             student_quizz.quizz_end_time = datetime.now()
             student_quizz.save()
@@ -53,8 +53,9 @@ def finish_full_test(student_quizz_id: int):
             for lesson in lessons:
                 index += 1
                 question_score = StudentScore.objects.filter(
+                    Q(question__student_quizz_questions__student_quizz=student_quizz)
+                    | Q(question__parent__student_quizz_questions__student_quizz=student_quizz),
                     question__student_quizz_questions__lesson=lesson,
-                    question__student_quizz_questions__student_quizz=student_quizz,
                     student_quizz=student_quizz,
                     status=True
                 ).distinct().aggregate(sum_score=Coalesce(Sum('score'), 0))

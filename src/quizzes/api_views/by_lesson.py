@@ -244,40 +244,6 @@ class ByLessonFinishView(views.APIView):
         if student_quizz.status in ["PASSED"]:
             raise PassedTestError()
         finish_full_test(student_quizz.id)
-        # student_quizz = get_object_or_404(StudentQuizz, pk=student_quizz)
-        # student_quizz.status = "PASSED"
-        # student_quizz.quizz_end_time = datetime.now()
-        # student_quizz.save()
-        # test_full_score = []
-        # question_score = StudentScore.objects.filter(
-        #     student_quizz=student_quizz
-        # ).exclude(status=False).distinct(). \
-        #     aggregate(sum_score=Coalesce(Sum('score'), 0))
-        # quantity_question = StudentQuizzQuestion.objects.filter(
-        #     student_quizz=student_quizz).count()
-        # ans_quantity_question = StudentScore.objects.filter(
-        #     status=True,
-        #     student_quizz=student_quizz,
-        #     score__gt=0
-        # ).values('question').annotate(
-        #     count=Count('question')
-        # ).count()
-        # question_full_score = StudentQuizzQuestion.objects.filter(
-        #     student_quizz=student_quizz,
-        # ).distinct().aggregate(sum_score=Coalesce(
-        #     Sum('question__lesson_question_level__question_level__point'), 0)
-        # ).get("sum_score")
-        # score = question_score.get('sum_score', 0)
-        # test_full_score.append(
-        #     TestFullScore(
-        #         student_quizz=student_quizz,
-        #         lesson=student_quizz.lesson,
-        #         score=score,
-        #         unattem=quantity_question - ans_quantity_question,
-        #         number_of_score=question_full_score,
-        #         number_of_question=quantity_question,
-        #         accuracy=100 * score / question_full_score))
-        # TestFullScore.objects.bulk_create(test_full_score)
         return Response({
             "detail": "success"
         }, status=status.HTTP_201_CREATED)
