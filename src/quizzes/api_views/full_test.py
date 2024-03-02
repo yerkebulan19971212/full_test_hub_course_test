@@ -224,57 +224,52 @@ class PassStudentAnswerView(generics.CreateAPIView):
         student_quizz_id = data.get('student_quizz')
         answers = data.get('answers')
         if answers:
-            has_question = StudentQuizzQuestion.objects.filter(
-                student_quizz_id=student_quizz_id,
-                question_id=question_id
-            )
-            if has_question.exists():
-                try:
-                    with transaction.atomic():
-                        score = 0
-                        question = Question.objects.select_related(
-                            'lesson_question_level__question_level'
-                        ).get(pk=question_id)
-                        correct_answers = question.answers.filter(correct=True)
-                        StudentAnswer.objects.filter(
+            try:
+                with transaction.atomic():
+                    score = 0
+                    question = Question.objects.select_related(
+                        'lesson_question_level__question_level'
+                    ).get(pk=question_id)
+                    correct_answers = question.answers.filter(correct=True)
+                    StudentAnswer.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question=question,
+                    ).update(status=False)
+                    StudentAnswer.objects.bulk_create([
+                        StudentAnswer(
                             student_quizz_id=student_quizz_id,
                             question=question,
-                        ).update(status=False)
-                        StudentAnswer.objects.bulk_create([
-                            StudentAnswer(
-                                student_quizz_id=student_quizz_id,
-                                question=question,
-                                answer_id=a
-                            ) for a in answers
-                        ])
-                        question_choice = question.lesson_question_level.question_level.choice
-                        if question_choice == ChoiceType.CHOICE:
-                            if correct_answers[0].id == answers[0]:
-                                score += 1
-                        else:
-                            len_correct_answers = correct_answers.count()
-                            user_answers = Answer.objects.filter(id__in=answers)
-                            len_student_answers = user_answers.count()
-                            if len_correct_answers >= len_student_answers:
-                                user_answers = list(set(user_answers))
-                                correct_answers = list(
-                                    set([ans for ans in correct_answers]))
-                                score += get_multi_score(user_answers,
-                                                         correct_answers)
-                        StudentScore.objects.filter(
-                            student_quizz_id=student_quizz_id,
-                            question=question
-                        ).update(status=False)
-                        StudentScore.objects.get_or_create(
-                            student_quizz_id=student_quizz_id,
-                            question=question,
-                            score=score,
-                            status=True
-                        )
-                except Exception as e:
-                    print(e)
-                    return Response({"detail": str(e)},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                            answer_id=a
+                        ) for a in answers
+                    ])
+                    question_choice = question.lesson_question_level.question_level.choice
+                    if question_choice == ChoiceType.CHOICE:
+                        if correct_answers[0].id == answers[0]:
+                            score += 1
+                    else:
+                        len_correct_answers = correct_answers.count()
+                        user_answers = Answer.objects.filter(id__in=answers)
+                        len_student_answers = user_answers.count()
+                        if len_correct_answers >= len_student_answers:
+                            user_answers = list(set(user_answers))
+                            correct_answers = list(
+                                set([ans for ans in correct_answers]))
+                            score += get_multi_score(user_answers,
+                                                     correct_answers)
+                    StudentScore.objects.filter(
+                        student_quizz_id=student_quizz_id,
+                        question=question
+                    ).update(status=False)
+                    StudentScore.objects.get_or_create(
+                        student_quizz_id=student_quizz_id,
+                        question=question,
+                        score=score,
+                        status=True
+                    )
+            except Exception as e:
+                print(e)
+                return Response({"detail": str(e)},
+                                status=status.HTTP_400_BAD_REQUEST)
         return Response({"detail": "Success"})
 
 
@@ -368,12 +363,21 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
             student_quizz_id=student_quizz_id
         ).aggregate(total_score=Coalesce(Sum('score'), 0)).get("total_score")
         total_bal = 140
-        answered_questions = StudentAnswer.objects.filter(
+        answered_questions_parent_true = StudentAnswer.objects.filter(
             student_quizz=student_quizz_id,
-            status=True
+            status=True,
+            question__parent__isnull=True
         ).aggregate(
             answered_questions=Coalesce(Count('question_id', distinct=True), 0)
         ).get("answered_questions")
+        answered_questions_parent_false = StudentAnswer.objects.filter(
+            student_quizz=student_quizz_id,
+            status=True,
+            question__parent__isnull=False
+        ).aggregate(
+            answered_questions=Coalesce(Count('question__parent_id', distinct=True), 0)
+        ).get("answered_questions")
+        answered_questions = answered_questions_parent_true + answered_questions_parent_false
         quantity_correct_question = StudentScore.objects.filter(
             student_quizz=student_quizz_id,
             status=True,
@@ -383,7 +387,7 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
             student_quizz=student_quizz
         ).count()
         if answered_questions > 0:
-            correct_question_percent = 100 * quantity_correct_question / answered_questions
+            correct_question_percent = 100 * quantity_question / answered_questions
         else:
             correct_question_percent = 0
         return Response({
