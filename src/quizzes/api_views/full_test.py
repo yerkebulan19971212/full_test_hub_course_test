@@ -306,15 +306,17 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
                 student_quizz_questions__lesson_id=d.get('lesson_id'),
             ).annotate(
                 answered_correct=Exists(
-                    StudentAnswer.objects.filter(
+                    StudentScore.objects.filter(
                         Q(
                             status=True,
                             student_quizz_id=student_quizz_id,
-                            answer__correct=True
+                            score__gt=0
                         ) & Q(
-                            Q(question_id=OuterRef('pk')) | Q(
-                                question__parent_id=OuterRef('pk'))
-                        ))),
+                            Q(question_id=OuterRef('pk'))
+                            | Q(question__parent_id=OuterRef('pk'))
+                        )
+                    )
+                ),
                 answered=Exists(
                     StudentAnswer.objects.filter(
                         Q(
