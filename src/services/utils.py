@@ -33,7 +33,7 @@ def finish_full_test(student_quizz_id: int):
     try:
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
         test_full_score = TestFullScore.objects.filter(student_quizz=student_quizz)
-        if test_full_score.exists():
+        if not test_full_score.exists():
             student_quizz.status = "PASSED"
             student_quizz.quizz_end_time = datetime.now()
             student_quizz.save()
