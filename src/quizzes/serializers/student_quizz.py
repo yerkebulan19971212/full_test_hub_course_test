@@ -57,12 +57,15 @@ class ByLessonQuizzSerializer(serializers.ModelSerializer):
                 packet=packet,
                 status=True
             ).first()
+            print(bought_packet)
+            print("bought_packet")
+            print("bought_packet========")
             if bought_packet.remainder == 1:
                 bought_packet.status = False
             bought_packet.remainder -= 1
             bought_packet.save()
             student_quizz.bought_packet = bought_packet
-            student_quizz.packet = packet
+            student_quizz.packet_id = packet
             student_quizz.save()
 
         return student_quizz
