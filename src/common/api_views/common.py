@@ -32,6 +32,7 @@ class PacketListView(generics.ListAPIView):
                 name_code='rating',
                 bought_packets__user=self.request.user,
                 bought_packets__status=True,
+                is_active=True,
             )
             return queryset.union(p).order_by('order')
         return queryset.order_by('order')
