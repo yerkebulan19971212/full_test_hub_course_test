@@ -195,7 +195,8 @@ class QuestionResultSerializer(serializers.ModelSerializer):
             ans_exists = StudentAnswer.objects.filter(
                 student_quizz_id=student_quizz_id,
                 question=obj,
-                answer_id=a.get('id')
+                answer_id=a.get('id'),
+                status=True
             ).first()
             if ans_exists:
                 if ans_exists.answer.correct:

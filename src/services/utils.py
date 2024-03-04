@@ -53,9 +53,12 @@ def finish_full_test(student_quizz_id: int):
             for lesson in lessons:
                 index += 1
                 question_score = StudentScore.objects.filter(
-                    Q(question__student_quizz_questions__student_quizz=student_quizz)
-                    | Q(question__parent__student_quizz_questions__student_quizz=student_quizz),
-                    question__student_quizz_questions__lesson=lesson,
+                    Q(
+                        Q(Q(question__student_quizz_questions__student_quizz=student_quizz),
+                          Q(question__student_quizz_questions__lesson=lesson)) |
+                        Q(Q(question__parent__student_quizz_questions__student_quizz=student_quizz),
+                          Q(question__parent__student_quizz_questions__lesson=lesson))
+                    ),
                     student_quizz=student_quizz,
                     status=True
                 ).distinct().aggregate(sum_score=Coalesce(Sum('score'), 0))
