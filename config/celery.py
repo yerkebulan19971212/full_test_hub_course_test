@@ -40,22 +40,23 @@ def rating_quizz_full():
         )
     else:
         rating = rating.first()
-    packet = Packet.objects.filter(name_code='rating').first()
-    users = User.objects.all()
-    for u in users:
-        bought_packet, created = BoughtPacket.objects.get_or_create(
-            user=u,
-            packet=packet,
-            rating_test=rating,
-            end_time=next_monday,
-        )
-        if created:
-            bought_packet.start_time = monday
-            bought_packet.remainder = 1
-            bought_packet.price = 0
-            bought_packet.save()
-        else:
-            print("not created")
+    packet = Packet.objects.filter(name_code='rating', is_active=True).first()
+    if packet is not None:
+        users = User.objects.all()
+        for u in users:
+            bought_packet, created = BoughtPacket.objects.get_or_create(
+                user=u,
+                packet=packet,
+                rating_test=rating,
+                end_time=next_monday,
+            )
+            if created:
+                bought_packet.start_time = monday
+                bought_packet.remainder = 1
+                bought_packet.price = 0
+                bought_packet.save()
+            else:
+                print("not created")
 
 
 @celery_app.task
