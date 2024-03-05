@@ -339,6 +339,7 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
                     "question_id": q.id,
                     "correct_answered": answered,
                 })
+        data = [d for d in data if len(d.get("questions")) > 0]
         return Response(data)
 
     def get_queryset(self):
