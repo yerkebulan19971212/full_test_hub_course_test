@@ -51,6 +51,7 @@ def finish_full_test(student_quizz_id: int):
             index = 0
             test_full_score = []
             for lesson in lessons:
+                print(lesson)
                 index += 1
                 question_score = StudentScore.objects.filter(
                     Q(
@@ -85,7 +86,7 @@ def finish_full_test(student_quizz_id: int):
                         unattem=quantity_question - score,
                         number_of_score=question_full_score,
                         number_of_question=quantity_question,
-                        accuracy=100 * score / question_full_score
+                        accuracy=100 * score / question_full_score if question_full_score > 0 else 0
                     ))
             TestFullScore.objects.bulk_create(test_full_score)
     except Exception as e:
