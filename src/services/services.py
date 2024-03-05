@@ -44,9 +44,9 @@ def get_result_lesson(student_quizz_id: int, data):
                         answered = constant.AnswerStatus.CORRECT
                     elif 0 < q.answered_correct < q.point:
                         answered = constant.AnswerStatus.HALF_CORRECT
-                d['questions'].append({
-                    "question_id": q.id,
-                    "correct_answered": answered,
-                })
-    # data = [d for d in data if len(d.get("questions")) > 0]
+            d['questions'].append({
+                "question_id": q.id,
+                "correct_answered": answered,
+            })
+    data = [d for d in data if len(d.get("questions")) > 0]
     return data
