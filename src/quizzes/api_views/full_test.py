@@ -29,7 +29,7 @@ from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, \
     StudentQuizz, StudentQuizzFile
 from src.quizzes.serializers import FullQuizQuestionQuerySerializer
-from src.services.utils import finish_full_test
+from src.services.utils import finish_full_test, get_result_st
 
 
 class MyTest(generics.ListAPIView):
@@ -360,50 +360,8 @@ class StudentQuizFinishInfoListView(generics.RetrieveAPIView):
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('pk')
-        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
-        total_score = TestFullScore.objects.filter(
-            student_quizz_id=student_quizz_id
-        ).aggregate(total_score=Coalesce(Sum('score'), 0)).get("total_score")
-        total_bal = 140
-        answered_questions_parent_true = StudentAnswer.objects.filter(
-            student_quizz=student_quizz_id,
-            status=True,
-            question__parent__isnull=True
-        ).aggregate(
-            answered_questions=Coalesce(Count('question_id', distinct=True), 0)
-        ).get("answered_questions")
-        answered_questions_parent_false = StudentAnswer.objects.filter(
-            student_quizz=student_quizz_id,
-            status=True,
-            question__parent__isnull=False
-        ).aggregate(
-            answered_questions=Coalesce(Count('question__parent_id', distinct=True), 0)
-        ).get("answered_questions")
-        answered_questions = answered_questions_parent_true + answered_questions_parent_false
-        quantity_correct_question = StudentScore.objects.filter(
-            student_quizz=student_quizz_id,
-            status=True,
-            score__gt=0
-        ).count()
-        quantity_question = StudentQuizzQuestion.objects.filter(
-            student_quizz=student_quizz
-        ).count()
-        if answered_questions > 0:
-            correct_question_percent = 100 * answered_questions / quantity_question
-        else:
-            correct_question_percent = 0
-        return Response({
-            "total_user_score": total_score,
-            "total_score": total_bal,
-            "start_time": student_quizz.quizz_start_time,
-            "end_time": student_quizz.quizz_end_time,
-            "duration": student_quizz.quizz_end_time - student_quizz.quizz_start_time,
-            "quantity_question": quantity_question,
-            "quantity_answered_questions": answered_questions,
-            "quantity_correct_question": quantity_correct_question,
-            "quantity_wrong_question": answered_questions - quantity_correct_question,
-            "correct_question_percent": correct_question_percent,
-        })
+        data = get_result_st(student_quizz_id=student_quizz_id)
+        return Response(data)
 
 
 st_result_view = StudentQuizFinishInfoListView.as_view()
