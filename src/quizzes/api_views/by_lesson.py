@@ -20,6 +20,7 @@ from src.quizzes.models import (Question, Answer, StudentScore, StudentAnswer,
                                 TestFullScore, StudentQuizzQuestion, StudentQuizz)
 from src.quizzes import serializers
 from src.quizzes.serializers import FullQuizQuestionQuerySerializer
+from src.services.services import get_result_lesson
 from src.services.utils import finish_full_test, get_result_st
 
 
@@ -293,45 +294,7 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('pk')
         data = super().get(request, *args, **kwargs).data
-        for d in data:
-            questions = Question.objects.filter(
-                student_quizz_questions__student_quizz_id=student_quizz_id,
-                student_quizz_questions__lesson_id=d.get('lesson_id'),
-            ).annotate(
-                answered_correct=Exists(
-                    StudentScore.objects.filter(
-                        Q(
-                            status=True,
-                            student_quizz_id=student_quizz_id,
-                            score__gt=0
-                        ) & Q(
-                            Q(question_id=OuterRef('pk'))
-                            | Q(question__parent_id=OuterRef('pk'))
-                        )
-                    )
-                ),
-                answered=Exists(
-                    StudentAnswer.objects.filter(
-                        Q(
-                            student_quizz_id=student_quizz_id,
-                            status=True
-                        ) & Q(
-                            Q(question_id=OuterRef('pk'))
-                            | Q(question__parent_id=OuterRef('pk'))
-                        )
-                    ))
-            ).order_by('student_quizz_questions__order')
-            d['questions'] = []
-            for q in questions:
-                answered = 'NOT_ANSWERED'
-                if q.answered_correct and q.answered:
-                    answered = 'CORRECT'
-                elif q.answered_correct is False and q.answered:
-                    answered = 'WRONG'
-                d['questions'].append({
-                    "question_id": q.id,
-                    "correct_answered": answered,
-                })
+        data = get_result_lesson(student_quizz_id, data)
         return Response(data)
 
     def get_queryset(self):

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from django.db.models import (Sum, Count, Q, Prefetch, Exists, OuterRef, Max,
                               Case, When, IntegerField, F, Value, CharField,
-                              BooleanField)
+                              BooleanField, Subquery)
 from django.db.models.functions import Concat, Coalesce
 
 from django.utils import timezone
@@ -16,6 +16,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from config.celery import finish_test
+from src.common import constant
 from src.common.constant import ChoiceType, QuizzStatus
 from src.common.exception import PassedTestError
 from src.common.models import Lesson, CourseTypeLesson
@@ -29,6 +30,7 @@ from src.quizzes import filters
 from src.quizzes.models.student_quizz import StudentQuizzQuestion, \
     StudentQuizz, StudentQuizzFile
 from src.quizzes.serializers import FullQuizQuestionQuerySerializer
+from src.services.services import get_result_lesson
 from src.services.utils import finish_full_test, get_result_st
 
 
@@ -300,46 +302,7 @@ class GetTestFullScoreResultListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         student_quizz_id = self.kwargs.get('pk')
         data = super().get(request, *args, **kwargs).data
-        for d in data:
-            questions = Question.objects.filter(
-                student_quizz_questions__student_quizz_id=student_quizz_id,
-                student_quizz_questions__lesson_id=d.get('lesson_id'),
-            ).annotate(
-                answered_correct=Exists(
-                    StudentScore.objects.filter(
-                        Q(
-                            status=True,
-                            student_quizz_id=student_quizz_id,
-                            score__gt=0
-                        ) & Q(
-                            Q(question_id=OuterRef('pk'))
-                            | Q(question__parent_id=OuterRef('pk'))
-                        )
-                    )
-                ),
-                answered=Exists(
-                    StudentAnswer.objects.filter(
-                        Q(
-                            student_quizz_id=student_quizz_id,
-                            status=True
-                        ) & Q(
-                            Q(question_id=OuterRef('pk'))
-                            | Q(question__parent_id=OuterRef('pk'))
-                        )
-                    ))
-            ).order_by('student_quizz_questions__order')
-            d['questions'] = []
-            for q in questions:
-                answered = 'NOT_ANSWERED'
-                if q.answered_correct and q.answered:
-                    answered = 'CORRECT'
-                elif q.answered_correct is False and q.answered:
-                    answered = 'WRONG'
-                d['questions'].append({
-                    "question_id": q.id,
-                    "correct_answered": answered,
-                })
-        data = [d for d in data if len(d.get("questions")) > 0]
+        data = get_result_lesson(student_quizz_id, data)
         return Response(data)
 
     def get_queryset(self):

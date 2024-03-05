@@ -151,6 +151,8 @@ class QuestionResultSerializer(serializers.ModelSerializer):
     common_question = CommonQuestionSerializer(many=False)
     choice = serializers.IntegerField(
         source='lesson_question_level.question_level.choice')
+    next = serializers.SerializerMethodField()
+    back = serializers.SerializerMethodField()
     lesson = serializers.SerializerMethodField()
     order = serializers.SerializerMethodField()
     correct_answer = serializers.SerializerMethodField()
@@ -171,6 +173,8 @@ class QuestionResultSerializer(serializers.ModelSerializer):
             'sub_questions',
             'answer_question',
             'answer_url',
+            'next',
+            'back',
         )
 
     def get_order(self, obj):
@@ -185,6 +189,36 @@ class QuestionResultSerializer(serializers.ModelSerializer):
             lesson=stq.lesson
         ).order_by('order').first()
         return stq.order - order.order + 1
+
+    def get_next(self, obj):
+        student_quizz_id = self.context.get('view').kwargs.get(
+            'student_quizz_id')
+        stq = StudentQuizzQuestion.objects.filter(
+            student_quizz_id=student_quizz_id,
+            question=obj
+        ).first()
+        next = StudentQuizzQuestion.objects.filter(
+            student_quizz_id=student_quizz_id,
+            order=(stq.order +   1)
+        ).order_by('order')
+        if next.exists():
+            return next.first().question_id
+        return None
+
+    def get_back(self, obj):
+        student_quizz_id = self.context.get('view').kwargs.get(
+            'student_quizz_id')
+        stq = StudentQuizzQuestion.objects.filter(
+            student_quizz_id=student_quizz_id,
+            question=obj
+        ).first()
+        back = StudentQuizzQuestion.objects.filter(
+            student_quizz_id=student_quizz_id,
+            order=(stq.order - 1)
+        ).order_by('order')
+        if back.exists():
+            return back.first().question_id
+        return None
 
     def get_answers(self, obj):
         answers = obj.answers.all()

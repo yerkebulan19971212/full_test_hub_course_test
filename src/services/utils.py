@@ -17,6 +17,7 @@ from datetime import datetime
 from django.db.models import Sum, Q, Count
 from django.db.models.functions import Coalesce
 
+
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 MODIFY_SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
@@ -145,6 +146,8 @@ def get_result_st(student_quizz_id: int):
         "quantity_wrong_question": answered_questions - quantity_correct_question,
         "correct_question_percent": correct_question_percent,
     }
+
+
 
 
 def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql):
