@@ -350,7 +350,11 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         index_lql = 0
         if question_count >= 0:
             index_lql = question_count // 5
-        validated_data['lesson_question_level'] = lql_list[index_lql]
+        if question_level:
+            lql = lql_list[0]
+        else:
+            lql = lql_list[index_lql]
+        validated_data['lesson_question_level'] = lql
         question = super().create(validated_data)
         sub_questions_serializer = self.fields['sub_questions']
         for s in sub_questions_data:
