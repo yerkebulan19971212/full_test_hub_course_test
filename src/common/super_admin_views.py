@@ -332,33 +332,34 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         return instance
 
     def create(self, validated_data):
+        print(validated_data)
+        print("validated_data")
         variant = validated_data.get('variant')
         lesson = validated_data.pop('lesson')
-        question_level = validated_data.pop('question_level', None)
-        lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson).order_by('id')
-        if question_level:
-            question_level_obj = LessonQuestionLevel.objects.filter(
-                test_type_lesson=lesson,
-                question_level_id=question_level
-            )
-            lql_list = [question_level_obj for i in range(len(lql_list))]
+        question_level = self.context['request'].data.get('question_level', None)
         sub_questions_data = validated_data.pop('sub_questions', [])
         question_count = Question.objects.filter(
             variant=variant,
             lesson_question_level__test_type_lesson_id=lesson
         ).count()
-        index_lql = 0
-        if question_count >= 0:
-            index_lql = question_count // 5
-        if question_level:
-            lql = lql_list[0]
+
+        if question_level is not None:
+            lql = LessonQuestionLevel.objects.filter(
+                test_type_lesson=lesson,
+                question_level_id=question_level
+            ).first()
+            validated_data['lesson_question_level'] = lql
         else:
+            lql_list = LessonQuestionLevel.objects.filter(test_type_lesson_id=lesson).order_by('id')
+            index_lql = 0
+            if question_count >= 0:
+                index_lql = question_count // 5
             lql = lql_list[index_lql]
-        validated_data['lesson_question_level'] = lql
+            validated_data['lesson_question_level'] = lql
         question = super().create(validated_data)
         sub_questions_serializer = self.fields['sub_questions']
         for s in sub_questions_data:
-            s["lesson_question_level"] = lql_list[index_lql]
+            s["lesson_question_level"] = lql
             s["lesson"] = lesson
             s["variant"] = variant
             s["parent"] = question
