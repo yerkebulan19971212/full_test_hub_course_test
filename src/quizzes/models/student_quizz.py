@@ -1,6 +1,6 @@
 from django.db import models
 from src.common import abstract_models
-from src.common.constant import QuizzType, QuizzStatus, TestLang
+from src.common.constant import QuizzStatus, TestLang
 
 
 class StudentQuizz(

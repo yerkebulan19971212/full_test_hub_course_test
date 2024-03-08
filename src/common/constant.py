@@ -85,6 +85,13 @@ class QuizzStatus(str, Choice):
     EXPIRED = 'EXPIRED'
 
 
+class AnswerStatus(str, Choice):
+    NOT_ANSWERED = 'NOT_ANSWERED'
+    CORRECT = 'CORRECT'
+    WRONG = 'WRONG'
+    HALF_CORRECT = 'HALF_CORRECT'
+
+
 class QuestionType(str, Choice):
     DEFAULT = 'DEFAULT'
     SELECT = 'SELECT'

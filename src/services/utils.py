@@ -4,7 +4,6 @@ import base64
 import email
 import os.path
 import re
-import requests
 import ast
 import os
 
@@ -15,8 +14,9 @@ from googleapiclient.discovery import build
 
 from datetime import datetime
 
-from django.db.models import Sum, Q, F
+from django.db.models import Sum, Q, Count
 from django.db.models.functions import Coalesce
+
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 MODIFY_SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
@@ -51,6 +51,7 @@ def finish_full_test(student_quizz_id: int):
             index = 0
             test_full_score = []
             for lesson in lessons:
+                print(lesson)
                 index += 1
                 question_score = StudentScore.objects.filter(
                     Q(
@@ -85,11 +86,68 @@ def finish_full_test(student_quizz_id: int):
                         unattem=quantity_question - score,
                         number_of_score=question_full_score,
                         number_of_question=quantity_question,
-                        accuracy=100 * score / question_full_score
+                        accuracy=100 * score / question_full_score if question_full_score > 0 else 0
                     ))
             TestFullScore.objects.bulk_create(test_full_score)
     except Exception as e:
         print(e)
+
+
+def get_result_st(student_quizz_id: int):
+    from src.quizzes.models import (StudentQuizzQuestion, StudentScore, StudentAnswer, StudentQuizz, TestFullScore,
+                                    Question)
+
+    student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+    total_score = TestFullScore.objects.filter(
+        student_quizz_id=student_quizz_id
+    ).aggregate(total_score=Coalesce(Sum('score'), 0)).get("total_score")
+    total_bal = Question.objects.filter(
+        parent__isnull=True,
+        student_quizz_questions__student_quizz_id=student_quizz_id,
+    ).aggregate(
+        sum_point=Coalesce(Sum('lesson_question_level__question_level__point'), 0)
+    ).get('sum_point')
+    answered_questions_parent_true = StudentAnswer.objects.filter(
+        student_quizz=student_quizz_id,
+        status=True,
+        question__parent__isnull=True
+    ).aggregate(
+        answered_questions=Coalesce(Count('question_id', distinct=True), 0)
+    ).get("answered_questions")
+    answered_questions_parent_false = StudentAnswer.objects.filter(
+        student_quizz=student_quizz_id,
+        status=True,
+        question__parent__isnull=False
+    ).aggregate(
+        answered_questions=Coalesce(Count('question__parent_id', distinct=True), 0)
+    ).get("answered_questions")
+    answered_questions = answered_questions_parent_true + answered_questions_parent_false
+    quantity_correct_question = StudentScore.objects.filter(
+        student_quizz=student_quizz_id,
+        status=True,
+        score__gt=0
+    ).count()
+    quantity_question = StudentQuizzQuestion.objects.filter(
+        student_quizz=student_quizz
+    ).count()
+    if answered_questions > 0:
+        correct_question_percent = 100 * answered_questions / quantity_question
+    else:
+        correct_question_percent = 0
+    return {
+        "total_user_score": total_score,
+        "total_score": total_bal,
+        "start_time": student_quizz.quizz_start_time,
+        "end_time": student_quizz.quizz_end_time,
+        "duration": student_quizz.quizz_end_time - student_quizz.quizz_start_time,
+        "quantity_question": quantity_question,
+        "quantity_answered_questions": answered_questions,
+        "quantity_correct_question": quantity_correct_question,
+        "quantity_wrong_question": answered_questions - quantity_correct_question,
+        "correct_question_percent": correct_question_percent,
+    }
+
+
 
 
 def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql):
