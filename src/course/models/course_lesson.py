@@ -3,13 +3,25 @@ from django.db import models
 from src.common import abstract_models
 
 
+class CourseLessonType(
+    abstract_models.UUID,
+    abstract_models.AbstractBaseNameCode,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted
+):
+    icon = models.FileField()
+
+
 class CourseLesson(
     abstract_models.UUID,
     abstract_models.AbstractBaseName,
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
-    abstract_models.TimeStampedModel
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted
 ):
     owner = models.ForeignKey(
         'accounts.User',
@@ -18,6 +30,18 @@ class CourseLesson(
         related_name="course_lessons"
     )
     description = models.TextField(null=True)
+    course_lesson_type = models.ForeignKey(
+        CourseLessonType,
+        on_delete=models.CASCADE,
+        related_name="course_lessons"
+    )
+    from_course_lesson = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        db_index=True
+    )
 
     class Meta:
         db_table = 'course\".\"course_lesson'

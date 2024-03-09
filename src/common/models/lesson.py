@@ -16,7 +16,8 @@ class Lesson(
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
-    abstract_models.TimeStampedModel
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted,
 ):
     # course_type = models.ForeignKey(
     #     'common.CourseType',

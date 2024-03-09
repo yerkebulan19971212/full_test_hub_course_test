@@ -332,8 +332,6 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         return instance
 
     def create(self, validated_data):
-        print(validated_data)
-        print("validated_data")
         variant = validated_data.get('variant')
         lesson = validated_data.pop('lesson')
         question_level = self.context['request'].data.get('question_level', None)

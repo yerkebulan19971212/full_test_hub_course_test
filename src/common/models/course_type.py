@@ -17,7 +17,8 @@ class CourseType(
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
-    abstract_models.TimeStampedModel
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted,
 ):
     icon = models.FileField(upload_to='test_type', null=True, blank=True)
     quizz_duration = models.DurationField(null=True, blank=True)

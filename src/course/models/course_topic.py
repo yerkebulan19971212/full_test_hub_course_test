@@ -32,7 +32,8 @@ class CourseTopicM2M(
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
-    abstract_models.TimeStampedModel
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted
 ):
     owner = models.ForeignKey(
         'accounts.User',
@@ -51,6 +52,13 @@ class CourseTopicM2M(
         on_delete=models.CASCADE,
         null=True, blank=True,
         related_name="course_topic_lessons_m2m2"
+    )
+    from_course_topic = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        db_index=True
     )
 
     class Meta:

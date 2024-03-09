@@ -70,7 +70,29 @@ class AbstractBaseTitle(models.Model):
         abstract = True
 
 
+class Deleted(models.Model):
+    deleted = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class AbstractQuerySet(models.QuerySet):
 
     def get_all_active(self):
         return self.filter(is_active=True)
+
+    def is_active(self):
+        return self.filter(is_active=True)
+
+    def not_deleted(self):
+        return self.filter(deleted__isnull=True)
+
+
+class AbstractManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().not_deleted()
+
+    def is_active(self):
+        return self.get_queryset().is_active()

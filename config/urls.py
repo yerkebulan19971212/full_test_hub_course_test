@@ -7,6 +7,7 @@ import debug_toolbar
 from src.accounts.urls import accounts_api_v1_urlpatterns
 from src.common.urls import api_v1_urlpatterns as common_url,api_v1_quizzes, api_v1_super_admin_urlpatterns
 from src.quizzes.urls import urlpatterns as quizzes_url
+from src.course.urls import urlpatterns as course_url
 from src.accounts.urls import super_admin_api_v1_urlpatterns
 from src.services.views import utils_v
 
@@ -20,6 +21,7 @@ urlpatterns = [
          include((accounts_api_v1_urlpatterns, 'accounts'),
                  namespace='accounts')),
     path('commmon/', include((common_url, 'common'), namespace='common')),
+    path('course/', include((course_url, 'course'), namespace='course')),
     path('quizzes/',
          include((quizzes_url, 'quizzes'), namespace='quizzes')),
 ]

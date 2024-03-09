@@ -18,7 +18,8 @@ class QuizzType(
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
-    abstract_models.TimeStampedModel
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted,
 ):
     icon = models.FileField(upload_to='quiz-type', null=True, blank=True)
     color = models.CharField(max_length=128)
@@ -55,7 +56,8 @@ class CourseTypeQuizzManager(models.Manager):
 class CourseTypeQuizz(
     abstract_models.UUID,
     abstract_models.Ordering,
-    abstract_models.TimeStampedModel
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted,
 ):
     course_type = models.ForeignKey(
         'common.CourseType',
