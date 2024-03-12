@@ -100,3 +100,9 @@ class PromoCodeUsedError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("promo code used")
     default_code = "promo_code_used"
+
+
+class DoesNotHaveTest(APIException):
+    message = _("does not have test")
+    default_detail = _("does not have test")
+    default_code = _("does_not_have_test")

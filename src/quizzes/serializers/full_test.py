@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from src.accounts.api_views.serializers import UserBaseSerializer
 from src.common import abstract_serializer
-from src.common.exception import UnexpectedError
+from src.common.exception import UnexpectedError, DoesNotHaveTest
 from src.common.models import CourseType, Lesson, QuizzType, LessonPair, \
     CourseTypeQuizz, BoughtPacket, Packet
 from src.common.utils import get_multi_score
@@ -51,6 +51,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
         ).first()
         if not bought_packet:
             raise UnexpectedError()
+        if bought_packet.remainder < 1:
+            raise DoesNotHaveTest()
         lesson_pair = LessonPair.objects.filter(
             Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
             Q(lesson_1=lessons[-1], lesson_2=lessons[0])
