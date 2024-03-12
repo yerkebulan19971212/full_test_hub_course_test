@@ -19,7 +19,7 @@ from config.celery import finish_test
 from src.common import constant
 from src.common.constant import ChoiceType, QuizzStatus
 from src.common.exception import PassedTestError
-from src.common.models import Lesson, CourseTypeLesson
+from src.common.models import Lesson, CourseTypeLesson, RatingTest
 from src.common.paginations import SimplePagination
 from src.common.utils import get_multi_score
 from src.quizzes.filters import StudentQuizFileFilterSerializer
@@ -364,7 +364,7 @@ class ResultRatingView(generics.ListAPIView):
         q = self.request.query_params.get("q")
         school_id = self.request.query_params.get("school_id")
         lesson_pair_id = self.request.query_params.get("lesson_pair_id")
-        rating_period_id = self.request.query_params.get("rating_period_id")
+        rating_period_id = self.request.query_params.get("rating_period_id", None)
         queryset = super().get_queryset()
         if q:
             queryset = queryset.filter(
@@ -382,13 +382,11 @@ class ResultRatingView(generics.ListAPIView):
             queryset = queryset.filter(
                 student_quizz__lesson_pair_id=lesson_pair_id
             )
-
-        print(rating_period_id)
-        print("rating_period_id")
+        if rating_period_id is None:
+            rating_period = RatingTest.objects.all().order_by('id').last()
+            rating_period_id = rating_period.id
         if rating_period_id:
-            queryset = queryset.filter(
-                student_quizz__bought_packet__rating_test_id=rating_period_id
-            )
+            queryset = queryset.filter(student_quizz__bought_packet__rating_test_id=rating_period_id)
         queryset = queryset.values(
             'student_quizz',
             'student_quizz__user__city__name_ru',
