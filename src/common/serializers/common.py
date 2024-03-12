@@ -142,7 +142,8 @@ class PromoCodeSerializer(serializers.ModelSerializer):
         promo_code_obj = PromoCode.objects.filter(
             name_code=promo_code,
             start_date__lte=now.date(),
-            end_date__gte=now.date()
+            end_date__gte=now.date(),
+            is_active=True
         )
         if not promo_code_obj.exists():
             raise PromoCodeNotExistsError()
