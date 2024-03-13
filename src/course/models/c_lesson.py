@@ -14,7 +14,7 @@ class CourseLessonType(
     icon = models.FileField()
 
 
-class CourseLesson(
+class CLesson(
     abstract_models.UUID,
     abstract_models.AbstractBaseName,
     abstract_models.AbstractBaseNameCode,
@@ -27,13 +27,13 @@ class CourseLesson(
         'accounts.User',
         on_delete=models.CASCADE,
         null=True, blank=True,
-        related_name="course_lessons"
+        related_name="c_lessons"
     )
     description = models.TextField(null=True)
     course_lesson_type = models.ForeignKey(
         CourseLessonType,
         on_delete=models.CASCADE,
-        related_name="course_lessons"
+        related_name="c_lessons"
     )
     from_course_lesson = models.ForeignKey(
         'self',
@@ -44,13 +44,13 @@ class CourseLesson(
     )
 
     class Meta:
-        db_table = 'course\".\"course_lesson'
+        db_table = 'course\".\"c_lessons'
 
     def __str__(self):
-        return f'{self.description}'
+        return f'{self.name_code}'
 
 
-class CourseTopicLessonM2M(
+class CourseTopicLesson(
     abstract_models.UUID,
     abstract_models.Ordering,
     abstract_models.IsActive,
@@ -60,23 +60,23 @@ class CourseTopicLessonM2M(
         'accounts.User',
         on_delete=models.CASCADE,
         null=True, blank=True,
-        related_name="course_topic_lessons_m2m"
+        related_name="course_topic_lessons"
     )
-    course = models.ForeignKey(
+    course_topic = models.ForeignKey(
         'course.CourseTopic',
         on_delete=models.CASCADE,
         null=True, blank=True,
-        related_name="course_topic_lessons_m2m"
+        related_name="course_topic_lessons"
     )
     course_lesson = models.ForeignKey(
-        'course.CourseLesson',
+        'course.CLesson',
         on_delete=models.CASCADE,
         null=True, blank=True,
-        related_name="course_topic_lessons_m2m"
+        related_name="course_topic_lessons"
     )
 
     class Meta:
-        db_table = 'course\".\"course_topic_lesson_m2m'
+        db_table = 'course\".\"course_topic_lesson'
 
     def __str__(self):
         return f'{self.course_lesson.name_ru}'

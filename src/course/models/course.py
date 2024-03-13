@@ -6,7 +6,7 @@ from src.common import abstract_models
 
 class CourseQuerySet(abstract_models.AbstractQuerySet):
     def content_count(self):
-        return self.annotate(content_count=Count('course_topic_lessons_m2m2'))
+        return self.annotate(content_count=Count('course_topic'))
 
 
 class CourseManager(abstract_models.AbstractManager):
@@ -50,5 +50,5 @@ class Course(
     class Meta:
         db_table = 'course\".\"course'
 
-    def __str__(self):
-        return f'{self.description}'
+    # def __str__(self):
+    #     return f'{self.name_code}'

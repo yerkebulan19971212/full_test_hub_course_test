@@ -1,1 +1,6 @@
-from .course import CourseSerializer
+from .course import (
+    CourseSerializer,
+    CourseOneSerializer,
+    CourseCurriculumFilterSerializer,
+    CourseCurriculumSerializer
+)
