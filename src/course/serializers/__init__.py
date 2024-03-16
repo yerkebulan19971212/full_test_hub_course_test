@@ -2,5 +2,7 @@ from .course import (
     CourseSerializer,
     CourseOneSerializer,
     CourseCurriculumFilterSerializer,
-    CourseCurriculumSerializer
+    CourseCurriculumSerializer,
+    CourseCurriculumUserSerializer,
+    CourseLessonUserSerializer
 )
