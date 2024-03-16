@@ -3,7 +3,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
 
 from src.course import serializers
-from src.course.models import Course, CourseTopic, CLesson
+from src.course.models import Course, CourseTopic, CLesson, Topic
 from src.course.serializers.course import CourseCurriculumFilterSerializer
 
 
@@ -22,8 +22,8 @@ course_list_view = CourseListView.as_view()
 
 class CourseRetrieveView(generics.RetrieveAPIView):
     # permission_classes = [permissions.IsAuthenticated]
-    queryset = Course.api_objects.is_active()
-    serializer_class = serializers.CourseSerializer
+    queryset = Course.api_objects.is_active().select_related('owner')
+    serializer_class = serializers.CourseOneSerializer
     lookup_field = 'uuid'
 
     @swagger_auto_schema(tags=["course"])
@@ -35,20 +35,14 @@ course_view = CourseRetrieveView.as_view()
 
 
 class CourseCurriculumView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    queryset = CourseTopic.objects.all().filter().prefetch_related(
+    queryset = Topic.objects.prefetch_related(
+        'course_topic__course_topic_lessons__course_lesson'
     )
     serializer_class = serializers.CourseCurriculumSerializer
-    lookup_field = 'uuid'
 
     def get_queryset(self):
         uuid = self.request.query_params.get('uuid')
-        course_lesson = CLesson.objects.filter(
-            course_topic_lessons__course_topic__course__uuid=uuid,
-        )
-        queryset = super().get_queryset().prefetch_related(
-            Prefetch('course_topic_lessons__course_lesson', queryset=course_lesson),
-        )
+        queryset = super().get_queryset().filter(course_topic__course__uuid=uuid)
         return queryset
 
     @swagger_auto_schema(tags=["course"],
