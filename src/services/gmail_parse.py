@@ -43,7 +43,7 @@ def as_read_message(msg_id):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secret.json', MODIFY_SCOPES)
+                '../../client_secret.json', MODIFY_SCOPES)
             creds = flow.run_local_server(port=0)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
@@ -61,7 +61,7 @@ def main(sc):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secret.json', SCOPES)
+                '../../client_secret.json', SCOPES)
             creds = flow.run_local_server(port=0)
         with open('read_token.json', 'w') as token:
             token.write(creds.to_json())
