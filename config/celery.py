@@ -89,20 +89,20 @@ def student_user_question_count(user, question_ids, quizz_type):
     from src.quizzes.models import UserQuestionCount, Question
     questions = Question.objects.filter(id__in=question_ids)
     user_questions = UserQuestionCount.objects.filter(
-        user=user,
+        user_id=user,
         question_id__in=question_ids,
         quizz_type_id=quizz_type
     )
     user_question_ids = [q.question_id for q in user_questions]
     UserQuestionCount.objects.bulk_create([
         UserQuestionCount(
-            user=user,
+            user_id=user,
             quizz_type_id=quizz_type,
-            question=q.id,
+            question=q,
         ) for q in questions.exclud(id__in=user_question_ids)
     ])
     UserQuestionCount.objects.filter(
-        user=user,
+        user_id=user,
         question_id__in=question_ids,
         quizz_type_id=quizz_type
     ).update(quantity=F('quantity') + 1)
