@@ -4,7 +4,6 @@ from django.db import models
 from django.db.models import Prefetch, Count, Q, Sum
 from django.db.models.functions import Coalesce
 
-from config.celery import student_user_question_count
 from src.common import abstract_models
 from src.common.constant import ChoiceType, QuestionType
 from src.common.models import CourseTypeQuizz, CourseTypeLesson, Packet
@@ -127,8 +126,6 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     )),
                 0),
         ).order_by('question_count', '?')
-        question_ids = [q.id for q in queryset]
-        student_user_question_count.delay(student_quizz.user.id, question_ids, quizz_type.id)
         return queryset
 
     def get_mat_full_test(self, lang: str, packet):

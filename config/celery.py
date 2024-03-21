@@ -99,7 +99,7 @@ def student_user_question_count(user, question_ids, quizz_type):
             user_id=user,
             quizz_type_id=quizz_type,
             question=q,
-        ) for q in questions.exclud(id__in=user_question_ids)
+        ) for q in questions.exclude(id__in=user_question_ids)
     ])
     UserQuestionCount.objects.filter(
         user_id=user,
