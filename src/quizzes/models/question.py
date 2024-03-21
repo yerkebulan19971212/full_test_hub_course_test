@@ -1,9 +1,10 @@
 import random
 from django.template.defaultfilters import truncatechars
 from django.db import models
-from django.db.models import Prefetch, Count, Q
+from django.db.models import Prefetch, Count, Q, Sum
 from django.db.models.functions import Coalesce
 
+from config.celery import student_user_question_count
 from src.common import abstract_models
 from src.common.constant import ChoiceType, QuestionType
 from src.common.models import CourseTypeQuizz, CourseTypeLesson, Packet
@@ -20,7 +21,7 @@ class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
                 questions__lesson_question_level__question_level=q,
                 questions__variant__variant_packets__packet=packet,
                 questions__lesson_question_level__test_type_lesson__lesson__name_code=lesson,
-                questions__parent__isnull=True
+                questions__parent__isnull=True,
             ).annotate(
                 user_question_count=Count(
                     'questions__student_quizz_questions',
@@ -107,6 +108,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
     def get_question_for_quizz(self, student_quizz_id: int):
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
         answer_queryset = quizzes_models.Answer.objects.all()
+        quizz_type = CourseTypeQuizz.objects.filter(quizz_type__name_code='infinity_quizz').first()
         queryset = self.prefetch_related(
             Prefetch('answers', queryset=answer_queryset)
         ).filter(
@@ -117,17 +119,15 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
         ).annotate(
             question_count=Coalesce(
-                Count(
-                    'student_quizz_questions',
+                Sum(
+                    'user_questions_count__quantity',
                     filter=Q(
-                        student_quizz_questions__student_quizz__user=student_quizz.user,
-                        student_quizz_questions__student_quizz__quizz_type=CourseTypeQuizz.objects.filter(
-                            quizz_type__name_code='infinity_quizz').first()
-                    ),
-                    distinct=True),
+                        user_questions_count__user=student_quizz.user,
+                        user_questions_count__quizz_type=quizz_type
+                    )),
                 0),
-            # filter=
         ).order_by('question_count', '?')
+        student_user_question_count.delay(student_quizz.user, queryset, quizz_type)
         return queryset
 
     def get_mat_full_test(self, lang: str, packet):
@@ -417,3 +417,34 @@ class Question(
     @property
     def level_name(self):
         return self.lesson_question_level.question_level.name_code
+
+
+class UserQuestionCount(models.Model):
+    question = models.ForeignKey(
+        'quizzes.Question',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='user_questions_count'
+    )
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        null=True,
+        db_index=True,
+        related_name='user_questions_count'
+    )
+    quizz_type = models.ForeignKey(
+        'common.CourseTypeQuizz',
+        on_delete=models.CASCADE,
+        related_name='user_questions_count',
+        null=True,
+        db_index=True
+    )
+    quantity = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'quizz\".\"user_questions_count'
+
+    def __str__(self):
+        return f"{self.user}"
