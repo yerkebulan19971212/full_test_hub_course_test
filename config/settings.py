@@ -10,17 +10,17 @@ from pathlib import Path
 
 from src.services.utils import getenv_bool
 import sentry_sdk
-
-sentry_sdk.init(
-    dsn="https://ce1614ff2e0b52f752a773787821f1c8@o4506944970293248.ingest.us.sentry.io/4506944976781312",
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    traces_sample_rate=1.0,
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
-    profiles_sample_rate=1.0,
-)
+#
+# sentry_sdk.init(
+#     dsn="https://ce1614ff2e0b52f752a773787821f1c8@o4506944970293248.ingest.us.sentry.io/4506944976781312",
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     traces_sample_rate=1.0,
+#     # Set profiles_sample_rate to 1.0 to profile 100%
+#     # of sampled transactions.
+#     # We recommend adjusting this value in production.
+#     profiles_sample_rate=1.0,
+# )
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
