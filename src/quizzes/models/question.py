@@ -1,7 +1,7 @@
 import random
 from django.template.defaultfilters import truncatechars
 from django.db import models
-from django.db.models import Prefetch, Count, Q, Sum
+from django.db.models import Prefetch, Count, Q
 from django.db.models.functions import Coalesce
 
 from config.celery import student_user_question_count
@@ -119,15 +119,16 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
         ).annotate(
             question_count=Coalesce(
-                Sum(
-                    'user_questions_count__quantity',
+                Count(
+                    'student_quizz_questions',
                     filter=Q(
-                        user_questions_count__user=student_quizz.user,
-                        user_questions_count__quizz_type=quizz_type
-                    )),
+                        student_quizz_questions__student_quizz__user=student_quizz.user,
+                        student_quizz_questions__student_quizz__quizz_type=quizz_type
+                    ),
+                    distinct=True),
                 0),
         ).order_by('question_count', '?')
-        student_user_question_count.delay(student_quizz.user, queryset, quizz_type)
+        # student_user_question_count.delay(student_quizz.user, queryset, quizz_type)
         return queryset
 
     def get_mat_full_test(self, lang: str, packet):
