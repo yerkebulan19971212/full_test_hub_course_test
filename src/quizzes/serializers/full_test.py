@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
+from config.celery import student_user_question_count
 from src.accounts.api_views.serializers import UserBaseSerializer
 from src.common import abstract_serializer
 from src.common.exception import UnexpectedError, DoesNotHaveTest
@@ -57,9 +58,10 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
             Q(lesson_1=lessons[-1], lesson_2=lessons[0])
         ).first()
+        quizz_type = CourseTypeQuizz.objects.get(quizz_type__name_code=quizz_type)
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
-        validated_data["quizz_type"] = CourseTypeQuizz.objects.get(quizz_type__name_code=quizz_type)
+        validated_data["quizz_type"] = quizz_type
         validated_data["course_type"] = CourseType.objects.get_ent()
         validated_data["lesson_pair"] = lesson_pair
         validated_data[
@@ -80,6 +82,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
             student_quizz=student_quizz
         ) for i, q in enumerate(questions)])
+        question_ids = [q.id for q in questions]
+        student_user_question_count.delay(user.id, question_ids, quizz_type.id)
         if bought_packet.remainder == 1:
             bought_packet.status = False
         bought_packet.remainder -= 1
