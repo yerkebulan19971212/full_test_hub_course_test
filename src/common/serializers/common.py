@@ -4,7 +4,8 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from src.common import models
-from src.common.exception import PromoCodeNotExistsError, PassedTestError, PromoCodeUsedError
+from src.common.exception import PromoCodeNotExistsError, PassedTestError, \
+    PromoCodeUsedError
 from src.common.models import BoughtPacket, PromoCode, UserPromoCode
 
 
@@ -44,6 +45,7 @@ class PacketSerializer(serializers.ModelSerializer):
             'days',
             'img',
             'price',
+            'second_price',
             'packet_type',
             'quantity',
             'remainder',
@@ -82,14 +84,15 @@ class BuyPacketSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         packet = validated_data['packet']
+        price = packet.second_price if packet.second_price is not None else packet.price
         user = self.context['request'].user
         validated_data['user'] = user
         validated_data[
             'end_time'] = datetime.datetime.now() + datetime.timedelta(
             days=packet.days)
-        validated_data['price'] = packet.price
+        validated_data['price'] = price
         validated_data['remainder'] = packet.quantity
-        user.balance -= packet.price
+        user.balance -= price
         user.save()
         return super().create(validated_data)
 

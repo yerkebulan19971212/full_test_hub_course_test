@@ -50,7 +50,8 @@ class BuyPacket(generics.CreateAPIView):
         packet_obj = Packet.objects.filter(pk=packet).first()
 
         user = self.request.user
-        if user.balance < packet_obj.price:
+        price = packet_obj.second_price if packet_obj.second_price is not None else packet_obj.price
+        if user.balance < price:
             raise NotEnoughBalance()
         return self.create(request, *args, **kwargs)
 
