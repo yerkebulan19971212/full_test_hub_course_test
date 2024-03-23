@@ -58,7 +58,8 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
             Q(lesson_1=lessons[-1], lesson_2=lessons[0])
         ).first()
-        quizz_type = CourseTypeQuizz.objects.get(quizz_type__name_code=quizz_type)
+        quizz_type = CourseTypeQuizz.objects.get(
+            quizz_type__name_code=quizz_type)
         language = validated_data.get("language")
         validated_data["quizz_start_time"] = datetime.datetime.now()
         validated_data["quizz_type"] = quizz_type
@@ -68,14 +69,23 @@ class FullQuizzSerializer(serializers.ModelSerializer):
             "quizz_duration"] = packet.quizz_type.quizz_type.quizz_duration
         student_quizz = super().create(validated_data)
         questions = []
-        questions += Question.objects.get_history_full_test_v2(language, packet, user)
-        questions += Question.objects.get_reading_literacy_full_test_v2(language, packet, user)
+        questions += Question.objects.get_history_full_test_v2(language,
+                                                               packet, user,
+                                                               quizz_type)
+        questions += Question.objects.get_reading_literacy_full_test_v2(
+            language, packet, user, quizz_type)
         if lesson_pair.lesson_1.name_code != 'creative_exam':
-            questions += Question.objects.get_mat_full_test_v2(language, packet, user)
+            questions += Question.objects.get_mat_full_test_v2(language,
+                                                               packet, user,
+                                                               quizz_type)
             questions += Question.objects.get_full_test_v2(language,
-                                                           lesson_pair.lesson_1, packet, user)
+                                                           lesson_pair.lesson_1,
+                                                           packet, user,
+                                                           quizz_type)
             questions += Question.objects.get_full_test_v2(language,
-                                                           lesson_pair.lesson_2, packet, user)
+                                                           lesson_pair.lesson_2,
+                                                           packet, user,
+                                                           quizz_type)
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,
             question=q,
