@@ -19,6 +19,13 @@ class StudentAnswer(abstract_models.TimeStampedModel):
         on_delete=models.CASCADE,
         related_name='student_answers'
     )
+    lesson = models.ForeignKey(
+        'common.Lesson',
+        on_delete=models.CASCADE,
+        related_name='student_answers',
+        null=True,
+        db_index=True,
+    )
     status = models.BooleanField(default=True)
 
     class Meta:
@@ -40,6 +47,13 @@ class StudentScore(abstract_models.TimeStampedModel):
         related_name='question_score',
         db_index=True,
         on_delete=models.CASCADE
+    )
+    lesson = models.ForeignKey(
+        'common.Lesson',
+        on_delete=models.CASCADE,
+        related_name='question_score',
+        null=True,
+        db_index=True,
     )
     score = models.IntegerField(default=0)
     status = models.BooleanField(default=True)

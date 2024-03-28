@@ -230,8 +230,10 @@ class PassStudentAnswerView(generics.CreateAPIView):
                 with transaction.atomic():
                     score = 0
                     question = Question.objects.select_related(
-                        'lesson_question_level__question_level'
+                        'lesson_question_level__question_level',
+                        'lesson_question_level__test_type_lesson__lesson',
                     ).get(pk=question_id)
+                    lesson = question.lesson_question_level.test_type_lesson.lesson
                     correct_answers = question.answers.filter(correct=True)
                     StudentAnswer.objects.filter(
                         student_quizz_id=student_quizz_id,
@@ -241,6 +243,7 @@ class PassStudentAnswerView(generics.CreateAPIView):
                         StudentAnswer(
                             student_quizz_id=student_quizz_id,
                             question=question,
+                            lesson=lesson,
                             answer_id=a
                         ) for a in answers
                     ])
@@ -265,6 +268,7 @@ class PassStudentAnswerView(generics.CreateAPIView):
                     StudentScore.objects.get_or_create(
                         student_quizz_id=student_quizz_id,
                         question=question,
+                        lesson=lesson,
                         score=score,
                         status=True
                     )
