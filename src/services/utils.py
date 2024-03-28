@@ -17,7 +17,6 @@ from datetime import datetime
 from django.db.models import Sum, Q, Count
 from django.db.models.functions import Coalesce
 
-
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 MODIFY_SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
@@ -34,7 +33,8 @@ def finish_full_test(student_quizz_id: int):
     try:
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
 
-        if not TestFullScore.objects.filter(student_quizz=student_quizz).exists():
+        if not TestFullScore.objects.filter(
+                student_quizz=student_quizz).exists():
             if student_quizz.lesson_pair:
                 test_type_lessons = CourseTypeLesson.objects.filter(
                     main=True, course_type__name_code='ent'
@@ -118,6 +118,7 @@ def get_result_st(student_quizz_id: int):
     ).aggregate(
         answered_questions=Coalesce(Count('question_id', distinct=True), 0)
     ).get("answered_questions")
+
     answered_questions_parent_false = StudentAnswer.objects.filter(
         student_quizz=student_quizz_id,
         status=True,
@@ -127,11 +128,19 @@ def get_result_st(student_quizz_id: int):
             Count('question__parent_id', distinct=True), 0)
     ).get("answered_questions")
     answered_questions = answered_questions_parent_true + answered_questions_parent_false
-    quantity_correct_question = StudentScore.objects.filter(
+    quantity_correct_question_1 = StudentScore.objects.filter(
         student_quizz=student_quizz_id,
+        question__parent__isnull=True,
         status=True,
         score__gt=0
     ).count()
+    quantity_correct_question_2 = StudentScore.objects.filter(
+        student_quizz=student_quizz_id,
+        question__parent__isnull=False,
+        status=True,
+        score__gt=0
+    ).values('question__parent').distinct().count()
+    quantity_correct_question = quantity_correct_question_1 + quantity_correct_question_2
     quantity_question = StudentQuizzQuestion.objects.filter(
         student_quizz=student_quizz
     ).count()
