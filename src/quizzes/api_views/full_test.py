@@ -183,8 +183,7 @@ class FullQuizQuestionListView(generics.ListAPIView):
         'lesson_question_level__question_level'
     ).prefetch_related(
         'answers',
-        'student_quizz_questions',
-    ).filter(parent__isnull=True).distinct()
+    ).filter(parent__isnull=True)
 
     @swagger_auto_schema(tags=["full-test"],
                          query_serializer=FullQuizQuestionQuerySerializer)
