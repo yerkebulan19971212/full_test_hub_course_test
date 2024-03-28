@@ -34,7 +34,7 @@ def finish_full_test(student_quizz_id: int):
     try:
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
 
-        if TestFullScore.objects.filter(student_quizz=student_quizz).exists():
+        if not TestFullScore.objects.filter(student_quizz=student_quizz).exists():
             if student_quizz.lesson_pair:
                 test_type_lessons = CourseTypeLesson.objects.filter(
                     main=True, course_type__name_code='ent'
