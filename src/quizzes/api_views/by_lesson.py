@@ -16,7 +16,7 @@ from src.common.constant import ChoiceType, QuestionType
 from src.common.exception import PassedTestError
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.utils import get_multi_score
-from src.quizzes.models import (Question, Answer, StudentScStudentQuizzQuestionore, StudentAnswer,
+from src.quizzes.models import (Question, Answer, StudentScore, StudentAnswer,
                                 TestFullScore, StudentQuizzQuestion,
                                 StudentQuizz)
 from src.quizzes import serializers
