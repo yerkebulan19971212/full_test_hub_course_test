@@ -17,7 +17,6 @@ from datetime import datetime
 from django.db.models import Sum, Q, Count
 from django.db.models.functions import Coalesce
 
-
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 MODIFY_SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
@@ -28,15 +27,14 @@ def getenv_bool(name: str, default: str = "False"):
 
 
 def finish_full_test(student_quizz_id: int):
-    from src.quizzes.models import (TestFullScore, StudentQuizz, StudentScore, StudentQuizzQuestion)
+    from src.quizzes.models import (TestFullScore, StudentQuizz, StudentScore,
+                                    StudentQuizzQuestion)
     from src.common.models import CourseTypeLesson
     try:
         student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
-        test_full_score = TestFullScore.objects.filter(student_quizz=student_quizz)
-        if not test_full_score.exists():
-            student_quizz.status = "PASSED"
-            student_quizz.quizz_end_time = datetime.now()
-            student_quizz.save()
+
+        if not TestFullScore.objects.filter(
+                student_quizz=student_quizz).exists():
             if student_quizz.lesson_pair:
                 test_type_lessons = CourseTypeLesson.objects.filter(
                     main=True, course_type__name_code='ent'
@@ -51,7 +49,6 @@ def finish_full_test(student_quizz_id: int):
             index = 0
             test_full_score = []
             for lesson in lessons:
-                print(lesson)
                 index += 1
                 question_score = StudentScore.objects.filter(
                     Q(
@@ -61,6 +58,7 @@ def finish_full_test(student_quizz_id: int):
                           Q(question__parent__student_quizz_questions__lesson=lesson))
                     ),
                     student_quizz=student_quizz,
+                    lesson=lesson,
                     status=True
                 ).distinct().aggregate(sum_score=Coalesce(Sum('score'), 0))
                 quantity_question = StudentQuizzQuestion.objects.filter(
@@ -74,7 +72,8 @@ def finish_full_test(student_quizz_id: int):
                 ).distinct().aggregate(
                     sum_score=Coalesce(
                         Sum(
-                            'question__lesson_question_level__question_level__point'), 0
+                            'question__lesson_question_level__question_level__point'),
+                        0
                     )
                 ).get("sum_score")
                 score = question_score.get('sum_score', 0)
@@ -89,12 +88,16 @@ def finish_full_test(student_quizz_id: int):
                         accuracy=100 * score / question_full_score if question_full_score > 0 else 0
                     ))
             TestFullScore.objects.bulk_create(test_full_score)
+            student_quizz.status = "PASSED"
+            student_quizz.quizz_end_time = datetime.now()
+            student_quizz.save()
     except Exception as e:
         print(e)
 
 
 def get_result_st(student_quizz_id: int):
-    from src.quizzes.models import (StudentQuizzQuestion, StudentScore, StudentAnswer, StudentQuizz, TestFullScore,
+    from src.quizzes.models import (StudentQuizzQuestion, StudentScore,
+                                    StudentAnswer, StudentQuizz, TestFullScore,
                                     Question)
 
     student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
@@ -105,7 +108,8 @@ def get_result_st(student_quizz_id: int):
         parent__isnull=True,
         student_quizz_questions__student_quizz_id=student_quizz_id,
     ).aggregate(
-        sum_point=Coalesce(Sum('lesson_question_level__question_level__point'), 0)
+        sum_point=Coalesce(Sum('lesson_question_level__question_level__point'),
+                           0)
     ).get('sum_point')
     answered_questions_parent_true = StudentAnswer.objects.filter(
         student_quizz=student_quizz_id,
@@ -114,19 +118,29 @@ def get_result_st(student_quizz_id: int):
     ).aggregate(
         answered_questions=Coalesce(Count('question_id', distinct=True), 0)
     ).get("answered_questions")
+
     answered_questions_parent_false = StudentAnswer.objects.filter(
         student_quizz=student_quizz_id,
         status=True,
         question__parent__isnull=False
     ).aggregate(
-        answered_questions=Coalesce(Count('question__parent_id', distinct=True), 0)
+        answered_questions=Coalesce(
+            Count('question__parent_id', distinct=True), 0)
     ).get("answered_questions")
     answered_questions = answered_questions_parent_true + answered_questions_parent_false
-    quantity_correct_question = StudentScore.objects.filter(
+    quantity_correct_question_1 = StudentScore.objects.filter(
         student_quizz=student_quizz_id,
+        question__parent__isnull=True,
         status=True,
         score__gt=0
     ).count()
+    quantity_correct_question_2 = StudentScore.objects.filter(
+        student_quizz=student_quizz_id,
+        question__parent__isnull=False,
+        status=True,
+        score__gt=0
+    ).values('question__parent').distinct().count()
+    quantity_correct_question = quantity_correct_question_1 + quantity_correct_question_2
     quantity_question = StudentQuizzQuestion.objects.filter(
         student_quizz=student_quizz
     ).count()
@@ -148,9 +162,8 @@ def get_result_st(student_quizz_id: int):
     }
 
 
-
-
-def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql):
+def create_question(questions_texts: str, variant_id: int, lesson_id: int,
+                    lql):
     from src.common import constant
     from src.quizzes.models import AnswerSign, Question, Answer, CommonQuestion
     if not questions_texts and 'new_line' not in questions_texts:
@@ -258,7 +271,8 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql):
 
 
 def get_message(service, user_id, msg_id):
-    msg = service.users().messages().get(userId=user_id, id=msg_id, format='raw').execute()
+    msg = service.users().messages().get(userId=user_id, id=msg_id,
+                                         format='raw').execute()
     msg_raw = base64.urlsafe_b64decode(msg['raw'].encode('ASCII'))
     msg_str = email.message_from_bytes(msg_raw)
     content_types = msg_str.get_content_maintype()
@@ -275,7 +289,8 @@ def get_message(service, user_id, msg_id):
 def as_read_message(msg_id):
     creds = None
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', MODIFY_SCOPES)
+        creds = Credentials.from_authorized_user_file('token.json',
+                                                      MODIFY_SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -287,7 +302,8 @@ def as_read_message(msg_id):
             token.write(creds.to_json())
     service = build('gmail', 'v1', credentials=creds)
 
-    msg = service.users().messages().modify(userId='me', id=msg_id, body={"removeLabelIds": ["UNREAD"]}).execute()
+    msg = service.users().messages().modify(userId='me', id=msg_id, body={
+        "removeLabelIds": ["UNREAD"]}).execute()
 
 
 def add_balance():
@@ -295,7 +311,8 @@ def add_balance():
 
     creds = None
     if os.path.exists('read_token.json'):
-        creds = Credentials.from_authorized_user_file('read_token.json', SCOPES)
+        creds = Credentials.from_authorized_user_file('read_token.json',
+                                                      SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())

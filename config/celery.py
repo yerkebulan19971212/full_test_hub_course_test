@@ -82,3 +82,27 @@ def auto_complete_finish_test():
 def add_balance_to_student():
     from src.services.utils import add_balance
     add_balance()
+
+
+@celery_app.task
+def student_user_question_count(user, question_ids, quizz_type):
+    from src.quizzes.models import UserQuestionCount, Question
+    questions = Question.objects.filter(id__in=question_ids)
+    user_questions = UserQuestionCount.objects.filter(
+        user_id=user,
+        question_id__in=question_ids,
+        quizz_type_id=quizz_type
+    )
+    user_question_ids = [q.question_id for q in user_questions]
+    UserQuestionCount.objects.bulk_create([
+        UserQuestionCount(
+            user_id=user,
+            quizz_type_id=quizz_type,
+            question=q,
+        ) for q in questions.exclude(id__in=user_question_ids)
+    ])
+    UserQuestionCount.objects.filter(
+        user_id=user,
+        question_id__in=question_ids,
+        quizz_type_id=quizz_type
+    ).update(quantity=F('quantity') + 1)

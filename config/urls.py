@@ -11,7 +11,13 @@ from src.course.urls import urlpatterns as course_url
 from src.accounts.urls import super_admin_api_v1_urlpatterns
 from src.services.views import utils_v
 
+
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
+
 urlpatterns = [
+    path('sentry-debug/', trigger_error),
     path('api/v1/super-admin/', include(api_v1_super_admin_urlpatterns)),
     path('api/v1/quizzes/', include(api_v1_quizzes)),
     path('api/v1/user/', include(super_admin_api_v1_urlpatterns)),

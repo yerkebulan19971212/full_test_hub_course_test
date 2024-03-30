@@ -9,7 +9,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 
+from config.celery import student_user_question_count
 from src.common.constant import QuizzStatus
+from src.common.models import CourseTypeQuizz
 from src.quizzes.models import Question, Answer, StudentScore, TestFullScore
 from src.quizzes import serializers
 from src.quizzes import filters
@@ -37,11 +39,14 @@ class GetQuizTestQuestion(generics.RetrieveAPIView):
     queryset = Question.objects.all()
 
     def get_object(self):
+        user = self.request.user
         student_quizz = self.kwargs['student_quizz']
         question = self.filter_queryset(
             queryset=Question.objects.get_question_for_quizz(
                 self.kwargs['student_quizz']),
         ).first()
+        quizz_type = CourseTypeQuizz.objects.filter(quizz_type__name_code='infinity_quizz').first()
+        student_user_question_count.delay(user.id, [question.id], quizz_type.id)
         StudentQuizzQuestion.objects.create(
             student_quizz_id=student_quizz,
             question=question

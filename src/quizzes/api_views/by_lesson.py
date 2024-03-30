@@ -17,7 +17,8 @@ from src.common.exception import PassedTestError
 from src.common.models import Lesson, CourseTypeLesson
 from src.common.utils import get_multi_score
 from src.quizzes.models import (Question, Answer, StudentScore, StudentAnswer,
-                                TestFullScore, StudentQuizzQuestion, StudentQuizz)
+                                TestFullScore, StudentQuizzQuestion,
+                                StudentQuizz)
 from src.quizzes import serializers
 from src.quizzes.serializers import FullQuizQuestionQuerySerializer
 from src.services.services import get_result_lesson
@@ -189,7 +190,9 @@ class ByLessonPassAnswerView(generics.CreateAPIView):
                     score = 0
                     question = Question.objects.select_related(
                         'lesson_question_level__question_level'
+                        'lesson_question_level__test_type_lesson__lesson',
                     ).get(pk=question_id)
+                    lesson = question.lesson_question_level.test_type_lesson.lesson
                     correct_answers = question.answers.filter(correct=True)
                     StudentAnswer.objects.filter(
                         student_quizz_id=student_quizz_id,
@@ -199,6 +202,7 @@ class ByLessonPassAnswerView(generics.CreateAPIView):
                         StudentAnswer(
                             student_quizz_id=student_quizz_id,
                             question=question,
+                            lesson=lesson,
                             answer_id=a
                         ) for a in answers
                     ])
@@ -223,6 +227,7 @@ class ByLessonPassAnswerView(generics.CreateAPIView):
                     StudentScore.objects.get_or_create(
                         student_quizz_id=student_quizz_id,
                         question=question,
+                        lesson=lesson,
                         score=score,
                         status=True
                     )

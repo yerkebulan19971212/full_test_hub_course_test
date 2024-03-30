@@ -60,6 +60,14 @@ class MyTest(generics.ListAPIView):
 my_test_view = MyTest.as_view()
 
 
+class NewTestView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.NewTestSerializer
+
+
+new_test_view = NewTestView.as_view()
+
+
 class GetFilesView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = StudentQuizzFile.objects.all()
@@ -122,7 +130,8 @@ class FullQuizLessonListView(generics.ListAPIView):
             student_test.save()
             # difference_duration = timedelta(seconds=0)
         current_time = timezone.now()
-        duration = (student_test.quizz_start_time + student_test.quizz_duration) - current_time
+        duration = (
+                           student_test.quizz_start_time + student_test.quizz_duration) - current_time
         if duration.total_seconds() <= 0:
             student_test.quizz_duration = timedelta(seconds=0)
             student_test.save()
@@ -155,7 +164,8 @@ class FullQuizLessonListView(generics.ListAPIView):
             course_type_lessons__main=True,
         ).order_by('course_type_lessons__main', 'id')
         if student_quizz.lesson_pair.lesson_1.name_code == "creative_exam":
-            main_lessons = main_lessons.exclude(name_code="mathematical_literacy")
+            main_lessons = main_lessons.exclude(
+                name_code="mathematical_literacy")
         if student_quizz.lesson_pair and not student_quizz.lesson_pair.lesson_1.name_ru == "Творческий экзамен":
             other_lessons = queryset.filter(
                 course_type_lessons__course_type__name_code="ent",
@@ -183,8 +193,7 @@ class FullQuizQuestionListView(generics.ListAPIView):
         'lesson_question_level__question_level'
     ).prefetch_related(
         'answers',
-        'student_quizz_questions',
-    ).filter(parent__isnull=True).distinct()
+    ).filter(parent__isnull=True)
 
     @swagger_auto_schema(tags=["full-test"],
                          query_serializer=FullQuizQuestionQuerySerializer)
@@ -230,8 +239,10 @@ class PassStudentAnswerView(generics.CreateAPIView):
                 with transaction.atomic():
                     score = 0
                     question = Question.objects.select_related(
-                        'lesson_question_level__question_level'
+                        'lesson_question_level__question_level',
+                        'lesson_question_level__test_type_lesson__lesson',
                     ).get(pk=question_id)
+                    lesson = question.lesson_question_level.test_type_lesson.lesson
                     correct_answers = question.answers.filter(correct=True)
                     StudentAnswer.objects.filter(
                         student_quizz_id=student_quizz_id,
@@ -241,6 +252,7 @@ class PassStudentAnswerView(generics.CreateAPIView):
                         StudentAnswer(
                             student_quizz_id=student_quizz_id,
                             question=question,
+                            lesson=lesson,
                             answer_id=a
                         ) for a in answers
                     ])
@@ -265,6 +277,7 @@ class PassStudentAnswerView(generics.CreateAPIView):
                     StudentScore.objects.get_or_create(
                         student_quizz_id=student_quizz_id,
                         question=question,
+                        lesson=lesson,
                         score=score,
                         status=True
                     )
@@ -364,7 +377,8 @@ class ResultRatingView(generics.ListAPIView):
         q = self.request.query_params.get("q")
         school_id = self.request.query_params.get("school_id")
         lesson_pair_id = self.request.query_params.get("lesson_pair_id")
-        rating_period_id = self.request.query_params.get("rating_period_id", None)
+        rating_period_id = self.request.query_params.get("rating_period_id",
+                                                         None)
         queryset = super().get_queryset()
         if q:
             queryset = queryset.filter(
@@ -386,7 +400,8 @@ class ResultRatingView(generics.ListAPIView):
             rating_period = RatingTest.objects.all().order_by('id').last()
             rating_period_id = rating_period.id
         if rating_period_id:
-            queryset = queryset.filter(student_quizz__bought_packet__rating_test_id=rating_period_id)
+            queryset = queryset.filter(
+                student_quizz__bought_packet__rating_test_id=rating_period_id)
         queryset = queryset.values(
             'student_quizz',
             'student_quizz__user__city__name_ru',
