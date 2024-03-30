@@ -87,9 +87,9 @@ class BuyPacketSerializer(serializers.ModelSerializer):
         price = packet.second_price if packet.second_price is not None else packet.price
         user = self.context['request'].user
         validated_data['user'] = user
-        validated_data[
-            'end_time'] = datetime.datetime.now() + datetime.timedelta(
+        end_time = datetime.datetime.now() + datetime.timedelta(
             days=packet.days)
+        validated_data['end_time'] = end_time
         validated_data['price'] = price
         validated_data['remainder'] = packet.quantity
         user.balance -= price

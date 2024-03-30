@@ -9,5 +9,7 @@ from .quizz_test import (QuizzTestSerializer, QuizTestPassAnswerSerializer)
 from .full_test import (FullQuizzSerializer, StudentQuizzInformationSerializer,
                         FullQuizLessonListSerializer,
                         StudentQuizzRatingSerializer, StudentAnswersSerializer)
-from .common import (MyTestSerializer, StudentQuizzFileSerializer, MyProgressSerializer, MyLessonProgressSerializer)
+from .common import (MyTestSerializer, StudentQuizzFileSerializer,
+                     NewTestSerializer, MyProgressSerializer,
+                     MyLessonProgressSerializer)
 from .student_quizz import ByLessonQuizzSerializer

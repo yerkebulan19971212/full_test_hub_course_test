@@ -144,8 +144,8 @@ class StudentQuizzInformationSerializer(serializers.ModelSerializer):
 
 class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
     correct = serializers.IntegerField(default=0)
-    sum_of_questions = serializers.IntegerField(default=0)
-    sum_of_point = serializers.IntegerField(default=120)
+    # sum_of_questions = serializers.IntegerField(default=0)
+    # sum_of_point = serializers.IntegerField(default=120)
     number = serializers.IntegerField(default=1)
     score = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
@@ -158,8 +158,8 @@ class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
             'number',
             'correct',
             'score',
-            'sum_of_point',
-            'sum_of_questions'
+            # 'sum_of_point',
+            # 'sum_of_questions'
         )
 
     # def get_name(self, obj):
