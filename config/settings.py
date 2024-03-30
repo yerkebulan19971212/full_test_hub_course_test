@@ -41,15 +41,17 @@ CSRF_TRUSTED_ORIGINS = [
     'https://api.testhub.kz',
     'http://127.0.0.1:5000',
     'http://127.0.0.1:3000',
-    'https://admin-course.testhub.kz/',
-    'https://dev-ent.testhub.kz/',
+
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000', 'https://ent.testhub.kz'
+    'http://localhost:3000',
+    'https://ent.testhub.kz',
+    'https://admin-course.testhub.kz/',
+    'https://dev-ent.testhub.kz/',
 ]
 
 # Application definition
@@ -225,7 +227,6 @@ AWS_QUERYSTRING_AUTH = False
 
 MEDIA_ROOT = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}'
 
-
 # CELERY_BROKER_URL = 'redis://86.107.199.59:6379/1'
 # CELERY_RESULT_BACKEND = 'redis://86.107.199.59:6379/1'
 
@@ -246,7 +247,8 @@ LOGGING = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://:yerke1234@localhost:6379/1',  # Adjust the Redis server details as needed
+        'LOCATION': 'redis://:yerke1234@localhost:6379/1',
+        # Adjust the Redis server details as needed
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
