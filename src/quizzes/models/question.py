@@ -29,7 +29,7 @@ class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
                         filter=Q(
                             questions__user_questions_count__user=user,
                             questions__user_questions_count__quizz_type=quizz_type
-                        )),0
+                        )), 0
                 )
             ).order_by('user_question_count2')
         )
@@ -83,6 +83,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_questions_for_flash_card(
             self, lang: str, lesson: int, question_number: int):
+        print("question_number=", question_number)
         return self.filter(
             variant__language=lang,
             lesson_question_level__test_type_lesson__lesson_id=lesson,
@@ -97,18 +98,19 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
     def get_questions_by_lesson(
             self, lang: str, lesson, user, packet, quizz_type):
         if lesson.name_code == 'reading_literacy':
-            return self.get_reading_literacy_full_test_v2(lang=lang,
-                                                          packet=packet,
-                                                          user=user, quizz_type=quizz_type)
+            return self.get_reading_literacy_full_test_v2(
+                lang=lang, packet=packet, user=user, quizz_type=quizz_type)
         elif lesson.name_code == 'history_of_kazakhstan':
-            return self.get_history_full_test_v2(lang=lang, packet=packet,
-                                                 user=user, quizz_type=quizz_type)
+            return self.get_history_full_test_v2(
+                lang=lang, packet=packet, user=user, quizz_type=quizz_type)
         elif lesson.name_code == 'mathematical_literacy':
-            return self.get_mat_full_test_v2(lang=lang, packet=packet,
-                                             user=user, quizz_type=quizz_type)
+            return self.get_mat_full_test_v2(
+                lang=lang, packet=packet, user=user, quizz_type=quizz_type)
         else:
-            return self.get_full_test_v2(lang=lang, lesson=lesson,
-                                         packet=packet, user=user, quizz_type=quizz_type)
+            return self.get_full_test_v2(
+                lang=lang, lesson=lesson, packet=packet, user=user,
+                quizz_type=quizz_type
+            )
 
     def get_questions_with_correct_answer(self):
         queryset = quizzes_models.Answer.objects.filter(correct=True)
@@ -248,10 +250,12 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     lesson=lesson.name_code,
                     user=user, quizz_type=quizz_type
                 )
-                questions = list(self.filter(common_question=common_question))
-                random.shuffle(questions)
-                questions_list += questions
-                continue
+                if common_question:
+                    questions = list(
+                        self.filter(common_question=common_question))
+                    random.shuffle(questions)
+                    questions_list += questions
+                    continue
             questions = list(self.filter(
                 variant__is_active=True,
                 variant__language=lang,

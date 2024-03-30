@@ -135,7 +135,7 @@ class NewTestSerializer(serializers.ModelSerializer):
             ).first()
             validated_data["lesson_pair"] = lesson_pair
         else:
-            lesson = not Lesson.objects.get(pk=lessons[0])
+            lesson = Lesson.objects.get(pk=lessons[0])
             validated_data["lesson"] = lesson
 
         validated_data["quizz_start_time"] = datetime.datetime.now()
@@ -171,15 +171,16 @@ class NewTestSerializer(serializers.ModelSerializer):
             questions += Question.objects.get_questions_by_lesson(
                 lang=language,
                 lesson=lesson,
-                user=self.context["request"].user,
-                packet=packet, quizz_type=quizz_type
+                user=user,
+                packet=packet,
+                quizz_type=quizz_type
             )
         elif quizz_type_name == 'flash_card':
-            questions += Question.objects.get_questions_for_flash_card(
+            questions = list(Question.objects.get_questions_for_flash_card(
                 language,
                 lesson,
                 question_number
-            )
+            ))
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,
             question=q,
