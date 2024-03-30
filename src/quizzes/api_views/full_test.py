@@ -172,11 +172,11 @@ class FullQuizLessonListView(generics.ListAPIView):
                 id__in=[student_quizz.lesson_pair.lesson_1_id,
                         student_quizz.lesson_pair.lesson_2_id])
             main_lessons = main_lessons | other_lessons
-        # main_lessons = main_lessons.annotate(
-        #     sum_of_questions=Count('student_quizz_questions',
-        #                            filter=Q(
-        #                                student_quizz_questions__student_quizz=student_quizz))
-        # )
+        main_lessons = main_lessons.annotate(
+            sum_of_questions=Count('student_quizz_questions',
+                                   filter=Q(
+                                       student_quizz_questions__student_quizz=student_quizz))
+        )
 
         return main_lessons.order_by('-course_type_lessons__main', 'id')
 
