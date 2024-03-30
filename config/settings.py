@@ -39,7 +39,10 @@ DEBUG = getenv_bool('DEBUG')
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://api.testhub.kz',
-    'http://127.0.0.1:8001',
+    'http://127.0.0.1:5000',
+    'http://127.0.0.1:3000',
+    'https://admin-course.testhub.kz/',
+    'https://dev-ent.testhub.kz/',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
