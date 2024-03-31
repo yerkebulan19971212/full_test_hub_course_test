@@ -42,11 +42,12 @@ class GetQuizTestQuestion(generics.RetrieveAPIView):
         user = self.request.user
         student_quizz = self.kwargs['student_quizz']
         question = self.filter_queryset(
-            queryset=Question.objects.get_question_for_quizz(
-                self.kwargs['student_quizz']),
+            queryset=Question.objects.get_question_for_quizz(student_quizz),
         ).first()
-        quizz_type = CourseTypeQuizz.objects.filter(quizz_type__name_code='infinity_quizz').first()
-        student_user_question_count.delay(user.id, [question.id], quizz_type.id)
+        quizz_type = CourseTypeQuizz.objects.filter(
+            quizz_type__name_code='infinity_quizz').first()
+        student_user_question_count.delay(user.id, [question.id],
+                                          quizz_type.id)
         StudentQuizzQuestion.objects.create(
             student_quizz_id=student_quizz,
             question=question

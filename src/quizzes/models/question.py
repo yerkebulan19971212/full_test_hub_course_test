@@ -67,33 +67,15 @@ class CommonQuestion(abstract_models.TimeStampedModel):
 
 
 class QuestionQuerySet(abstract_models.AbstractQuerySet):
-    @staticmethod
-    def get_active_variant_list(packet):
-        return [v for v in
-                Variant.objects.filter(
-                    is_active=True,
-                    variant_packets__packet=packet
-                ).order_by('?')]
-
-    @staticmethod
-    def first_random(variants: list):
-        for i in range(random.randint(1, 5)):
-            random.shuffle(variants)
-        return variants[0]
 
     def get_questions_for_flash_card(
-            self, lang: str, lesson: int, question_number: int):
-        print("question_number=", question_number)
+            self, lang: str, lesson: int, question_number: int, packet):
         return self.filter(
             variant__language=lang,
+            variant__variant_packets__packet=packet,
             lesson_question_level__test_type_lesson__lesson_id=lesson,
             question_type=QuestionType.DEFAULT,
         )[:question_number]
-
-    def get_questions_with_answer(self):
-        return self.prefetch_related(
-            Prefetch('answers', queryset=quizzes_models.Answer.objects.all())
-        )
 
     def get_questions_by_lesson(
             self, lang: str, lesson, user, packet, quizz_type):
@@ -128,6 +110,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             question_type=QuestionType.DEFAULT,
             common_question__isnull=True,
             variant__language=student_quizz.language,
+            variant__variant_packets__packet=student_quizz.packet,
             lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
         ).annotate(
             question_count=Coalesce(
