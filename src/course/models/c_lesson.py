@@ -30,6 +30,9 @@ class CLesson(
         related_name="c_lessons"
     )
     description = models.TextField(null=True)
+    text = models.TextField(null=True)
+    video = models.URLField(null=True)
+    img = models.FileField(null=True)
     course_lesson_type = models.ForeignKey(
         CourseLessonType,
         on_delete=models.CASCADE,
@@ -77,6 +80,34 @@ class CourseTopicLesson(
 
     class Meta:
         db_table = 'course\".\"course_topic_lesson'
+
+    def __str__(self):
+        return f'{self.course_lesson.name_ru}'
+
+
+class UserCLesson(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel
+):
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name='user_c_lesson'
+    )
+    course_lesson = models.ForeignKey(
+        CLesson,
+        on_delete=models.CASCADE,
+        db_index=True,
+        related_name='user_c_lesson'
+    )
+    passed = models.BooleanField(default=False)
+    passed_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'course\".\"user_course_lesson'
 
     def __str__(self):
         return f'{self.course_lesson.name_ru}'

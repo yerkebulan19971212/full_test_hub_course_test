@@ -1,3 +1,5 @@
+import uuid
+
 from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
@@ -52,3 +54,42 @@ class CourseCurriculumView(generics.ListAPIView):
 
 
 course_curriculum_view = CourseCurriculumView.as_view()
+
+
+class CourseCurriculumUserView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Topic.objects.all()
+    serializer_class = serializers.CourseCurriculumUserSerializer
+
+    def get_queryset(self):
+        uuid = self.request.query_params.get('uuid')
+        queryset = super().get_queryset().filter(course_topic__course__uuid=uuid)
+        return queryset
+
+    @swagger_auto_schema(tags=["course"],
+                         query_serializer=CourseCurriculumFilterSerializer)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+course_curriculum_user_view = CourseCurriculumUserView.as_view()
+
+
+class CourseLessonUserView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CLesson.objects.all()
+    serializer_class = serializers.CourseLessonUserSerializer
+
+    def get_queryset(self):
+        uuid = self.request.query_params.get('uuid')
+        return super().get_queryset().filter(
+            course_topic_lessons__course_topic__topic__uuid=uuid
+        )
+
+    @swagger_auto_schema(tags=["course"],
+                         query_serializer=CourseCurriculumFilterSerializer)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+course_lesson_user_view = CourseLessonUserView.as_view()

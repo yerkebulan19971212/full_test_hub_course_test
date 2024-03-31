@@ -91,3 +91,28 @@ class CourseCurriculumSerializer(serializers.ModelSerializer):
         if course_lessons:
             return CourseLessonCurriculumSerializer(course_lessons, many=True).data
         return course_lessons
+
+
+class CourseCurriculumUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = (
+            'uuid',
+            'name_kz',
+            'name_ru',
+            'name_en',
+        )
+
+
+class CourseLessonUserSerializer(serializers.ModelSerializer):
+    passed = serializers.BooleanField()
+
+    class Meta:
+        model = CLesson
+        fields = (
+            'uuid',
+            'name_kz',
+            'name_ru',
+            'name_en',
+            'passed'
+        )
