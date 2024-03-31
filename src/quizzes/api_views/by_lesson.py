@@ -189,7 +189,7 @@ class ByLessonPassAnswerView(generics.CreateAPIView):
                 with transaction.atomic():
                     score = 0
                     question = Question.objects.select_related(
-                        'lesson_question_level__question_level'
+                        'lesson_question_level__question_level',
                         'lesson_question_level__test_type_lesson__lesson',
                     ).get(pk=question_id)
                     lesson = question.lesson_question_level.test_type_lesson.lesson
