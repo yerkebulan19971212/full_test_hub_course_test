@@ -160,23 +160,18 @@ class FullQuizLessonListView(generics.ListAPIView):
 
         queryset = self.queryset
         main_lessons = queryset.filter(
-            course_type_lessons__course_type__name_code='ent',
             course_type_lessons__main=True,
         ).order_by('course_type_lessons__main', 'id')
-        if student_quizz.lesson_pair.lesson_1.name_code == "creative_exam":
+        lesson_1_name_code = student_quizz.lesson_pair.lesson_1.name_code
+        if lesson_1_name_code == "creative_exam":
             main_lessons = main_lessons.exclude(
                 name_code="mathematical_literacy")
-        if student_quizz.lesson_pair and not student_quizz.lesson_pair.lesson_1.name_ru == "Творческий экзамен":
+        elif student_quizz.lesson_pair:
             other_lessons = queryset.filter(
                 course_type_lessons__course_type__name_code="ent",
                 id__in=[student_quizz.lesson_pair.lesson_1_id,
                         student_quizz.lesson_pair.lesson_2_id])
             main_lessons = main_lessons | other_lessons
-        main_lessons = main_lessons.annotate(
-            sum_of_questions=Count('student_quizz_questions',
-                                   filter=Q(
-                                       student_quizz_questions__student_quizz=student_quizz))
-        )
 
         return main_lessons.order_by('-course_type_lessons__main', 'id')
 

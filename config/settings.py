@@ -54,6 +54,7 @@ CORS_ALLOWED_ORIGINS = [
     'https://dev-ent.testhub.kz/',
 ]
 
+
 # Application definition
 
 INSTALLED_APPS = [

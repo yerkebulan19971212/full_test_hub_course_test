@@ -183,8 +183,8 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 question_index = 3
             elif q.name_code == 'C':
                 question_index = 5
-            questions = list(self.filter(common_question=common_question))[
-                        :question_index]
+            questions = list(self.filter(common_question=common_question)[
+                        :question_index])
             random.shuffle(questions)
             questions_list += questions
         return questions_list

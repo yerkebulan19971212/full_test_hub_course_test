@@ -144,8 +144,8 @@ class StudentQuizzInformationSerializer(serializers.ModelSerializer):
 
 class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
     correct = serializers.IntegerField(default=0)
-    sum_of_questions = serializers.IntegerField(default=0)
-    sum_of_point = serializers.IntegerField(default=120)
+    sum_of_questions = serializers.SerializerMethodField()
+    # sum_of_point = serializers.IntegerField(default=120)
     number = serializers.IntegerField(default=1)
     score = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
@@ -158,19 +158,16 @@ class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
             'number',
             'correct',
             'score',
-            'sum_of_point',
+            # 'sum_of_point',
             'sum_of_questions'
         )
 
-    # def get_name(self, obj):
-    #     test_id = self.context['view'].kwargs.get('test_id')
-    #     student_test = StudentQuizz.objects.select_related(
-    #             'variant'
-    #         ).get(pk=test_id)
-    #     variant = student_test.variant
-    #     if variant.test_lang == 1:
-    #         return obj.name_ru
-    #     return obj.name_kz
+    def get_sum_of_questions(self, obj):
+        print(self.context)
+        print("self.context")
+        student_id = self.context["view"].kwargs.get('student_quizz')
+        return StudentQuizzQuestion.objects.filter(student_quizz_id=student_id,
+                                                   lesson=obj).count()
 
     def get_score(self, obj):
         return 0
