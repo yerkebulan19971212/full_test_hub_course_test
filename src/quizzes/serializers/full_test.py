@@ -163,8 +163,6 @@ class FullQuizLessonListSerializer(abstract_serializer.NameSerializer):
         )
 
     def get_sum_of_questions(self, obj):
-        print(self.context)
-        print("self.context")
         student_id = self.context["view"].kwargs.get('student_quizz')
         return StudentQuizzQuestion.objects.filter(student_quizz_id=student_id,
                                                    lesson=obj).count()

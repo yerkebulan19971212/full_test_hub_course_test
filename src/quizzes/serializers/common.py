@@ -179,7 +179,8 @@ class NewTestSerializer(serializers.ModelSerializer):
             questions = list(Question.objects.get_questions_for_flash_card(
                 language,
                 lesson,
-                question_number
+                question_number,
+                packet
             ))
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,

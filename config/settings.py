@@ -51,6 +51,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://ent.testhub.kz',
     'https://admin-course.testhub.kz/',
+    'https://admin-ent.testhub.kz/',
     'https://dev-ent.testhub.kz/',
 ]
 
