@@ -91,6 +91,30 @@ class CourseCurriculumSerializer(NameSerializer):
         return course_lessons
 
 
+class CourseTopicCurriculumSerializer(NameSerializer):
+    # course_lessons = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseTopic
+        fields = (
+            'uuid',
+            'name',
+        )
+
+    def get_course_lessons(self, obj):
+        course_lessons = []
+        course_topics = obj.course_topic.all()
+        for ct in course_topics:
+            course_topic_lessons = ct.course_topic_lessons.all()
+            for ctl in course_topic_lessons:
+                course_lessons.append(ctl.course_lesson)
+        if course_lessons:
+            return CourseLessonCurriculumSerializer(course_lessons,
+                                                    many=True,
+                                                    context=self.context).data
+        return course_lessons
+
+
 class CourseCurriculumUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic

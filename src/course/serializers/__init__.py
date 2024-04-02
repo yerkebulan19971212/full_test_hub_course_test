@@ -4,5 +4,6 @@ from .course import (
     CourseCurriculumFilterSerializer,
     CourseCurriculumSerializer,
     CourseCurriculumUserSerializer,
-    CourseLessonUserSerializer
+    CourseLessonUserSerializer,
+    CourseTopicCurriculumSerializer
 )

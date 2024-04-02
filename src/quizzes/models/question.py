@@ -185,9 +185,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 questions = self.filter(common_question=common_question)
                 questions_list += [q for q in questions[:5]]
                 continue
-            questions = self.select_related(
-                'lesson_question_level__test_type_lesson'
-            ).filter(
+            questions = self.filter(
                 variant__language=lang,
                 variant__is_active=True,
                 lesson_question_level__question_level=q,
