@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from src.accounts.models import User
-from src.course.models import Course, CourseTopic, Topic, CLesson, CourseLessonType
+from src.common.abstract_serializer import NameSerializer
+from src.course.models import Course, CourseTopic, Topic, CLesson, \
+    CourseLessonType
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -14,7 +16,7 @@ class OwnerSerializer(serializers.ModelSerializer):
         ]
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class CourseSerializer(NameSerializer):
     content_count = serializers.IntegerField(default=0)
     owner = OwnerSerializer(read_only=True)
 
@@ -26,9 +28,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'main_img',
             'price',
             'owner',
-            'name_kz',
-            'name_ru',
-            'name_en',
+            'name',
         )
 
 
@@ -53,22 +53,20 @@ class CourseCurriculumFilterSerializer(serializers.Serializer):
     uuid = serializers.UUIDField()
 
 
-class CourseLessonCurriculumSerializer(serializers.ModelSerializer):
-    course_lesson_type = serializers.FileField(source='course_lesson_type.icon')
+class CourseLessonCurriculumSerializer(NameSerializer):
+    course_lesson_type = serializers.FileField(
+        source='course_lesson_type.icon')
 
     class Meta:
         model = CLesson
         fields = [
             'uuid',
             'course_lesson_type',
-            'name_kz',
-            'name_ru',
-            'name_en',
+            'name',
         ]
 
 
-class CourseCurriculumSerializer(serializers.ModelSerializer):
-    # course_lesson = CourseLessonCurriculumSerializer(source='course_topic_lessons__course_lesson')
+class CourseCurriculumSerializer(NameSerializer):
     course_lessons = serializers.SerializerMethodField()
 
     class Meta:
@@ -76,9 +74,7 @@ class CourseCurriculumSerializer(serializers.ModelSerializer):
         fields = (
             'uuid',
             'course_lessons',
-            'name_kz',
-            'name_ru',
-            'name_en',
+            'name',
         )
 
     def get_course_lessons(self, obj):
@@ -89,7 +85,9 @@ class CourseCurriculumSerializer(serializers.ModelSerializer):
             for ctl in course_topic_lessons:
                 course_lessons.append(ctl.course_lesson)
         if course_lessons:
-            return CourseLessonCurriculumSerializer(course_lessons, many=True).data
+            return CourseLessonCurriculumSerializer(course_lessons,
+                                                    many=True,
+                                                    context=self.context).data
         return course_lessons
 
 

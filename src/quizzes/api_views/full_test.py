@@ -305,7 +305,7 @@ full_test_finish_view = EntFinishView.as_view()
 class GetTestFullScoreResultListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.TestFullScoreSerializer
-    queryset = TestFullScore.objects.all()
+    queryset = TestFullScore.objects.select_related('lesson').all()
 
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):
