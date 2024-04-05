@@ -128,7 +128,7 @@ class NewTestSerializer(serializers.ModelSerializer):
         bought_packet.save()
         lesson_pair = None
         lesson = None
-        if len(lessons) > 1:
+        if len(lessons) > 1 or 8 in lessons:
             lesson_pair = LessonPair.objects.filter(
                 Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
                 Q(lesson_1=lessons[-1], lesson_2=lessons[0])
