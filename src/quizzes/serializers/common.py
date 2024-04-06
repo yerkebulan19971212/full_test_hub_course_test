@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from django.conf import settings
 from django.db.models import Q
@@ -11,6 +12,8 @@ from src.common.models import BoughtPacket, LessonPair, CourseType, Lesson
 from src.quizzes.serializers import AnswerSerializer
 from src.quizzes.models import Question, CommonQuestion, StudentQuizz, \
     StudentQuizzFile, TestFullScore, StudentQuizzQuestion
+
+logger = logging.getLogger("quizzes.models.question")
 
 
 class MyTestSerializer(serializers.ModelSerializer):
@@ -152,8 +155,15 @@ class NewTestSerializer(serializers.ModelSerializer):
             questions += Question.objects.get_history_full_test_v2(
                 language, packet, user, quizz_type
             )
-            questions += Question.objects.get_reading_literacy_full_test_v2(
+            r_questions = Question.objects.get_reading_literacy_full_test_v2(
                 language, packet, user, quizz_type)
+            logger.critical(
+                f"user {user.id},"
+                f"student_quizz_id {student_quizz.id},"
+                f" len_questions_list {len(r_questions)}"
+                f" questions_list {[q.id for q in r_questions]}"
+            )
+            questions += r_questions
             if lesson_pair:
                 if lesson_pair.lesson_1.name_code != 'creative_exam':
                     questions += Question.objects.get_mat_full_test_v2(
