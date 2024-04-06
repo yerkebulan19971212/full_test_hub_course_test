@@ -122,10 +122,7 @@ class NewTestSerializer(serializers.ModelSerializer):
         ).first()
         if not bought_packet or bought_packet.remainder < 1:
             raise exception.DoesNotHaveTest()
-        if bought_packet.remainder == 1:
-            bought_packet.status = False
-        bought_packet.remainder -= 1
-        bought_packet.save()
+
         lesson_pair = None
         lesson = None
         if len(lessons) > 1 or 8 in lessons:
@@ -190,4 +187,8 @@ class NewTestSerializer(serializers.ModelSerializer):
         ) for i, q in enumerate(questions)])
         question_ids = [q.id for q in questions]
         student_user_question_count.delay(user.id, question_ids, quizz_type.id)
+        if bought_packet.remainder == 1:
+            bought_packet.status = False
+        bought_packet.remainder -= 1
+        bought_packet.save()
         return student_quizz

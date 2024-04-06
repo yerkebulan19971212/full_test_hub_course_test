@@ -125,35 +125,34 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
         return queryset
 
     def get_mat_full_test_v2(self, lang: str, packet, user, quizz_type):
-        questions = list(
-            self.filter(
-                variant__language=lang,
-                variant__is_active=True,
-                variant__variant_packets__packet=packet,
-                lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'
-            ).annotate(
-                user_question_count=Coalesce(
-                    Sum(
-                        'user_questions_count__quantity',
-                        filter=Q(
-                            user_questions_count__user=user,
-                            user_questions_count__quizz_type=quizz_type
-                        )),
-                    0)
-            ).order_by('user_question_count')
-        )
-        if len(questions) >= 20:
-            questions = questions[:len(questions) // 2]
-            for i in range(random.randint(1, 5)):
-                random.shuffle(questions)
-        else:
+        questions = list(self.select_related(
+            'lesson_question_level__test_type_lesson',
+        ).filter(
+            variant__language=lang,
+            variant__is_active=True,
+            variant__variant_packets__packet=packet,
+            lesson_question_level__test_type_lesson__lesson__name_code='mathematical_literacy'
+        ).annotate(
+            user_question_count=Coalesce(
+                Sum(
+                    'user_questions_count__quantity',
+                    filter=Q(
+                        user_questions_count__user=user,
+                        user_questions_count__quizz_type=quizz_type
+                    )),
+                0)
+        ).order_by('user_question_count'))
+        questions_count = len(questions)
+        if questions_count >= 20:
+            questions = questions[:questions_count // 2]
+        for i in range(random.randint(1, 5)):
             random.shuffle(questions)
         return questions[:10]
 
     def get_reading_literacy_full_test_v2(self, lang: str, packet, user,
                                           quizz_type):
         questions_list = []
-        for q in QuestionLevel.objects.all().order_by('id')[:3]:
+        for q in QuestionLevel.objects.order_by('id')[:3]:
             common_question = CommonQuestion.objects.get_common_question(
                 lang=lang, q=q,
                 packet=packet,
@@ -161,19 +160,30 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 user=user,
                 quizz_type=quizz_type
             )
+            print("name_code: ", q.name_code, " " 'common_question:',
+                  common_question)
             question_index = 2
             if q.name_code == 'B':
                 question_index = 3
             elif q.name_code == 'C':
                 question_index = 5
-            questions = list(self.filter(common_question=common_question))[
-                        :question_index]
+            questions = list(
+                self.select_related(
+                    'lesson_question_level__test_type_lesson',
+                ).filter(
+                    common_question=common_question
+                ))[:question_index]
+            print("name_code: ", q.name_code, " " 'questions:',
+                  len(questions))
             random.shuffle(questions)
             questions_list += questions
         return questions_list
 
     def get_history_full_test_v2(self, lang: str, packet, user, quizz_type):
         questions_list = []
+        queryset = self.select_related(
+            'lesson_question_level__test_type_lesson',
+        )
         for q in QuestionLevel.objects.all().order_by('id')[:4]:
             if q.name_code == 'C' or q.name_code == 'D':
                 common_question = CommonQuestion.objects.get_common_question(
@@ -182,10 +192,10 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     lesson='history_of_kazakhstan',
                     user=user, quizz_type=quizz_type
                 )
-                questions = self.filter(common_question=common_question)
+                questions = queryset.filter(common_question=common_question)
                 questions_list += [q for q in questions[:5]]
                 continue
-            questions = self.filter(
+            questions = queryset.filter(
                 variant__language=lang,
                 variant__is_active=True,
                 lesson_question_level__question_level=q,
@@ -216,13 +226,17 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     user=user,
                     quizz_type=quizz_type
                 )
-                questions = list(self.filter(common_question=common_question))
+                questions = list(
+                    queryset.filter(common_question=common_question))
                 random.shuffle(questions)
             questions_list += questions[:5]
         return questions_list
 
     def get_full_test_v2(self, lang: str, lesson, packet, user, quizz_type):
         questions_list = []
+        queryset = self.select_related(
+            'lesson_question_level__test_type_lesson',
+        )
         for q in QuestionLevel.objects.all().order_by('id'):
             if q.name_code == 'F':
                 common_question = CommonQuestion.objects.get_common_question(
@@ -233,11 +247,11 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 )
                 if common_question:
                     questions = list(
-                        self.filter(common_question=common_question))
+                        queryset.filter(common_question=common_question))
                     random.shuffle(questions)
                     questions_list += questions
                     continue
-            questions = list(self.filter(
+            questions = list(queryset.filter(
                 variant__is_active=True,
                 variant__language=lang,
                 lesson_question_level__question_level=q,
