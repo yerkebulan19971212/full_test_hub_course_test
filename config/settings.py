@@ -9,6 +9,7 @@ from pathlib import Path
 from pathlib import Path
 
 from src.services.utils import getenv_bool
+
 # import sentry_sdk
 
 #
@@ -128,7 +129,7 @@ DATABASES = {
         'NAME': 'course_dev',
         'USER': 'course_dev',
         'PASSWORD': 'course_dev',
-        'HOST': '185.125.90.25',
+        'HOST': 'localhost',  # '185.125.90.25',
         'PORT': '5433',
     }
 }
@@ -218,15 +219,33 @@ MEDIA_ROOT = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(name)-12s %(levelname)-8s %(message)s'
+        },
+        'file': {
+            'format': '[%(asctime)s] %(levelname)s | %(funcName)s | %(name)s | %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': CORE_DIR + '/logs/full_test_hub.log'
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file']
+        }
+    }
 }
 
 CACHES = {

@@ -1,3 +1,4 @@
+import logging
 import random
 from django.template.defaultfilters import truncatechars
 from django.db import models
@@ -11,11 +12,12 @@ from src.common.models import CourseTypeQuizz, CourseTypeLesson, Packet, \
 from src.quizzes import models as quizzes_models
 from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
 
+logger = logging.getLogger("quizzes.models.question")
+
 
 class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
     def get_common_question(self, lang, q, packet, lesson, user, quizz_type):
-        common_questions = list(
-            self.filter(
+        common_questions = self.filter(
                 questions__variant__is_active=True,
                 questions__variant__language=lang,
                 questions__lesson_question_level__question_level=q,
@@ -32,7 +34,16 @@ class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
                         )), 0
                 )
             ).order_by('user_question_count2')
-        )
+
+        logger.critical(
+            f"user {user.id},"
+            f"q.name_code {q.name_code},"
+            f" common_question {common_questions.query}")
+        common_questions = list(common_questions)
+        logger.critical(
+            f"user {user.id},"
+            f"q.name_code {q.name_code},"
+            f" common_question {len(common_questions)}")
         if len(common_questions) >= 2:
             common_questions = common_questions[:len(common_questions) // 2]
             for i in range(random.randint(1, 5)):
@@ -160,8 +171,16 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 user=user,
                 quizz_type=quizz_type
             )
-            print("name_code: ", q.name_code, " " 'common_question:',
-                  common_question)
+            if common_question is None:
+                logger.critical(
+                    f"user {user.id},"
+                    f"q.name_code {q.name_code},"
+                    f" common_question {common_question}")
+            else:
+                logger.critical(
+                    f"user {user.id},"
+                    f"q.name_code {q.name_code},"
+                    f" common_question {common_question.id}")
             question_index = 2
             if q.name_code == 'B':
                 question_index = 3
@@ -173,8 +192,11 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 ).filter(
                     common_question=common_question
                 ))[:question_index]
-            print("name_code: ", q.name_code, " " 'questions:',
-                  len(questions))
+
+            logger.critical(
+                f"user {user.id},"
+                f"q.name_code {q.name_code},"
+                f" len_questions {len(questions)}")
             random.shuffle(questions)
             questions_list += questions
         return questions_list
