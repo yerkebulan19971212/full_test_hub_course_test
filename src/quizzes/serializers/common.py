@@ -196,6 +196,12 @@ class NewTestSerializer(serializers.ModelSerializer):
             student_quizz=student_quizz
         ) for i, q in enumerate(questions)])
         question_ids = [q.id for q in questions]
+        logger.critical(
+            f"user {user.id},"
+            f"student_quizz_id {student_quizz.id},"
+            f" questions_list {len(question_ids)}"
+            f" questions_list {question_ids}"
+        )
         student_user_question_count.delay(user.id, question_ids, quizz_type.id)
         if bought_packet.remainder == 1:
             bought_packet.status = False
