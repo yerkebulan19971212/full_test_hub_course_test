@@ -196,13 +196,17 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             logger.critical(
                 f"user {user.id},"
                 f"q.name_code {q.name_code},"
-                f" len_questions {len(questions)}")
+                f" len_questions {len(questions)}",
+                f" questions {[q.id for q in questions]}",
+            )
             random.shuffle(questions)
             questions_list += questions
             logger.critical(
                 f"user {user.id},"
                 f"q.name_code {q.name_code},"
-                f" len_questions_list {len(questions_list)}")
+                f" len_questions_list {len(questions_list)}"
+                f" questions_list {[q.id for q in questions_list]}"
+            )
         return questions_list
 
     def get_history_full_test_v2(self, lang: str, packet, user, quizz_type):
