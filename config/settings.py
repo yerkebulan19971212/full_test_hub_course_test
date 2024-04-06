@@ -129,7 +129,7 @@ DATABASES = {
         'NAME': 'course_dev',
         'USER': 'course_dev',
         'PASSWORD': 'course_dev',
-        'HOST': 'localhost',  # '185.125.90.25',
+        'HOST': '185.125.90.25',
         'PORT': '5433',
     }
 }
