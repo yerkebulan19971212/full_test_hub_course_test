@@ -1,49 +1,36 @@
-import logging
 import random
 from django.template.defaultfilters import truncatechars
 from django.db import models
-from django.db.models import Prefetch, Count, Q, Sum
+from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 
 from src.common import abstract_models
 from src.common.constant import ChoiceType, QuestionType
-from src.common.models import CourseTypeQuizz, CourseTypeLesson, Packet, \
-    quizz_type
+from src.common.models import CourseTypeQuizz
 from src.quizzes import models as quizzes_models
-from src.quizzes.models import StudentQuizz, Variant, QuestionLevel
-
-logger = logging.getLogger("quizzes.models.question")
+from src.quizzes.models import StudentQuizz, QuestionLevel
 
 
 class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
     def get_common_question(self, lang, q, packet, lesson, user, quizz_type):
         common_questions = self.filter(
-                questions__variant__is_active=True,
-                questions__variant__language=lang,
-                questions__lesson_question_level__question_level=q,
-                questions__variant__variant_packets__packet=packet,
-                questions__lesson_question_level__test_type_lesson__lesson__name_code=lesson,
-                questions__parent__isnull=True,
-            ).annotate(
-                user_question_count2=Coalesce(
-                    Sum(
-                        'questions__user_questions_count__quantity',
-                        filter=Q(
-                            questions__user_questions_count__user=user,
-                            questions__user_questions_count__quizz_type=quizz_type
-                        )), 0
-                )
-            ).order_by('user_question_count2')
-
-        logger.critical(
-            f"user {user.id},"
-            f"q.name_code {q.name_code},"
-            f" common_question {common_questions.query}")
+            questions__variant__is_active=True,
+            questions__variant__language=lang,
+            questions__lesson_question_level__question_level=q,
+            questions__variant__variant_packets__packet=packet,
+            questions__lesson_question_level__test_type_lesson__lesson__name_code=lesson,
+            questions__parent__isnull=True,
+        ).annotate(
+            user_question_count2=Coalesce(
+                Sum(
+                    'questions__user_questions_count__quantity',
+                    filter=Q(
+                        questions__user_questions_count__user=user,
+                        questions__user_questions_count__quizz_type=quizz_type
+                    )), 0
+            )
+        ).order_by('user_question_count2')
         common_questions = list(common_questions)
-        logger.critical(
-            f"user {user.id},"
-            f"q.name_code {q.name_code},"
-            f" common_question {len(common_questions)}")
         if len(common_questions) >= 2:
             common_questions = common_questions[:len(common_questions) // 2]
             for i in range(random.randint(1, 5)):
@@ -171,16 +158,6 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 user=user,
                 quizz_type=quizz_type
             )
-            if common_question is None:
-                logger.critical(
-                    f"user {user.id},"
-                    f"q.name_code {q.name_code},"
-                    f" common_question {common_question}")
-            else:
-                logger.critical(
-                    f"user {user.id},"
-                    f"q.name_code {q.name_code},"
-                    f" common_question {common_question.id}")
             question_index = 2
             if q.name_code == 'B':
                 question_index = 3
@@ -192,21 +169,8 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                 ).filter(
                     common_question=common_question
                 ))[:question_index]
-
-            logger.critical(
-                f"user {user.id},"
-                f"q.name_code {q.name_code},"
-                f" len_questions {len(questions)}",
-                f" questions {[q.id for q in questions]}",
-            )
             random.shuffle(questions)
             questions_list += questions
-            logger.critical(
-                f"user {user.id},"
-                f"q.name_code {q.name_code},"
-                f" len_questions_list {len(questions_list)}"
-                f" questions_list {[q.id for q in questions_list]}"
-            )
         return questions_list
 
     def get_history_full_test_v2(self, lang: str, packet, user, quizz_type):
