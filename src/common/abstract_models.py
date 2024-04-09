@@ -49,6 +49,13 @@ class AbstractBaseName(models.Model):
         abstract = True
 
 
+class Description(models.Model):
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class AbstractBaseNameCode(models.Model):
     name_code = models.CharField(
         max_length=255,
@@ -77,6 +84,13 @@ class Deleted(models.Model):
         abstract = True
 
 
+class Icon(models.Model):
+    icon = models.FileField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class AbstractQuerySet(models.QuerySet):
 
     def get_all_active(self):
@@ -96,3 +110,8 @@ class AbstractManager(models.Manager):
 
     def is_active(self):
         return self.get_queryset().is_active()
+
+    def not_deleted(self):
+        return self.is_active().not_deleted()
+
+

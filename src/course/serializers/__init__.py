@@ -7,3 +7,4 @@ from .course import (
     CourseLessonUserSerializer,
     CourseTopicCurriculumSerializer
 )
+from .category import CategorySerializer

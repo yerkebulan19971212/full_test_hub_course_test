@@ -36,12 +36,21 @@ class Course(
     description = models.TextField(null=True)
     main_img = models.FileField()
     price = models.FloatField(default=0)
+    category = models.ForeignKey(
+        'course.Category',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        db_index=True,
+        related_name="courses"
+    )
     from_course = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        db_index=True
+        db_index=True,
+        related_name="children"
     )
 
     objects = CourseManager.from_queryset(CourseQuerySet)()

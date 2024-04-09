@@ -73,7 +73,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
             variant__variant_packets__packet=packet,
             lesson_question_level__test_type_lesson__lesson_id=lesson,
             question_type=QuestionType.DEFAULT,
-        )[:question_number]
+        ).order_by("?")[:question_number]
 
     def get_questions_by_lesson(
             self, lang: str, lesson, user, packet, quizz_type):
