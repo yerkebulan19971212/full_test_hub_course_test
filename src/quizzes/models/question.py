@@ -67,13 +67,30 @@ class CommonQuestion(abstract_models.TimeStampedModel):
 class QuestionQuerySet(abstract_models.AbstractQuerySet):
 
     def get_questions_for_flash_card(
-            self, lang: str, lesson: int, question_number: int, packet):
-        return self.filter(
-            variant__language=lang,
-            variant__variant_packets__packet=packet,
-            lesson_question_level__test_type_lesson__lesson_id=lesson,
+            self, student_quizz_id: int, question_number: int, quizz_type):
+
+        student_quizz = StudentQuizz.objects.get(pk=student_quizz_id)
+        answer_queryset = quizzes_models.Answer.objects.all()
+        queryset = self.prefetch_related(
+            Prefetch('answers', queryset=answer_queryset)
+        ).filter(
+            lesson_question_level__question_level__choice=ChoiceType.CHOICE,
             question_type=QuestionType.DEFAULT,
-        ).order_by("?")[:question_number]
+            common_question__isnull=True,
+            variant__language=student_quizz.language,
+            variant__variant_packets__packet=student_quizz.packet,
+            lesson_question_level__test_type_lesson__lesson=student_quizz.lesson,
+        ).annotate(
+            question_count=Coalesce(
+                Sum(
+                    'user_questions_count__quantity',
+                    filter=Q(
+                        user_questions_count__user=student_quizz.user,
+                        user_questions_count__quizz_type=quizz_type
+                    )),
+                0),
+        ).order_by('question_count', '?')
+        return queryset[:question_number]
 
     def get_questions_by_lesson(
             self, lang: str, lesson, user, packet, quizz_type):

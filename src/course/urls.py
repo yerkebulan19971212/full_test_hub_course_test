@@ -7,9 +7,13 @@ from src.course.api_views.views import (course_list_view, course_view,
 from src.course.api_views import (category_list_view,
                                   course_create_view,
                                   admin_course_list_view,
-                                  admin_course_retrieve_update_destroy_view)
+                                  admin_course_retrieve_update_destroy_view,
+                                  topic_create_view,
+                                  admin_course_topic_list_view)
 
 admin_urlpatterns = [
+    path('section/', topic_create_view),
+    path('section/all/', admin_course_topic_list_view),
     path('category/all/', category_list_view),
     path('course/', course_create_view),
     path('course/all/', admin_course_list_view),

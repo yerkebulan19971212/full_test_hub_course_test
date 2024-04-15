@@ -174,10 +174,9 @@ class NewTestSerializer(serializers.ModelSerializer):
             )
         elif quizz_type_name == 'flash_card':
             questions = list(Question.objects.get_questions_for_flash_card(
-                language,
-                lesson,
-                question_number,
-                packet
+                student_quizz_id=student_quizz.id,
+                question_number=question_number,
+                quizz_type=quizz_type
             ))
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,

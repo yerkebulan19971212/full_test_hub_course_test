@@ -19,7 +19,6 @@ class CourseLessonType(
 
 class CLesson(
     abstract_models.UUID,
-    abstract_models.AbstractBaseName,
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
@@ -27,6 +26,7 @@ class CLesson(
     abstract_models.TimeStampedModel,
     abstract_models.Deleted
 ):
+    title = models.CharField(max_length=1024, default='', blank=True)
     owner = models.ForeignKey(
         'accounts.User',
         on_delete=models.CASCADE,

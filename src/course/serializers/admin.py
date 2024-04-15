@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from src.common.abstract_serializer import NameSerializer
-from src.course.models import Course, Category
+from src.course.models import Course, Category, CourseTopic, Topic, CLesson
 
 
 class RecursiveSerializer(serializers.Serializer):
@@ -49,4 +49,76 @@ class CourseListSerializer(serializers.ModelSerializer):
             'uuid',
             'title',
             'main_img',
+        )
+
+
+class TopicCreateSerializer(serializers.ModelSerializer):
+    course_uuid = serializers.UUIDField(required=True, write_only=True)
+
+    class Meta:
+        model = Topic
+        fields = (
+            'title',
+            'course_uuid',
+        )
+
+    def create(self, validated_data):
+        order = 1
+        course_uuid = validated_data.pop('course_uuid')
+        course = Course.api_objects.get(uuid=course_uuid)
+        course_topic = CourseTopic.api_objects.all_active().filter(
+            course=course
+        ).order_by('order')
+        if course_topic.exists():
+            order = course_topic.last().order + 1
+        validated_data['owner'] = course.owner
+        validated_data['order'] = order
+        topic = super().create(validated_data)
+        CourseTopic.objects.create(
+            owner=course.owner,
+            course=course,
+            topic=topic,
+            order=order
+        )
+        return topic
+
+
+class CourseTopicCreateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField()
+
+    class Meta:
+        model = Topic
+        fields = (
+            'title',
+        )
+
+    def update(self, instance, validated_data):
+        title = validated_data.pop('title')
+        topic = instance.topic
+        topic.title = title
+        topic.save()
+        return instance
+
+
+class CLessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CLesson
+        fields = [
+            'uuid',
+            'title',
+            'order'
+        ]
+
+
+class CourseTopicListSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='topic.title', read_only=True)
+    lessons = CLessonSerializer(source='course_topic_lessons')
+
+    class Meta:
+        model = CourseTopic
+        fields = (
+            'uuid',
+            'title',
+            'order',
+            'lessons'
         )

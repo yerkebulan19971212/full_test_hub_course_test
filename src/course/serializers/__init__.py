@@ -9,4 +9,4 @@ from .course import (
 )
 from .admin import (CourseCreateSerializer,
                     CategorySerializer,
-                    CourseListSerializer)
+                    CourseListSerializer, TopicCreateSerializer,CourseTopicListSerializer)

@@ -28,9 +28,7 @@ class FlashCardQuizzSerializer(serializers.ModelSerializer):
             quizz_type__name_code='flash_card').first()
         validated_data["course_type"] = CourseType.objects.get_ent()
         student_quizz = super().create(validated_data)
-        questions = Question.objects.get_questions_for_flash_card(language,
-                                                                  lesson,
-                                                                  question_number)
+        questions = Question.objects.get_questions_for_flash_card(student_quizz.id, question_number)
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             question=q,
             student_quizz=student_quizz,
