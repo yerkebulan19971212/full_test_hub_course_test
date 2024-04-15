@@ -4,5 +4,10 @@ from .course import (
     CourseCurriculumFilterSerializer,
     CourseCurriculumSerializer,
     CourseCurriculumUserSerializer,
-    CourseLessonUserSerializer
+    CourseLessonUserSerializer,
+    CourseTopicCurriculumSerializer,
 )
+from .admin import (CourseCreateSerializer,
+                    CategorySerializer, CreateCLessonSerializer,
+                    CourseListSerializer, TopicCreateSerializer,
+                    CourseTopicListSerializer)

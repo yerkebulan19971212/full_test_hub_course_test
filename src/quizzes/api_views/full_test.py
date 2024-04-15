@@ -162,16 +162,24 @@ class FullQuizLessonListView(generics.ListAPIView):
         main_lessons = queryset.filter(
             course_type_lessons__main=True,
         ).order_by('course_type_lessons__main', 'id')
-        lesson_1_name_code = student_quizz.lesson_pair.lesson_1.name_code
-        if lesson_1_name_code == "creative_exam":
+        if not student_quizz.lesson_pair:
             main_lessons = main_lessons.exclude(
                 name_code="mathematical_literacy")
+            # lesson_1_name_code = student_quizz.lesson_pair.lesson_1.name_code
+            # if lesson_1_name_code == "creative_exam":
+            #     main_lessons = main_lessons.exclude(
+            #         name_code="mathematical_literacy")
         elif student_quizz.lesson_pair:
-            other_lessons = queryset.filter(
-                course_type_lessons__course_type__name_code="ent",
-                id__in=[student_quizz.lesson_pair.lesson_1_id,
-                        student_quizz.lesson_pair.lesson_2_id])
-            main_lessons = main_lessons | other_lessons
+            lesson_1_name_code = student_quizz.lesson_pair.lesson_1.name_code
+            if lesson_1_name_code == "creative_exam":
+                main_lessons = main_lessons.exclude(
+                    name_code="mathematical_literacy")
+            else:
+                other_lessons = queryset.filter(
+                    course_type_lessons__course_type__name_code="ent",
+                    id__in=[student_quizz.lesson_pair.lesson_1_id,
+                            student_quizz.lesson_pair.lesson_2_id])
+                main_lessons = main_lessons | other_lessons
 
         return main_lessons.order_by('-course_type_lessons__main', 'id')
 
@@ -304,7 +312,7 @@ full_test_finish_view = EntFinishView.as_view()
 class GetTestFullScoreResultListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.TestFullScoreSerializer
-    queryset = TestFullScore.objects.all()
+    queryset = TestFullScore.objects.select_related('lesson').all()
 
     @swagger_auto_schema(tags=["full-test"])
     def get(self, request, *args, **kwargs):

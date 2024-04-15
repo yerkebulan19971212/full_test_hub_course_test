@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import (Course, CLesson, CourseLessonType, CourseTopicLesson, CourseTopic, Topic, UserCLesson)
+from .models import (Course, CLesson, CourseLessonType, CourseTopicLesson,
+                     Category, CourseTopic, Topic, UserCLesson)
 
 admin.site.register([
     Course,
@@ -8,5 +9,6 @@ admin.site.register([
     CourseTopic,
     Topic,
     CourseLessonType,
-    UserCLesson
+    UserCLesson,
+    Category
 ])

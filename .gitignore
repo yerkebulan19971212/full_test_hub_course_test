@@ -94,3 +94,4 @@ conc.py
 .idea/
 logs/*
 staticfiles/*
+logs

@@ -127,11 +127,7 @@ class ByLessonQuizLessonListView(generics.ListAPIView):
             StudentQuizz.objects.select_related('lesson'), pk=student_quizz_id)
 
         queryset = self.queryset
-        lesson = queryset.filter(pk=student_quizz.lesson_id).annotate(
-            sum_of_questions=Count('student_quizz_questions',
-                                   filter=Q(
-                                       student_quizz_questions__student_quizz=student_quizz))
-        )
+        lesson = queryset.filter(pk=student_quizz.lesson_id)
 
         return lesson.order_by('-course_type_lessons__main', 'id')
 

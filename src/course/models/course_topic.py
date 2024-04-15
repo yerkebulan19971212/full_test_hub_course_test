@@ -5,10 +5,10 @@ from src.common import abstract_models
 
 class Topic(
     abstract_models.UUID,
-    abstract_models.AbstractBaseName,
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
+    abstract_models.Description,
     abstract_models.TimeStampedModel
 ):
     owner = models.ForeignKey(
@@ -17,7 +17,7 @@ class Topic(
         null=True, blank=True,
         related_name="course_topics"
     )
-    description = models.TextField(null=True)
+    title = models.CharField(max_length=1024, default='', blank=True)
     from_course_topic = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
@@ -31,6 +31,18 @@ class Topic(
 
     def __str__(self):
         return f'{self.description}'
+
+
+class CourseTopicQuerySet(abstract_models.AbstractQuerySet):
+    pass
+
+
+class CourseTopicAPIManager(abstract_models.AbstractManager):
+    def all_active(self):
+        return self.is_active()
+
+    def ordering(self):
+        self.all_active().order_by('order')
 
 
 class CourseTopic(
@@ -58,6 +70,8 @@ class CourseTopic(
         null=True, blank=True,
         related_name="course_topic"
     )
+    objects = models.Manager.from_queryset(models.QuerySet)()
+    api_objects = CourseTopicAPIManager.from_queryset(CourseTopicQuerySet)()
 
     class Meta:
         db_table = 'course\".\"course_topic'
