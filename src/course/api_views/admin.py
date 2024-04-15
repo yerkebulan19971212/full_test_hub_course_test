@@ -4,8 +4,24 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 
-from src.course.models import Category, Course, CourseTopic
+from src.course.models import Category, Course, CourseTopic, CourseLessonType
 from src.course import serializers, filters
+
+
+class CourseLessonTypeListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CourseLessonType.objects.filter(
+        is_active=True,
+        deleted__isnull=True,
+    ).order_by("order")
+    serializer_class = serializers.CategorySerializer
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+c_lesson_type_list_view = CourseLessonTypeListView.as_view()
 
 
 class CategoryListView(generics.ListAPIView):
@@ -86,7 +102,7 @@ topic_create_view = CreateTopicView.as_view()
 
 
 class CourseTopicListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CourseTopicListSerializer
     queryset = CourseTopic.api_objects.all_active().select_related(
         'topic'
@@ -128,3 +144,13 @@ class TopicRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 topic_retrieve_update_view = TopicRetrieveUpdateDestroyView.as_view()
 
 
+class CreateCLessonView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.CreateCLessonSerializer
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+c_lesson_create_view = CreateCLessonView.as_view()

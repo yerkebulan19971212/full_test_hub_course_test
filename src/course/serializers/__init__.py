@@ -8,5 +8,6 @@ from .course import (
     CourseTopicCurriculumSerializer,
 )
 from .admin import (CourseCreateSerializer,
-                    CategorySerializer,
-                    CourseListSerializer, TopicCreateSerializer,CourseTopicListSerializer)
+                    CategorySerializer, CreateCLessonSerializer,
+                    CourseListSerializer, TopicCreateSerializer,
+                    CourseTopicListSerializer)

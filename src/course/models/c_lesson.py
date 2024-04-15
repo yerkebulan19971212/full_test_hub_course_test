@@ -33,6 +33,7 @@ class CLesson(
         null=True, blank=True,
         related_name="c_lessons"
     )
+    duration = models.DurationField(null=True, blank=True)
     img = models.FileField(null=True)
     course_lesson_type = models.ForeignKey(
         CourseLessonType,

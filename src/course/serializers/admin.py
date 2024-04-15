@@ -1,7 +1,18 @@
 from rest_framework import serializers
 
 from src.common.abstract_serializer import NameSerializer
-from src.course.models import Course, Category, CourseTopic, Topic, CLesson
+from src.course.models import Course, Category, CourseTopic, Topic, CLesson, \
+    CourseLessonType
+
+
+class CourseLessonTypeSerializer(NameSerializer):
+    class Meta:
+        model = CourseLessonType
+        fields = (
+            'uuid',
+            'name',
+            'icon',
+        )
 
 
 class RecursiveSerializer(serializers.Serializer):
@@ -121,4 +132,14 @@ class CourseTopicListSerializer(serializers.ModelSerializer):
             'title',
             'order',
             'lessons'
+        )
+
+
+class CreateCLessonSerializer(NameSerializer):
+    class Meta:
+        model = CLesson
+        fields = (
+            'title',
+            'course_lesson_type',
+            'duration',
         )
