@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from config.celery import student_user_question_count
 from src.common import exception
-from src.common.models import BoughtPacket, LessonPair, CourseType, Lesson
+from src.common.models import BoughtPacket, LessonPair, CourseType, Lesson, RatingTest
 from src.quizzes.models import (Question, StudentQuizz,
                                 StudentQuizzFile, TestFullScore,
                                 StudentQuizzQuestion)
@@ -114,9 +114,13 @@ class NewTestSerializer(serializers.ModelSerializer):
         packet = validated_data.get("packet")
         question_number = validated_data.pop("question_number")
         language = validated_data.get("language")
+        rating_test = None
+        if packet.name_code == 'rating':
+            rating_test = RatingTest.objects.all().order_by('id').last()
         bought_packet = BoughtPacket.objects.filter(
             user=user,
             packet=packet,
+            rating_test=rating_test,
             status=True
         ).first()
         if not bought_packet or bought_packet.remainder < 1:
