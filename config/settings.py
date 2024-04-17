@@ -9,6 +9,7 @@ from pathlib import Path
 from pathlib import Path
 
 from src.services.utils import getenv_bool
+
 # import sentry_sdk
 
 #
@@ -38,16 +39,9 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://ent.testhub.kz',
-    'https://admin-course.testhub.kz',
-    'https://admin-ent.testhub.kz',
-    'https://dev-ent.testhub.kz',
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS').split(';')
 
 # Application definition
-
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -225,15 +219,33 @@ MEDIA_ROOT = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(name)-12s %(levelname)-8s %(message)s'
+        },
+        'file': {
+            'format': '[%(asctime)s] %(levelname)s | %(funcName)s | %(name)s | %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': CORE_DIR + '/logs/full_test_hub.log'
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file']
+        }
+    }
 }
 
 CACHES = {

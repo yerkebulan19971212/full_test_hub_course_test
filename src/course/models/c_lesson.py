@@ -5,33 +5,35 @@ from src.common import abstract_models
 
 class CourseLessonType(
     abstract_models.UUID,
+    abstract_models.AbstractBaseName,
     abstract_models.AbstractBaseNameCode,
+    abstract_models.Description,
     abstract_models.Ordering,
     abstract_models.IsActive,
+    abstract_models.Icon,
     abstract_models.TimeStampedModel,
     abstract_models.Deleted
 ):
-    icon = models.FileField()
+    pass
 
 
 class CLesson(
     abstract_models.UUID,
-    abstract_models.AbstractBaseName,
     abstract_models.AbstractBaseNameCode,
     abstract_models.Ordering,
     abstract_models.IsActive,
+    abstract_models.Description,
     abstract_models.TimeStampedModel,
     abstract_models.Deleted
 ):
+    title = models.CharField(max_length=1024, default='', blank=True)
     owner = models.ForeignKey(
         'accounts.User',
         on_delete=models.CASCADE,
         null=True, blank=True,
         related_name="c_lessons"
     )
-    description = models.TextField(null=True)
-    text = models.TextField(null=True)
-    video = models.URLField(null=True)
+    duration = models.DurationField(null=True, blank=True)
     img = models.FileField(null=True)
     course_lesson_type = models.ForeignKey(
         CourseLessonType,
@@ -48,6 +50,37 @@ class CLesson(
 
     class Meta:
         db_table = 'course\".\"c_lessons'
+
+    def __str__(self):
+        return f'{self.name_code}'
+
+
+class CLessonContent(
+    abstract_models.UUID,
+    abstract_models.AbstractBaseName,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted
+):
+    owner = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name="c_lesson_content"
+    )
+    text = models.TextField(null=True)
+    video = models.URLField(null=True)
+    img = models.FileField(null=True)
+    file = models.FileField(null=True)
+    course_lesson = models.ForeignKey(
+        CLesson,
+        on_delete=models.CASCADE,
+        related_name="c_lesson_content"
+    )
+
+    class Meta:
+        db_table = 'course\".\"c_lesson_content'
 
     def __str__(self):
         return f'{self.name_code}'

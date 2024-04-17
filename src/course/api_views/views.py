@@ -44,7 +44,8 @@ class CourseCurriculumView(generics.ListAPIView):
 
     def get_queryset(self):
         uuid = self.request.query_params.get('uuid')
-        queryset = super().get_queryset().filter(course__uuid=uuid).prefetch_related(
+        queryset = super().get_queryset().filter(
+            course__uuid=uuid).prefetch_related(
             'course_topic_lessons'
         )
         return queryset
@@ -79,6 +80,26 @@ course_curriculum_user_view = CourseCurriculumUserView.as_view()
 
 
 class CourseLessonUserView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CLesson.objects.all()
+    serializer_class = serializers.CourseLessonUserSerializer
+
+    def get_queryset(self):
+        uuid = self.request.query_params.get('uuid')
+        return super().get_queryset().filter(
+            course_topic_lessons__course_topic__topic__uuid=uuid
+        )
+
+    @swagger_auto_schema(tags=["course"],
+                         query_serializer=CourseCurriculumFilterSerializer)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+course_lesson_user_view = CourseLessonUserView.as_view()
+
+
+class CourseLessonUserView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = CLesson.objects.all()
     serializer_class = serializers.CourseLessonUserSerializer

@@ -5,12 +5,11 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from config.celery import student_user_question_count
-from src.common.exception import DoesNotHaveTest
 from src.common import exception
 from src.common.models import BoughtPacket, LessonPair, CourseType, Lesson
-from src.quizzes.serializers import AnswerSerializer
-from src.quizzes.models import Question, CommonQuestion, StudentQuizz, \
-    StudentQuizzFile, TestFullScore, StudentQuizzQuestion
+from src.quizzes.models import (Question, StudentQuizz,
+                                StudentQuizzFile, TestFullScore,
+                                StudentQuizzQuestion)
 
 
 class MyTestSerializer(serializers.ModelSerializer):
@@ -122,10 +121,7 @@ class NewTestSerializer(serializers.ModelSerializer):
         ).first()
         if not bought_packet or bought_packet.remainder < 1:
             raise exception.DoesNotHaveTest()
-        if bought_packet.remainder == 1:
-            bought_packet.status = False
-        bought_packet.remainder -= 1
-        bought_packet.save()
+
         lesson_pair = None
         lesson = None
         if len(lessons) > 1 or 8 in lessons:
@@ -155,8 +151,9 @@ class NewTestSerializer(serializers.ModelSerializer):
             questions += Question.objects.get_history_full_test_v2(
                 language, packet, user, quizz_type
             )
-            questions += Question.objects.get_reading_literacy_full_test_v2(
+            r_questions = Question.objects.get_reading_literacy_full_test_v2(
                 language, packet, user, quizz_type)
+            questions += r_questions
             if lesson_pair:
                 if lesson_pair.lesson_1.name_code != 'creative_exam':
                     questions += Question.objects.get_mat_full_test_v2(
@@ -177,10 +174,9 @@ class NewTestSerializer(serializers.ModelSerializer):
             )
         elif quizz_type_name == 'flash_card':
             questions = list(Question.objects.get_questions_for_flash_card(
-                language,
-                lesson,
-                question_number,
-                packet
+                student_quizz_id=student_quizz.id,
+                question_number=question_number,
+                quizz_type=quizz_type
             ))
         StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,
@@ -190,4 +186,8 @@ class NewTestSerializer(serializers.ModelSerializer):
         ) for i, q in enumerate(questions)])
         question_ids = [q.id for q in questions]
         student_user_question_count.delay(user.id, question_ids, quizz_type.id)
+        if bought_packet.remainder == 1:
+            bought_packet.status = False
+        bought_packet.remainder -= 1
+        bought_packet.save()
         return student_quizz
