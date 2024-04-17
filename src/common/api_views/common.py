@@ -28,8 +28,10 @@ class PacketListView(generics.ListAPIView):
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset=queryset)
         if queryset.first().quizz_type.quizz_type.name_code == 'full_test':
+            rating_period = RatingTest.objects.all().order_by('id').last()
             p = Packet.objects.filter(
                 name_code='rating',
+                bought_packets__rating_test=rating_period,
                 bought_packets__user=self.request.user,
                 bought_packets__status=True,
                 is_active=True,
