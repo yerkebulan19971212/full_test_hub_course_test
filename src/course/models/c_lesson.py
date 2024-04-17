@@ -57,17 +57,22 @@ class CLesson(
 
 class CLessonContent(
     abstract_models.UUID,
-    abstract_models.AbstractBaseName,
     abstract_models.Ordering,
     abstract_models.IsActive,
     abstract_models.TimeStampedModel,
     abstract_models.Deleted
 ):
+    course_lesson_type = models.ForeignKey(
+        CourseLessonType,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="c_lesson_contents"
+    )
     owner = models.ForeignKey(
         'accounts.User',
         on_delete=models.CASCADE,
         null=True, blank=True,
-        related_name="c_lesson_content"
+        related_name="c_lesson_contents"
     )
     text = models.TextField(null=True)
     video = models.URLField(null=True)
@@ -76,14 +81,11 @@ class CLessonContent(
     course_lesson = models.ForeignKey(
         CLesson,
         on_delete=models.CASCADE,
-        related_name="c_lesson_content"
+        related_name="c_lesson_contents"
     )
 
     class Meta:
         db_table = 'course\".\"c_lesson_content'
-
-    def __str__(self):
-        return f'{self.name_code}'
 
 
 class CourseTopicLesson(

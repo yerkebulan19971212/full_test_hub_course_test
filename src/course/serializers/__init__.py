@@ -7,7 +7,12 @@ from .course import (
     CourseLessonUserSerializer,
     CourseTopicCurriculumSerializer,
 )
-from .admin import (CourseCreateSerializer,
-                    CategorySerializer, CreateCLessonSerializer,
-                    CourseListSerializer, TopicCreateSerializer,
-                    CourseTopicListSerializer)
+from .admin import (
+    CourseCreateSerializer,
+    CategorySerializer,
+    CreateCLessonSerializer,
+    CourseListSerializer,
+    TopicCreateSerializer,
+    CourseTopicListSerializer,
+    CreateContentLessonSerializer
+)

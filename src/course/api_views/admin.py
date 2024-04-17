@@ -154,3 +154,41 @@ class CreateCLessonView(generics.CreateAPIView):
 
 
 c_lesson_create_view = CreateCLessonView.as_view()
+
+
+class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.CreateCLessonSerializer
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+retrieve_update_destroy_lesson_create_view = RetrieveUpdateDestroyCLessonView.as_view()
+
+
+class CreateContentLessonView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.CreateContentLessonSerializer
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+content_lesson_create_view = CreateContentLessonView.as_view()
+
+
+class RetrieveUpdateDestroyContentLessonView(
+    generics.RetrieveUpdateDestroyAPIView
+):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.CreateContentLessonSerializer
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+retrieve_update_destroy_content_lesson_view = RetrieveUpdateDestroyContentLessonView.as_view()

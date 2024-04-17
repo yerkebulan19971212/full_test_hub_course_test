@@ -3,6 +3,7 @@ from rest_framework import serializers
 from src.common.abstract_serializer import NameSerializer
 from src.course.models import Course, Category, CourseTopic, Topic, CLesson, \
     CourseLessonType
+from src.course.models.c_lesson import CLessonContent
 
 
 class CourseLessonTypeSerializer(NameSerializer):
@@ -135,11 +136,54 @@ class CourseTopicListSerializer(serializers.ModelSerializer):
         )
 
 
+class CLessonContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CLessonContent
+        fields = [
+            'uuid',
+            'uuid',
+            'uuid',
+        ]
+
+
+class ContentLessonSerializer(serializers.ModelSerializer):
+    course_lesson_type = CourseLessonTypeSerializer()
+
+    class Meta:
+        model = CLessonContent
+        fields = (
+            'course_lesson_type',
+            'text',
+            'video',
+            'img',
+            'file',
+            'course_lesson'
+        )
+
+
 class CreateCLessonSerializer(NameSerializer):
+    lesson_contents = ContentLessonSerializer()
+
     class Meta:
         model = CLesson
         fields = (
             'title',
             'course_lesson_type',
             'duration',
+            'lesson_contents'
+        )
+
+
+class CreateContentLessonSerializer(serializers.ModelSerializer):
+    course_lesson_type = CourseLessonTypeSerializer()
+
+    class Meta:
+        model = CLessonContent
+        fields = (
+            'course_lesson_type',
+            'text',
+            'video',
+            'img',
+            'file',
+            'course_lesson'
         )
