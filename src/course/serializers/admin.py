@@ -71,18 +71,19 @@ class CourseListSerializer(serializers.ModelSerializer):
 
 class TopicCreateSerializer(serializers.ModelSerializer):
     course_uuid = serializers.UUIDField(required=True, write_only=True)
+    course_id = serializers.UUIDField(required=True, write_only=True)
 
     class Meta:
         model = Topic
         fields = (
             'title',
-            'course_uuid',
+            'course_id',
         )
 
     def create(self, validated_data):
         order = 1
-        course_uuid = validated_data.pop('course_uuid')
-        course = Course.api_objects.get(uuid=course_uuid)
+        course_id = validated_data.pop('course_id')
+        course = Course.api_objects.get(id=course_id)
         course_topic = CourseTopic.api_objects.all_active().filter(
             course=course
         ).order_by('order')
@@ -120,11 +121,13 @@ class CourseTopicCreateSerializer(serializers.ModelSerializer):
 class CLessonSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='course_lesson.title')
     lesson_uuid = serializers.CharField(source='course_lesson.uuid')
+    lesson_id = serializers.CharField(source='course_lesson_id')
 
     class Meta:
         model = CourseTopicLesson
         fields = [
             # 'uuid',
+            'lesson_id',
             'lesson_uuid',
             'title',
             'order'
@@ -138,6 +141,7 @@ class CourseTopicListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseTopic
         fields = (
+            'id',
             'uuid',
             'title',
             'order',

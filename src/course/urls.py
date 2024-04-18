@@ -20,11 +20,12 @@ admin_urlpatterns = [
     path('course/all/', admin_course_list_view),
     path('course/<int:pk>/', admin_course_retrieve_update_destroy_view),
 
+    path('section/all/', admin_course_topic_list_view),
+    path('section/', topic_create_view),
+    path('section/<int:pk>/', topic_retrieve_update_view),
+
     path('lesson/', c_lesson_create_view),
     path('lesson/<uuid:uuid>/', retrieve_update_destroy_lesson_view),
-    path('section/<uuid:uuid>/', topic_retrieve_update_view),
-    path('section/', topic_create_view),
-    path('section/all/', admin_course_topic_list_view),
     path('lesson-types/', c_lesson_type_list_view),
 
 ]

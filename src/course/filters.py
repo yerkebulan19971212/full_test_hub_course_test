@@ -10,10 +10,9 @@ from src.course import models
 
 
 class CourseTopicFilter(django_filters.FilterSet):
-    course = filters.UUIDFilter(field_name='course__uuid')
-
     class Meta:
         model = models.CourseTopic
         fields = (
             'course',
+
         )

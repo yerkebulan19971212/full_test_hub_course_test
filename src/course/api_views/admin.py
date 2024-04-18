@@ -104,7 +104,7 @@ topic_create_view = CreateTopicView.as_view()
 
 
 class CourseTopicListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CourseTopicListSerializer
     queryset = CourseTopic.api_objects.all_active().select_related(
         'topic'
@@ -125,10 +125,10 @@ admin_course_topic_list_view = CourseTopicListView.as_view()
 class CourseTopicRetrieveUpdateDestroyView(
     generics.RetrieveUpdateDestroyAPIView
 ):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CourseTopic.objects.all()
     serializer_class = serializers.CourseTopicCreateSerializer
-    lookup_field = 'uuid'
+    lookup_field = 'id'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
