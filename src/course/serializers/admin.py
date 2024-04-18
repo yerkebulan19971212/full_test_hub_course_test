@@ -41,6 +41,7 @@ class CourseCreateSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'title',
+            'teacher',
             'category',
             'language',
             'duration',
@@ -70,7 +71,6 @@ class CourseListSerializer(serializers.ModelSerializer):
 
 
 class TopicCreateSerializer(serializers.ModelSerializer):
-    course_uuid = serializers.UUIDField(required=True, write_only=True)
     course_id = serializers.UUIDField(required=True, write_only=True)
 
     class Meta:

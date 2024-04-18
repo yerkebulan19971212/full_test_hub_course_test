@@ -24,8 +24,11 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 ProfileUserSerializer,
                                                 UpdateLoginProfileUserSerializer,
                                                 UpdateGooglePasswordUserSerializer,
-                                                StaffTokenObtainPairSerializer, UserChangePasswordSerializer,
-                                                AllStudentSerializer, BalanceHistorySerializer)
+                                                StaffTokenObtainPairSerializer,
+                                                UserChangePasswordSerializer,
+                                                AllStudentSerializer,
+                                                BalanceHistorySerializer,
+                                                UserBaseSerializer)
 from src.accounts.filters import UserStudentFilter
 from src.accounts.models import Role
 from src.common.exception import (UnexpectedError, PhoneExistError,
@@ -290,6 +293,20 @@ class UserListView(generics.ListAPIView):
 
 
 user_list_view = UserListView.as_view()
+
+
+class TeacherListView(generics.ListAPIView):
+    # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+    queryset = User.objects.all()
+    serializer_class = UserBaseSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserStudentFilter
+
+    def get_queryset(self):
+        return super().get_queryset()[:100]
+
+
+teacher_list_view = TeacherListView.as_view()
 
 
 class BalanceHistoryView(generics.CreateAPIView):

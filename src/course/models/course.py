@@ -37,6 +37,11 @@ class Course(
         null=True, blank=True,
         related_name="courses"
     )
+    teacher = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+    )
     language = models.CharField(
         max_length=64,
         choices=TestLang.choices(),
