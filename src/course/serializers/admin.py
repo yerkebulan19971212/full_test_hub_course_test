@@ -29,7 +29,6 @@ class CategorySerializer(NameSerializer):
         model = Category
         fields = (
             'id',
-            'uuid',
             'name',
             'parent',
             'children'
