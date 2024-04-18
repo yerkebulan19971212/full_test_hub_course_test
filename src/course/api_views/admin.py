@@ -15,7 +15,7 @@ class CourseLessonTypeListView(generics.ListAPIView):
         is_active=True,
         deleted__isnull=True,
     ).order_by("order")
-    serializer_class = serializers.CategorySerializer
+    serializer_class = serializers.CourseLessonTypeSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
@@ -154,7 +154,7 @@ topic_retrieve_update_view = CourseTopicRetrieveUpdateDestroyView.as_view()
 
 
 class CreateCLessonView(generics.CreateAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CreateCLessonSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
@@ -166,7 +166,7 @@ c_lesson_create_view = CreateCLessonView.as_view()
 
 
 class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CLesson.objects.all()
     serializer_class = serializers.CreateCLessonSerializer
     lookup_field = 'uuid'

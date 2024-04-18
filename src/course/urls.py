@@ -15,6 +15,7 @@ from src.course.api_views import (category_list_view,
                                   c_lesson_create_view)
 
 admin_urlpatterns = [
+    path('lesson-types/', c_lesson_type_list_view),
     path('category/all/', category_list_view),
     path('course/', course_create_view),
     path('course/all/', admin_course_list_view),
@@ -26,7 +27,6 @@ admin_urlpatterns = [
 
     path('lesson/', c_lesson_create_view),
     path('lesson/<uuid:uuid>/', retrieve_update_destroy_lesson_view),
-    path('lesson-types/', c_lesson_type_list_view),
 
 ]
 

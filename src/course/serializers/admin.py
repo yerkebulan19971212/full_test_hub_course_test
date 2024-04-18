@@ -10,7 +10,7 @@ class CourseLessonTypeSerializer(NameSerializer):
     class Meta:
         model = CourseLessonType
         fields = (
-            'uuid',
+            'id',
             'name',
             'icon',
         )
