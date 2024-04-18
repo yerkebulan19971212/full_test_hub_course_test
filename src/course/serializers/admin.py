@@ -215,7 +215,7 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
     course_lesson_type = CourseLessonTypeSerializer()
-    lesson_uuid = serializers.UUIDField(required=True, write_only=True)
+    lesson_id = serializers.IntegerField(required=True, write_only=True)
 
     class Meta:
         model = CLessonContent
@@ -225,12 +225,19 @@ class CreateContentLessonSerializer(serializers.ModelSerializer):
             'video',
             'img',
             'file',
-            'lesson_uuid'
+            'lesson_id'
         )
 
+    def update(self, instance, validated_data):
+        lesson_id = validated_data.pop('lesson_id')
+        c_lesson = CLesson.objects.get(pk=lesson_id)
+        validated_data['course_lesson'] = c_lesson
+        validated_data['owner'] = c_lesson.owner
+        return super().update(instance, validated_data)
+
     def create(self, validated_data):
-        lesson_uuid = validated_data.pop('lesson_uuid')
-        c_lesson = CLesson.objects.get(uuid=lesson_uuid)
+        lesson_id = validated_data.pop('lesson_id')
+        c_lesson = CLesson.objects.get(pk=lesson_id)
         validated_data['course_lesson'] = c_lesson
         validated_data['owner'] = c_lesson.owner
         return super().create(validated_data)
