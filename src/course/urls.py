@@ -1,5 +1,6 @@
 from django.urls import path, include
 
+from src.course.api_views.admin import topic_retrieve_update_view
 from src.course.api_views.views import (course_list_view, course_view,
                                         course_curriculum_view,
                                         course_curriculum_user_view,
@@ -13,6 +14,7 @@ from src.course.api_views import (category_list_view,
 
 admin_urlpatterns = [
     path('lesson/', c_lesson_create_view),
+    path('section/<uuid:uuid>/', topic_retrieve_update_view),
     path('section/', topic_create_view),
     path('section/all/', admin_course_topic_list_view),
     path('category/all/', category_list_view),
