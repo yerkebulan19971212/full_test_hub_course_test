@@ -39,6 +39,7 @@ class CourseCreateSerializer(serializers.ModelSerializer):
     discount_price = serializers.IntegerField(default=0)
     discount_percent = serializers.IntegerField(default=0)
     number_of_students = serializers.IntegerField(default=0)
+    parent_category = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Course
@@ -47,6 +48,7 @@ class CourseCreateSerializer(serializers.ModelSerializer):
             'title',
             'teacher',
             'category',
+            'parent_category',
             'language',
             'duration',
             'price',
@@ -61,6 +63,12 @@ class CourseCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
+
+    def get_parent_category(self, obj):
+        parent_id = obj.category.parent_id
+        if parent_id:
+            return parent_id
+        return None
 
 
 class CourseListSerializer(serializers.ModelSerializer):
