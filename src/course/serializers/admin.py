@@ -28,6 +28,7 @@ class CategorySerializer(NameSerializer):
     class Meta:
         model = Category
         fields = (
+            'id',
             'uuid',
             'name',
             'parent',
@@ -39,11 +40,11 @@ class CourseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = (
+            'id',
             'title',
             'category',
             'language',
             'duration',
-            'owner',
             'price',
             'discount_price',
             'discount_percent',
@@ -52,6 +53,10 @@ class CourseCreateSerializer(serializers.ModelSerializer):
             'main_img',
             'description',
         )
+
+    def create(self, validated_data):
+        validated_data['owner'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class CourseListSerializer(serializers.ModelSerializer):
