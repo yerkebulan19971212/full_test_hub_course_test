@@ -65,7 +65,7 @@ admin_course_list_view = CourseListView.as_view()
 
 
 class CourseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     queryset = Course.objects.all()
     serializer_class = serializers.CourseCreateSerializer
     http_method_names = ['get', 'patch', 'delete']
