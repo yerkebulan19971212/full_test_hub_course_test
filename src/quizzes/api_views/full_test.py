@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.db import transaction
-from django.db.models import (Sum, Count, Q, Prefetch, Exists, OuterRef, Max,
+from django.db.models import (Sum,Avg, Count, Q, Prefetch, Exists, OuterRef, Max,
                               Case, When, IntegerField, F, Value, CharField,
                               BooleanField, Subquery)
 from django.db.models.functions import Concat, Coalesce
@@ -19,7 +19,8 @@ from config.celery import finish_test
 from src.common import constant
 from src.common.constant import ChoiceType, QuizzStatus
 from src.common.exception import PassedTestError
-from src.common.models import Lesson, CourseTypeLesson, RatingTest
+from src.common.models import Lesson, CourseTypeLesson, RatingTest, \
+    CourseTypeQuizz
 from src.common.paginations import SimplePagination
 from src.common.utils import get_multi_score
 from src.quizzes.filters import StudentQuizFileFilterSerializer
@@ -532,7 +533,7 @@ class MyLessonProgressView(generics.ListAPIView):
             'lesson__name_en',
             'lesson__icon',
         ).annotate(
-            score_sum=Sum('score')
+            score_sum=Avg('score')
         ).filter(score_sum__gte=1).distinct()[:10]
 
     def get(self, request, *args, **kwargs):

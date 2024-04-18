@@ -14,5 +14,6 @@ from .admin import (
     CourseListSerializer,
     TopicCreateSerializer,
     CourseTopicListSerializer,
+    CourseTopicCreateSerializer,
     CreateContentLessonSerializer
 )
