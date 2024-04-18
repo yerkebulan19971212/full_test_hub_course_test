@@ -36,6 +36,10 @@ class CategorySerializer(NameSerializer):
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):
+    discount_price = serializers.IntegerField(default=0)
+    discount_percent = serializers.IntegerField(default=0)
+    number_of_students = serializers.IntegerField(default=0)
+
     class Meta:
         model = Course
         fields = (
