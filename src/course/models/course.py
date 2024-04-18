@@ -19,6 +19,8 @@ class CourseAPIManager(abstract_models.AbstractManager):
         return self.is_active()
 
     def first_page(self):
+        print(self.is_active().content_count().query)
+        print("self.is_active().content_count().query")
         return self.is_active().content_count()
 
 
