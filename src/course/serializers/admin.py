@@ -175,7 +175,7 @@ class ContentLessonSerializer(serializers.ModelSerializer):
 
 
 class CreateCLessonSerializer(serializers.ModelSerializer):
-    course_topic_uuid = serializers.UUIDField(required=True, write_only=True)
+    topic_id = serializers.IntegerField(required=True, write_only=True)
     course_lesson_type = CourseLessonTypeSerializer()
     c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
 
@@ -183,15 +183,15 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
         model = CLesson
         fields = (
             'title',
-            'course_topic_uuid',
+            'topic_id',
             'course_lesson_type',
             'duration',
             'c_lesson_contents'
         )
 
     def create(self, validated_data):
-        course_topic_uuid = validated_data.pop('course_topic_uuid')
-        course_topic = CourseTopic.objects.get(uuid=course_topic_uuid)
+        course_topic_uuid = validated_data.pop('topic_id')
+        course_topic = CourseTopic.objects.get(pk=course_topic_uuid)
         lesson = super().create(validated_data)
         CourseTopicLesson.objects.create(
             owner=course_topic.owner,

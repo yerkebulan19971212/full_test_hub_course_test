@@ -128,7 +128,7 @@ class CourseTopicRetrieveUpdateDestroyView(
     permission_classes = [permissions.IsAuthenticated]
     queryset = CourseTopic.objects.all()
     serializer_class = serializers.CourseTopicCreateSerializer
-    lookup_field = 'id'
+    lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
@@ -169,7 +169,7 @@ class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = CLesson.objects.all()
     serializer_class = serializers.CreateCLessonSerializer
-    lookup_field = 'uuid'
+    lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):

@@ -26,7 +26,7 @@ admin_urlpatterns = [
     path('section/<int:pk>/', topic_retrieve_update_view),
 
     path('lesson/', c_lesson_create_view),
-    path('lesson/<uuid:uuid>/', retrieve_update_destroy_lesson_view),
+    path('lesson/<int:pk>/', retrieve_update_destroy_lesson_view),
 
 ]
 
