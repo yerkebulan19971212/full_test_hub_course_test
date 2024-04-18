@@ -27,7 +27,8 @@ c_lesson_type_list_view = CourseLessonTypeListView.as_view()
 
 class CategoryListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Category.api_objects.all_active().order_by("order")
+    queryset = Category.api_objects.all_active().filter(
+        parent__isnull=True).order_by("order")
     serializer_class = serializers.CategorySerializer
 
     @swagger_auto_schema(tags=["course-admin"])

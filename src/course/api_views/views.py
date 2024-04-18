@@ -10,7 +10,7 @@ from src.course.serializers.course import CourseCurriculumFilterSerializer
 
 
 class CourseListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Course.api_objects.first_page()
     serializer_class = serializers.CourseSerializer
 
@@ -23,7 +23,7 @@ course_list_view = CourseListView.as_view()
 
 
 class CourseRetrieveView(generics.RetrieveAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Course.api_objects.is_active().select_related('owner')
     serializer_class = serializers.CourseOneSerializer
     lookup_field = 'uuid'
