@@ -114,11 +114,13 @@ class CourseTopicCreateSerializer(serializers.ModelSerializer):
 
 class CLessonSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='course_lesson.title')
+    lesson_uuid = serializers.CharField(source='course_lesson.uuid')
 
     class Meta:
         model = CourseTopicLesson
         fields = [
-            'uuid',
+            # 'uuid',
+            'lesson_uuid',
             'title',
             'order'
         ]
@@ -164,7 +166,9 @@ class ContentLessonSerializer(serializers.ModelSerializer):
 
 
 class CreateCLessonSerializer(serializers.ModelSerializer):
-    course_topic_uuid = serializers.UUIDField(required=True)
+    course_topic_uuid = serializers.UUIDField(required=True, write_only=True)
+    course_lesson_type = CourseLessonTypeSerializer()
+    c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = CLesson
@@ -173,6 +177,7 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
             'course_topic_uuid',
             'course_lesson_type',
             'duration',
+            'c_lesson_contents'
         )
 
     def create(self, validated_data):
@@ -189,6 +194,7 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
     course_lesson_type = CourseLessonTypeSerializer()
+    lesson_uuid = serializers.UUIDField(required=True, write_only=True)
 
     class Meta:
         model = CLessonContent
@@ -198,5 +204,12 @@ class CreateContentLessonSerializer(serializers.ModelSerializer):
             'video',
             'img',
             'file',
-            'course_lesson'
+            'lesson_uuid'
         )
+
+    def create(self, validated_data):
+        lesson_uuid = validated_data.pop('lesson_uuid')
+        c_lesson = CLesson.objects.get(uuid=lesson_uuid)
+        validated_data['course_lesson'] = c_lesson
+        validated_data['owner'] = c_lesson.owner
+        return super().create(validated_data)

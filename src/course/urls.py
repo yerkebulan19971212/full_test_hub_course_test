@@ -10,10 +10,13 @@ from src.course.api_views import (category_list_view,
                                   admin_course_list_view,
                                   admin_course_retrieve_update_destroy_view,
                                   topic_create_view, c_lesson_type_list_view,
-                                  admin_course_topic_list_view, c_lesson_create_view)
+                                  retrieve_update_destroy_lesson_view,
+                                  admin_course_topic_list_view,
+                                  c_lesson_create_view)
 
 admin_urlpatterns = [
     path('lesson/', c_lesson_create_view),
+    path('lesson/<uuid:uuid>/', retrieve_update_destroy_lesson_view),
     path('section/<uuid:uuid>/', topic_retrieve_update_view),
     path('section/', topic_create_view),
     path('section/all/', admin_course_topic_list_view),

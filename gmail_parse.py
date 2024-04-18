@@ -99,7 +99,7 @@ def main(sc):
     # s.enter(120, 1, main, (sc,))
 
 
-if __name__ == '__main__':
-    s.enter(1, 1, main, (s,))
-    s.run()
-# as_read_message(1)
+# if __name__ == '__main__':
+#     s.enter(1, 1, main, (s,))
+#     s.run()
+as_read_message(1)

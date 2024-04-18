@@ -4,7 +4,8 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 
-from src.course.models import Category, Course, CourseTopic, CourseLessonType
+from src.course.models import Category, Course, CourseTopic, CourseLessonType, \
+    CLesson, CourseTopicLesson
 from src.course import serializers, filters
 
 
@@ -164,15 +165,17 @@ c_lesson_create_view = CreateCLessonView.as_view()
 
 
 class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
+    queryset = CLesson.objects.all()
     serializer_class = serializers.CreateCLessonSerializer
+    lookup_field = 'uuid'
 
     @swagger_auto_schema(tags=["course-admin"])
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
-retrieve_update_destroy_lesson_create_view = RetrieveUpdateDestroyCLessonView.as_view()
+retrieve_update_destroy_lesson_view = RetrieveUpdateDestroyCLessonView.as_view()
 
 
 class CreateContentLessonView(generics.CreateAPIView):
