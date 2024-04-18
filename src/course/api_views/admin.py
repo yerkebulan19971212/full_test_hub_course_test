@@ -69,7 +69,7 @@ class CourseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = serializers.CourseCreateSerializer
     http_method_names = ['get', 'patch', 'delete']
-    lookup_field = 'uuid'
+    lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
