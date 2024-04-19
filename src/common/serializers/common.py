@@ -54,10 +54,13 @@ class PacketSerializer(serializers.ModelSerializer):
 
     def get_remainder(self, obj):
         user = self.context['request'].user
+        now = timezone.now()
         packet = BoughtPacket.objects.filter(
             user=user,
             packet_id=obj.id,
-            status=True
+            status=True,
+            start_time__lte=now,
+            end_time__gte=now
         )
         if packet:
             return obj.quantity - packet.first().remainder
