@@ -660,8 +660,13 @@ class SaveImageView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         data = self.create(request, *args, **kwargs).data
+        filename = request.data['upload'].name
         return Response(
-            data={"url": data.get('upload')},
+            data={
+                "filename": filename,
+                "upload": 1,
+                "url": data.get('upload')
+            },
             status=status.HTTP_201_CREATED
         )
 
