@@ -214,13 +214,13 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
         )
         return lesson
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        course_lesson_type = instance.course_lesson_type
-        if course_lesson_type:
-            serializer = CourseLessonTypeSerializer(course_lesson_type, context=self.context)
-            data['course_lesson_type'] = serializer.data
-        return data
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     course_lesson_type = instance.course_lesson_type
+    #     if course_lesson_type:
+    #         serializer = CourseLessonTypeSerializer(course_lesson_type, context=self.context)
+    #         data['course_lesson_type'] = serializer.data
+    #     return data
 
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
