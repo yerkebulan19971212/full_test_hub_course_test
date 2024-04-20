@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from src.course.models import Category, Course, CourseTopic, CourseLessonType, \
     CLesson, CourseTopicLesson
 from src.course import serializers, filters
+from src.course.models.c_lesson import CLessonContent
 
 
 class CourseLessonTypeListView(generics.ListAPIView):
@@ -203,6 +204,7 @@ class RetrieveUpdateDestroyContentLessonView(
     generics.RetrieveUpdateDestroyAPIView
 ):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CLessonContent.objects.all()
     serializer_class = serializers.CreateContentLessonSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
