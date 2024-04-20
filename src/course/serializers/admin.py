@@ -172,8 +172,6 @@ class CLessonContentSerializer(serializers.ModelSerializer):
 
 
 class ContentLessonSerializer(serializers.ModelSerializer):
-    course_lesson_type = CourseLessonTypeSerializer()
-
     class Meta:
         model = CLessonContent
         fields = (
@@ -184,6 +182,17 @@ class ContentLessonSerializer(serializers.ModelSerializer):
             'file',
             'course_lesson'
         )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        course_lesson_type = instance.course_lesson_type
+        if course_lesson_type:
+            serializer = CourseLessonTypeSerializer(
+                course_lesson_type,
+                context=self.context
+            )
+            data['course_lesson_type'] = serializer.data
+        return data
 
 
 class CreateCLessonSerializer(serializers.ModelSerializer):
@@ -224,7 +233,6 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
 
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
-    course_lesson_type = CourseLessonTypeSerializer()
     lesson_id = serializers.IntegerField(required=True, write_only=True)
 
     class Meta:
