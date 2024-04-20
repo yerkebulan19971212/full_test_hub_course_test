@@ -109,7 +109,7 @@ topic_create_view = CreateTopicView.as_view()
 
 
 class CourseTopicListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CourseTopicListSerializer
     queryset = CourseTopic.api_objects.all_active().select_related(
         'topic'
