@@ -188,17 +188,18 @@ class ContentLessonSerializer(serializers.ModelSerializer):
 
 class CreateCLessonSerializer(serializers.ModelSerializer):
     topic_id = serializers.IntegerField(required=True, write_only=True)
-    course_lesson_type = CourseLessonTypeSerializer()
-    c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
+    # course_lesson_type = CourseLessonTypeSerializer()
+    # c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = CLesson
         fields = (
+            'id',
             'title',
             'topic_id',
             'course_lesson_type',
             'duration',
-            'c_lesson_contents'
+
         )
 
     def create(self, validated_data):
