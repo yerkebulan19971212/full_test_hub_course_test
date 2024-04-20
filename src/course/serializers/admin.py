@@ -237,6 +237,7 @@ class CreateContentLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = CLessonContent
         fields = (
+            'id',
             'course_lesson_type',
             'text',
             'video',
