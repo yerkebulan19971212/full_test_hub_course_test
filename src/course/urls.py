@@ -1,6 +1,7 @@
 from django.urls import path, include
 
-from src.course.api_views.admin import topic_retrieve_update_view
+from src.course.api_views.admin import topic_retrieve_update_view, \
+    retrieve_update_destroy_content_lesson_view
 from src.course.api_views.views import (course_list_view, course_view,
                                         course_curriculum_view,
                                         course_curriculum_user_view,
@@ -30,6 +31,7 @@ admin_urlpatterns = [
     path('lesson/<int:pk>/', retrieve_update_destroy_lesson_view),
 
     path('content/', content_lesson_create_view),
+    path('content/<int:pk>/', retrieve_update_destroy_content_lesson_view),
 ]
 
 api_v1_urlpatterns = [
