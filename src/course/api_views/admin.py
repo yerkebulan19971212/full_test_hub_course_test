@@ -154,7 +154,7 @@ topic_retrieve_update_view = CourseTopicRetrieveUpdateDestroyView.as_view()
 
 
 class CreateCLessonView(generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CreateCLessonSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
@@ -166,7 +166,7 @@ c_lesson_create_view = CreateCLessonView.as_view()
 
 
 class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     queryset = CLesson.objects.all()
     serializer_class = serializers.CreateCLessonSerializer
     lookup_field = 'pk'
@@ -174,6 +174,14 @@ class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
 retrieve_update_destroy_lesson_view = RetrieveUpdateDestroyCLessonView.as_view()

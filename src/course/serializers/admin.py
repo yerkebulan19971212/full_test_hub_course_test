@@ -189,7 +189,7 @@ class ContentLessonSerializer(serializers.ModelSerializer):
 class CreateCLessonSerializer(serializers.ModelSerializer):
     topic_id = serializers.IntegerField(required=True, write_only=True)
     # course_lesson_type = CourseLessonTypeSerializer()
-    # c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
+    c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = CLesson
@@ -199,6 +199,7 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
             'topic_id',
             'course_lesson_type',
             'duration',
+            'c_lesson_contents'
 
         )
 
@@ -212,6 +213,14 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
             course_topic=course_topic
         )
         return lesson
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        course_lesson_type = instance.course_lesson_type
+        if course_lesson_type:
+            serializer = CourseLessonTypeSerializer(course_lesson_type, context=self.context)
+            data['course_lesson_type'] = serializer.data
+        return data
 
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
