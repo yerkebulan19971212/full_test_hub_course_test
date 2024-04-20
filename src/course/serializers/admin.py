@@ -164,25 +164,21 @@ class ContentLessonSerializer(serializers.ModelSerializer):
             'course_lesson'
         )
 
-
 class CreateCLessonSerializer(serializers.ModelSerializer):
-    course_topic_uuid = serializers.UUIDField(required=True, write_only=True)
-    course_lesson_type = CourseLessonTypeSerializer()
-    c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
+    topic_id = serializers.IntegerField(required=True, write_only=True)
 
     class Meta:
         model = CLesson
         fields = (
             'title',
-            'course_topic_uuid',
+            'topic_id',
             'course_lesson_type',
             'duration',
-            'c_lesson_contents'
         )
 
     def create(self, validated_data):
-        course_topic_uuid = validated_data.pop('course_topic_uuid')
-        course_topic = CourseTopic.objects.get(uuid=course_topic_uuid)
+        topic_id = validated_data.pop('topic_id')
+        course_topic = CourseTopic.objects.get(pk=topic_id)
         lesson = super().create(validated_data)
         CourseTopicLesson.objects.create(
             owner=course_topic.owner,
@@ -190,6 +186,31 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
             course_topic=course_topic
         )
         return lesson
+# class CLessonSerializer(serializers.ModelSerializer):
+#     course_topic_uuid = serializers.UUIDField(required=True, write_only=True)
+#     course_lesson_type = CourseLessonTypeSerializer()
+#     c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
+#
+#     class Meta:
+#         model = CLesson
+#         fields = (
+#             'title',
+#             'course_topic_uuid',
+#             'course_lesson_type',
+#             'duration',
+#             'c_lesson_contents'
+#         )
+#
+#     def create(self, validated_data):
+#         course_topic_uuid = validated_data.pop('course_topic_uuid')
+#         course_topic = CourseTopic.objects.get(uuid=course_topic_uuid)
+#         lesson = super().create(validated_data)
+#         CourseTopicLesson.objects.create(
+#             owner=course_topic.owner,
+#             course_lesson=lesson,
+#             course_topic=course_topic
+#         )
+#         return lesson
 
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
