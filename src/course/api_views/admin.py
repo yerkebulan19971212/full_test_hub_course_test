@@ -1,16 +1,16 @@
 import datetime
 
+from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.course.models import Category, Course, CourseTopic, CourseLessonType, \
-    CLesson, CourseTopicLesson
+from src.course.models import (Category, Course, CourseTopic, CourseLessonType,
+                               CLesson)
 from src.course import serializers, filters
-from src.course.models.c_lesson import CLessonContent
-from src.course.serializers import CreateContentLessonSerializer
+from src.course.models.c_lesson import CLessonContent, CourseTopicLesson
 from src.course.serializers.admin import OrderUpdateSerializer
 
 
@@ -70,7 +70,7 @@ admin_course_list_view = CourseListView.as_view()
 
 
 class CourseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Course.objects.all()
     serializer_class = serializers.CourseCreateSerializer
     http_method_names = ['get', 'patch', 'delete']
@@ -118,6 +118,12 @@ class CourseTopicListView(generics.ListAPIView):
     ).order_by('order')
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.CourseTopicFilter
+
+    def get_queryset(self):
+        course_topic_lessons = CourseTopicLesson.objects.all().order_by(
+            'order')
+        return super().get_queryset().prefetch_related(
+            Prefetch('course_topic_lessons', queryset=course_topic_lessons))
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
