@@ -245,7 +245,7 @@ class ContentCLessonOrderView(APIView):
         elif content_data.get("name") == 'LESSON':
             model = CLesson
         elif content_data.get("name") == 'TOPIC':
-            model = CourseTopic
+            model = CourseTopicLesson
         for o in content_data.get("order_list"):
             model.objects.filter(id=o.get('id')).update(**{
                 'order': o.get("order")
