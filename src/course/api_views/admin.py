@@ -109,12 +109,10 @@ topic_create_view = CreateTopicView.as_view()
 
 
 class CourseTopicListView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CourseTopicListSerializer
     queryset = CourseTopic.api_objects.all_active().select_related(
         'topic'
-    ).prefetch_related(
-        'course_topic_lessons'
     ).order_by('order')
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.CourseTopicFilter
