@@ -119,7 +119,7 @@ class CourseTopicListView(generics.ListAPIView):
 
     def get_queryset(self):
         course_topic_lessons = CourseTopicLesson.objects.all().order_by(
-            'order')
+            'course_lesson__order')
         return super().get_queryset().prefetch_related(
             Prefetch('course_topic_lessons', queryset=course_topic_lessons))
 
@@ -232,7 +232,7 @@ retrieve_update_destroy_content_lesson_view = RetrieveUpdateDestroyContentLesson
 
 
 class ContentCLessonOrderView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     @swagger_auto_schema(
         tags=["course-admin"],
         request_body=OrderUpdateSerializer()
@@ -245,7 +245,7 @@ class ContentCLessonOrderView(APIView):
         elif content_data.get("name") == 'LESSON':
             model = CLesson
         elif content_data.get("name") == 'TOPIC':
-            model = CourseTopicLesson
+            model = CourseTopic
         for o in content_data.get("order_list"):
             model.objects.filter(id=o.get('id')).update(**{
                 'order': o.get("order")
