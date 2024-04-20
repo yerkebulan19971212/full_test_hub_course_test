@@ -171,6 +171,26 @@ class CLessonContentSerializer(serializers.ModelSerializer):
         ]
 
 
+class GetContentLessonSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'order',
+        )
+        model = CLessonContent
+
+    def get_name(self, obj):
+        language = self.context.get('request').headers.get('language', 'kz')
+        if language == 'kz':
+            return obj.course_lesson_type.name_kz
+        elif language == 'en':
+            return obj.course_lesson_type.name_ru
+        return obj.course_lesson_type.name_ru
+
+
 class ContentLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = CLessonContent
@@ -198,7 +218,7 @@ class ContentLessonSerializer(serializers.ModelSerializer):
 class CreateCLessonSerializer(serializers.ModelSerializer):
     topic_id = serializers.IntegerField(required=True, write_only=True)
     # course_lesson_type = CourseLessonTypeSerializer()
-    c_lesson_contents = ContentLessonSerializer(many=True, read_only=True)
+    c_lesson_contents = GetContentLessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = CLesson
@@ -233,7 +253,6 @@ class CreateCLessonSerializer(serializers.ModelSerializer):
 
 
 class CreateContentLessonSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CLessonContent
         fields = (
