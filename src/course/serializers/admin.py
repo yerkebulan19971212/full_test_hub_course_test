@@ -276,3 +276,13 @@ class CreateContentLessonSerializer(serializers.ModelSerializer):
         print("========course_lesson")
         validated_data['owner'] = course_lesson.owner
         return super().create(validated_data)
+
+
+class OrderUpdateInstanceSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+
+
+class OrderUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    order_list = serializers.ListField(child=OrderUpdateInstanceSerializer())

@@ -11,7 +11,7 @@ from .admin import (
     CourseCreateSerializer,
     CategorySerializer,
     CreateCLessonSerializer,
-    CourseLessonTypeSerializer,
+    CourseLessonTypeSerializer,OrderUpdateInstanceSerializer,
     CourseListSerializer,
     TopicCreateSerializer,
     CourseTopicListSerializer,

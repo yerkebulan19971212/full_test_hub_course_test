@@ -1,13 +1,17 @@
 import datetime
 
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from src.course.models import Category, Course, CourseTopic, CourseLessonType, \
     CLesson, CourseTopicLesson
 from src.course import serializers, filters
 from src.course.models.c_lesson import CLessonContent
+from src.course.serializers import CreateContentLessonSerializer
+from src.course.serializers.admin import OrderUpdateSerializer
 
 
 class CourseLessonTypeListView(generics.ListAPIView):
@@ -219,4 +223,31 @@ class RetrieveUpdateDestroyContentLessonView(
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
+
 retrieve_update_destroy_content_lesson_view = RetrieveUpdateDestroyContentLessonView.as_view()
+
+
+class ContentCLessonOrderView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    @swagger_auto_schema(
+        tags=["course-admin"],
+        request_body=OrderUpdateSerializer()
+    )
+    def post(self, request, *args, **kwargs):
+        content_data = request.data
+        model = CLessonContent
+        if content_data.get("name") == 'CONTENT':
+            model = CLessonContent
+        elif content_data.get("name") == 'LESSON':
+            model = CLesson
+        elif content_data.get("name") == 'TOPIC':
+            model = CourseTopic
+        for o in content_data.get("order_list"):
+            model.objects.filter(id=o.get('id')).update(**{
+                'order': o.get("order")
+            })
+
+        return Response({"success": True}, status=status.HTTP_200_OK)
+
+
+order_view = ContentCLessonOrderView.as_view()
