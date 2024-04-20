@@ -206,8 +206,15 @@ class RetrieveUpdateDestroyContentLessonView(
     serializer_class = serializers.CreateContentLessonSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
+    @swagger_auto_schema(tags=["course-admin"])
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 retrieve_update_destroy_content_lesson_view = RetrieveUpdateDestroyContentLessonView.as_view()
