@@ -246,11 +246,13 @@ class CreateContentLessonSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
-        course_lesson = validated_data.pop('course_lesson')
+        course_lesson = validated_data.get('course_lesson')
         validated_data['owner'] = course_lesson.owner
         return super().update(instance, validated_data)
 
     def create(self, validated_data):
-        course_lesson = validated_data.pop('course_lesson')
+        course_lesson = validated_data.get('course_lesson')
+        print(course_lesson)
+        print("========course_lesson")
         validated_data['owner'] = course_lesson.owner
         return super().create(validated_data)
