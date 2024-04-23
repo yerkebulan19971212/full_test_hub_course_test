@@ -75,6 +75,9 @@ class CourseOneSerializer(serializers.ModelSerializer):
             'discount_price',
             'description',
             'teacher',
+            'number_of_students',
+            'course_trailer',
+            'duration',
         )
 
 
