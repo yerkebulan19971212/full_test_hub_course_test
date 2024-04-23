@@ -24,6 +24,7 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = (
             'uuid',
+            'title',
             'content_count',
             'main_img',
             'price',
