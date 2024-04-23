@@ -27,6 +27,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'content_count',
             'main_img',
             'price',
+            'discount_price',
             'owner',
             # 'name',
         )
