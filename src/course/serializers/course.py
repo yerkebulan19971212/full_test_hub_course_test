@@ -3,7 +3,7 @@ from rest_framework import serializers
 from src.accounts.models import User
 from src.common.abstract_serializer import NameSerializer
 from src.course.models import Course, CourseTopic, Topic, CLesson, \
-    CourseLessonType
+    CourseLessonType, CourseTopicLesson
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -95,14 +95,43 @@ class CourseCurriculumSerializer(serializers.Serializer):
         return course_lessons
 
 
+class CourseLessonTypeSerializer(NameSerializer):
+    class Meta:
+        model = CourseLessonType
+        fields = (
+            'id',
+            'name',
+            'icon',
+        )
+
+
+class CLessonSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='course_lesson.title')
+    lesson_uuid = serializers.CharField(source='course_lesson.uuid')
+    lesson_type = CourseLessonTypeSerializer(source='course_lesson.course_lesson_type')
+
+    class Meta:
+        model = CourseTopicLesson
+        fields = [
+            # 'lesson_id',
+            'lesson_uuid',
+            'lesson_type',
+            'title',
+            'order'
+        ]
+
+
 class CourseTopicCurriculumSerializer(serializers.ModelSerializer):
-    course_lessons = serializers.SerializerMethodField()
+    # course_lessons = serializers.SerializerMethodField()
+    title = serializers.CharField(source='topic.title', read_only=True)
+    lessons = CLessonSerializer(source='course_topic_lessons', many=True)
 
     class Meta:
         model = CourseTopic
         fields = (
             'uuid',
-            'course_lessons',
+            'title',
+            'lessons',
         )
 
     def get_course_lessons(self, obj):

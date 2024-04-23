@@ -121,7 +121,9 @@ class CourseTopicListView(generics.ListAPIView):
         course_topic_lessons = CourseTopicLesson.objects.all().order_by(
             'course_lesson__order')
         return super().get_queryset().prefetch_related(
-            Prefetch('course_topic_lessons', queryset=course_topic_lessons))
+            Prefetch('course_topic_lessons', queryset=course_topic_lessons),
+            'course_topic_lessons__course_lesson__course_lesson_type'
+        )
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
