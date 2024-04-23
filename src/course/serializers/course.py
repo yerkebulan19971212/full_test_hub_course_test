@@ -19,6 +19,7 @@ class OwnerSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     content_count = serializers.IntegerField(default=0)
     owner = OwnerSerializer(read_only=True)
+    teacher = OwnerSerializer(read_only=True)
 
     class Meta:
         model = Course
@@ -30,24 +31,27 @@ class CourseSerializer(serializers.ModelSerializer):
             'price',
             'discount_price',
             'owner',
-            # 'name',
+            'teacher',
+            'course_trailer',
+            'duration',
         )
 
 
 class CourseOneSerializer(serializers.ModelSerializer):
     content_count = serializers.IntegerField(default=0)
+    teacher = OwnerSerializer(read_only=True)
 
     class Meta:
         model = Course
         fields = (
             'uuid',
+            'title',
             'content_count',
             'main_img',
             'price',
+            'discount_price',
             'description',
-            # 'name_kz',
-            # 'name_ru',
-            # 'name_en',
+            'teacher',
         )
 
 
