@@ -5,6 +5,7 @@ from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from src.common.exception import BuyCourseException
 from src.course import serializers
@@ -199,13 +200,12 @@ class UserCourseInfoRetrieveView(generics.RetrieveAPIView):
 user_course_info_view = UserCourseInfoRetrieveView.as_view()
 
 
-class LessonCoursePassView(generics.CreateAPIView):
+class LessonCoursePassView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = serializers.UserCoursePassSerializer
 
     @swagger_auto_schema(tags=["course"])
     def post(self, request, *args, **kwargs):
-        lesson_uuid = self.kwargs['lesson_uuid']
+        lesson_uuid = self.kwargs['uuid']
         UserCLesson.objects.filter(
             user=self.request.user,
             course_lesson__uuid=lesson_uuid,
