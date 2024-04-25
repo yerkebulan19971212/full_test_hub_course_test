@@ -266,3 +266,28 @@ class BuyCourseSerializer(serializers.ModelSerializer):
         user.balance -= price
         user.save()
         return super().create(validated_data)
+
+
+class UserCourseInfoSerializer(serializers.ModelSerializer):
+    content_count = serializers.IntegerField(default=0)
+    passed_percent = serializers.IntegerField(default=0)
+    teacher = OwnerSerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Course
+        fields = (
+            'uuid',
+            'title',
+            'category',
+            'content_count',
+            'passed_percent',
+            'main_img',
+            'price',
+            'discount_price',
+            'description',
+            'teacher',
+            'number_of_students',
+            'course_trailer',
+            'duration',
+        )

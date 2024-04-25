@@ -174,3 +174,25 @@ class HasCourseView(generics.RetrieveAPIView):
 
 
 has_course_view = HasCourseView.as_view()
+
+
+class UserCourseInfoRetrieveView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Course.api_objects.is_active().select_related('owner')
+    serializer_class = serializers.UserCourseInfoSerializer
+    lookup_field = 'uuid'
+
+    @swagger_auto_schema(tags=["course"])
+    def get(self, request, *args, **kwargs):
+        uuid = self.kwargs['uuid']
+        user = self.request.user
+        queryset = super().get_queryset().filter(
+            uuid=uuid,
+            user_courses__user=user
+        )
+        if not queryset.exists():
+            raise BuyCourseException()
+        return super().get(request, *args, **kwargs)
+
+
+user_course_info_view = UserCourseInfoRetrieveView.as_view()

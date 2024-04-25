@@ -6,7 +6,8 @@ from .course import (
     CourseCurriculumUserSerializer,
     CourseLessonUserSerializer,
     CourseTopicCurriculumSerializer,
-    BuyCourseSerializer
+    BuyCourseSerializer,
+    UserCourseInfoSerializer
 )
 from .admin import (
     CourseCreateSerializer,
