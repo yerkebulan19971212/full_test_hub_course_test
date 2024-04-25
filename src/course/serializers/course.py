@@ -270,7 +270,7 @@ class BuyCourseSerializer(serializers.ModelSerializer):
         user_course = UserCourse.objects.filter(
             course=course,
             user=user,
-            sstatus__in=[
+            status__in=[
                 CourseStatus.NOT_PASSED,
                 CourseStatus.CONTINUE
             ]
