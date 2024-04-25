@@ -3,6 +3,7 @@ import uuid
 from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
+from rest_framework.response import Response
 
 from src.common.exception import BuyCourseException
 from src.course import serializers
@@ -131,3 +132,45 @@ class BuyCourse(generics.CreateAPIView):
 
 
 buy_course_view = BuyCourse.as_view()
+
+
+class CheckBuyCourse(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Course.objects.all()
+    serializer_class = serializers.BuyCourseSerializer
+    lookup_field = 'uuid'
+
+    @swagger_auto_schema(tags=["course"])
+    def get(self, request, *args, **kwargs):
+        uuid = self.kwargs['uuid']
+        user = self.request.user
+        queryset = super().get_queryset().filter(
+            uuid=uuid,
+            user_courses__user=user
+        )
+        if queryset.exists():
+            return Response({"status": True})
+        return Response({"status": False})
+
+
+check_buy_course_view = CheckBuyCourse.as_view()
+
+
+class HasCourseView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Course.objects.all()
+    serializer_class = serializers.BuyCourseSerializer
+    lookup_field = 'uuid'
+
+    @swagger_auto_schema(tags=["course"])
+    def get(self, request, *args, **kwargs):
+        uuid = self.kwargs['uuid']
+        queryset = super().get_queryset().filter(
+            uuid=uuid,
+        )
+        if queryset.exists():
+            return Response({"status": True})
+        return Response({"status": False})
+
+
+has_course_view = HasCourseView.as_view()
