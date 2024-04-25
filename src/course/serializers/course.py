@@ -237,6 +237,7 @@ class CourseLessonUserSerializer(serializers.ModelSerializer):
             # 'name_kz',
             # 'name_ru',
             # 'name_en',
+            'title',
             'passed',
             'lesson_contents'
         )
