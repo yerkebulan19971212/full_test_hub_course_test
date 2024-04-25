@@ -2,8 +2,10 @@ from rest_framework import serializers
 
 from src.accounts.models import User
 from src.common.abstract_serializer import NameSerializer
+from src.common.exception import NotEnoughBalance
 from src.course.models import Course, CourseTopic, Topic, CLesson, \
     CourseLessonType, CourseTopicLesson, Category
+from src.course.models.course import UserCourse
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -39,6 +41,7 @@ class CourseSerializer(serializers.ModelSerializer):
     content_count = serializers.IntegerField(default=0)
     owner = OwnerSerializer(read_only=True)
     teacher = OwnerSerializer(read_only=True)
+
     # category = CategorySerializer(read_only=True)
 
     class Meta:
@@ -198,3 +201,29 @@ class CourseLessonUserSerializer(serializers.ModelSerializer):
             # 'name_en',
             'passed'
         )
+
+
+class BuyCourseSerializer(serializers.ModelSerializer):
+    course_uuid = serializers.UUIDField(write_only=True)
+
+    class Meta:
+        model = UserCourse
+        fields = (
+            'id',
+            'uuid',
+            'course_uuid',
+        )
+
+    def create(self, validated_data):
+        course_uuid = validated_data.pop('course_uuid')
+        course = Course.objects.get(uuid=course_uuid)
+        price = course.discount_price if course.discount_price > 0 else course.price
+        user = self.context['request'].user
+        if user.balance < price:
+            raise NotEnoughBalance()
+        validated_data['course'] = course
+        validated_data['user'] = user
+        validated_data['price'] = price
+        user.balance -= price
+        user.save()
+        return super().create(validated_data)

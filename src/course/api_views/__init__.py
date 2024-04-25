@@ -6,3 +6,6 @@ from .admin import (category_list_view, course_create_view,
                     order_view,
                     content_lesson_create_view,
                     topic_create_view, admin_course_topic_list_view)
+from .views import (
+    buy_course_view,
+)

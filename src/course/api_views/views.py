@@ -118,3 +118,15 @@ class CourseLessonUserView(generics.CreateAPIView):
 
 
 course_lesson_user_view = CourseLessonUserView.as_view()
+
+
+class BuyCourse(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.BuyCourseSerializer
+
+    @swagger_auto_schema(tags=["course"])
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+buy_course_view = BuyCourse.as_view()

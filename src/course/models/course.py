@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Count
 
 from src.common import abstract_models
-from src.common.constant import TestLang
+from src.common.constant import TestLang, CourseStatus
 
 
 class CourseQuerySet(abstract_models.AbstractQuerySet):
@@ -19,8 +19,6 @@ class CourseAPIManager(abstract_models.AbstractManager):
         return self.is_active()
 
     def first_page(self):
-        print(self.is_active().content_count().query)
-        print("self.is_active().content_count().query")
         return self.is_active().content_count()
 
 
@@ -81,5 +79,33 @@ class Course(
     class Meta:
         db_table = 'course\".\"course'
 
-    # def __str__(self):
-    #     return f'{self.name_code}'
+
+class UserCourse(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted,
+):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="user_courses"
+    )
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        related_name="user_courses"
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=CourseStatus.choices(),
+        default=CourseStatus.NOT_PASSED,
+        db_index=True
+    )
+    price = models.FloatField(default=0.0)
+    start_time = models.DateField(null=True, blank=True)
+    end_time = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'course\".\"user_course'
