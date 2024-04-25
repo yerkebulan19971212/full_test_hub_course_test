@@ -109,3 +109,6 @@ class UserCourse(
 
     class Meta:
         db_table = 'course\".\"user_course'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title}"
