@@ -2,10 +2,11 @@ from rest_framework import serializers
 
 from src.accounts.models import User
 from src.common.abstract_serializer import NameSerializer
+from src.common.constant import CourseStatus
 from src.common.exception import NotEnoughBalance
 from src.course.models import Course, CourseTopic, Topic, CLesson, \
     CourseLessonType, CourseTopicLesson, Category
-from src.course.models.c_lesson import CLessonContent
+from src.course.models.c_lesson import CLessonContent, UserCLesson
 from src.course.models.course import UserCourse
 
 
@@ -266,7 +267,30 @@ class BuyCourseSerializer(serializers.ModelSerializer):
         validated_data['price'] = price
         user.balance -= price
         user.save()
-        return super().create(validated_data)
+        user_course = UserCourse.objects.filter(
+            course=course,
+            user=user,
+            sstatus__in=[
+                CourseStatus.NOT_PASSED,
+                CourseStatus.CONTINUE
+            ]
+
+        )
+        if user_course.exists():
+            user_course = user_course.first()
+        else:
+            user_course = super().create(validated_data)
+            c_lesson_list = CLesson.objects.filter(
+                course_topic_lessons__course_topic__course=course
+            )
+            user_lesson_list = []
+            for lesson in c_lesson_list:
+                user_lesson_list.append(UserCLesson(
+                    user=user,
+                    course_lesson=lesson,
+                ))
+            UserCLesson.objects.bulk_create(user_lesson_list)
+        return user_course
 
 
 class UserCourseInfoSerializer(serializers.ModelSerializer):
@@ -292,3 +316,7 @@ class UserCourseInfoSerializer(serializers.ModelSerializer):
             'course_trailer',
             'duration',
         )
+
+
+class UserCoursePassSerializer(serializers.Serializer):
+    lesson_uuid = serializers.UUIDField()

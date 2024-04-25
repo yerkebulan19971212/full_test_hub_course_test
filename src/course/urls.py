@@ -7,7 +7,8 @@ from src.course.api_views.views import (course_list_view, course_view,
                                         course_curriculum_user_view,
                                         course_lesson_user_view,
                                         buy_course_view, check_buy_course_view,
-                                        has_course_view, user_course_info_view)
+                                        has_course_view, user_course_info_view,
+                                        lesson_course_pass_view)
 from src.course.api_views import (category_list_view,
                                   course_create_view,
                                   admin_course_list_view,
@@ -48,6 +49,7 @@ api_v1_urlpatterns = [
     path('curriculum/', course_curriculum_view),
     path('curriculum-user/', course_curriculum_user_view),
     path('lesson/<uuid:uuid>/', course_lesson_user_view),
+    path('lesson/pass/<uuid:uuid>/', lesson_course_pass_view),
 ]
 
 app_name = 'course'

@@ -1,6 +1,7 @@
 import uuid
 
 from django.db.models import Prefetch
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from rest_framework.response import Response
 from src.common.exception import BuyCourseException
 from src.course import serializers
 from src.course.models import Course, CourseTopic, CLesson, Topic, \
-    CourseTopicLesson
+    CourseTopicLesson, UserCLesson
 from src.course.serializers.course import CourseCurriculumFilterSerializer
 
 
@@ -196,3 +197,24 @@ class UserCourseInfoRetrieveView(generics.RetrieveAPIView):
 
 
 user_course_info_view = UserCourseInfoRetrieveView.as_view()
+
+
+class LessonCoursePassView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.UserCoursePassSerializer
+
+    @swagger_auto_schema(tags=["course"])
+    def post(self, request, *args, **kwargs):
+        lesson_uuid = self.kwargs['lesson_uuid']
+        UserCLesson.objects.filter(
+            user=self.request.user,
+            course_lesson__uuid=lesson_uuid,
+            passed=False
+        ).update(
+            passed=True,
+            passed_time=timezone.now()
+        )
+        return Response({"status": True})
+
+
+lesson_course_pass_view = LessonCoursePassView.as_view()
