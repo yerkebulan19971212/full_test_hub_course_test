@@ -214,6 +214,7 @@ class GetContentLessonSerializer(serializers.ModelSerializer):
             'file',
         )
         model = CLessonContent
+        ref_name = 'GetContentLessonSerializer'
 
     def get_name(self, obj):
         language = self.context.get('request').headers.get('language', 'kz')
