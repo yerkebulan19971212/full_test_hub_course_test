@@ -43,7 +43,7 @@ api_v1_urlpatterns = [
     path('<uuid:uuid>/', course_view),
     path('curriculum/', course_curriculum_view),
     path('curriculum-user/', course_curriculum_user_view),
-    path('lesson/', course_lesson_user_view),
+    path('lesson/<uuid:uuid>/', course_lesson_user_view),
 ]
 
 app_name = 'course'

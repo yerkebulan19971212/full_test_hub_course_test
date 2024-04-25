@@ -5,6 +5,7 @@ from src.common.abstract_serializer import NameSerializer
 from src.common.exception import NotEnoughBalance
 from src.course.models import Course, CourseTopic, Topic, CLesson, \
     CourseLessonType, CourseTopicLesson, Category
+from src.course.models.c_lesson import CLessonContent
 from src.course.models.course import UserCourse
 
 
@@ -144,7 +145,6 @@ class CLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseTopicLesson
         fields = [
-            # 'lesson_id',
             'lesson_uuid',
             'lesson_type',
             'title',
@@ -153,8 +153,26 @@ class CLessonSerializer(serializers.ModelSerializer):
         ref_name = 'CLessonSerializer'
 
 
+class CLessonUserSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='course_lesson.title')
+    lesson_uuid = serializers.CharField(source='course_lesson.uuid')
+    lesson_type = CourseLessonTypeSerializer(
+        source='course_lesson.course_lesson_type')
+    status = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = CourseTopicLesson
+        fields = [
+            'lesson_uuid',
+            'lesson_type',
+            'title',
+            'order',
+            'status',
+        ]
+        ref_name = 'CLessonSerializerUser'
+
+
 class CourseTopicCurriculumSerializer(serializers.ModelSerializer):
-    # course_lessons = serializers.SerializerMethodField()
     title = serializers.CharField(source='topic.title', read_only=True)
     lessons = CLessonSerializer(source='course_topic_lessons', many=True)
 
@@ -166,31 +184,50 @@ class CourseTopicCurriculumSerializer(serializers.ModelSerializer):
             'lessons',
         )
 
-    def get_course_lessons(self, obj):
-        course_lessons = []
-        course_topic_lessons = obj.course_topic_lessons.all()
-        for ctl in course_topic_lessons:
-            course_lessons.append(ctl.course_lesson)
-        if course_lessons:
-            return CourseLessonCurriculumSerializer(course_lessons,
-                                                    many=True,
-                                                    context=self.context).data
-        return course_lessons
-
 
 class CourseCurriculumUserSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='topic.title', read_only=True)
+    lessons = CLessonUserSerializer(source='course_topic_lessons', many=True)
+    status = serializers.BooleanField(default=False)
+
     class Meta:
-        model = Topic
+        model = CourseTopic
         fields = (
             'uuid',
-            # 'name_kz',
-            # 'name_ru',
-            # 'name_en',
+            'title',
+            'lessons',
+            'status',
         )
 
 
+class GetContentLessonSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'order',
+            'text',
+            'video',
+            'img',
+            'file',
+        )
+        model = CLessonContent
+
+    def get_name(self, obj):
+        language = self.context.get('request').headers.get('language', 'kz')
+        if language == 'kz':
+            return obj.course_lesson_type.name_kz
+        elif language == 'en':
+            return obj.course_lesson_type.name_ru
+        return obj.course_lesson_type.name_ru
+
+
 class CourseLessonUserSerializer(serializers.ModelSerializer):
-    passed = serializers.BooleanField()
+    passed = serializers.BooleanField(default=False)
+    lesson_contents = GetContentLessonSerializer(source='c_lesson_contents',
+                                                 read_only=True, many=True)
 
     class Meta:
         model = CLesson
@@ -199,7 +236,8 @@ class CourseLessonUserSerializer(serializers.ModelSerializer):
             # 'name_kz',
             # 'name_ru',
             # 'name_en',
-            'passed'
+            'passed',
+            'lesson_contents'
         )
 
 
