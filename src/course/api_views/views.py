@@ -1,6 +1,6 @@
 import uuid
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Exists, OuterRef
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
@@ -10,8 +10,9 @@ from rest_framework.views import APIView
 from src.common.exception import BuyCourseException
 from src.course import serializers
 from src.course.models import Course, CourseTopic, CLesson, Topic, \
-    CourseTopicLesson, UserCLesson
-from src.course.serializers.course import CourseCurriculumFilterSerializer
+    CourseTopicLesson, UserCLesson, UserCourse
+from src.course.serializers.course import CourseCurriculumFilterSerializer, \
+    AllCourseFilterSerializer
 
 
 class CourseListView(generics.ListAPIView):
@@ -19,7 +20,26 @@ class CourseListView(generics.ListAPIView):
     queryset = Course.api_objects.first_page()
     serializer_class = serializers.CourseSerializer
 
-    @swagger_auto_schema(tags=["course"])
+    def get_queryset(self):
+        user = self.request.user
+        mine_param = self.request.query_params.get('mine', False)
+        mine = mine_param.lower() == 'true' if mine_param is not None else False
+
+        queryset = super().get_queryset()
+        if mine:
+            queryset = queryset.filter(user_courses__user=user)
+        queryset = queryset.annotate(
+            mine=Exists(
+                UserCourse.objects.filter(
+                    course_id=OuterRef('pk'),
+                    user=user,
+                ))
+        )
+        return queryset
+
+    @swagger_auto_schema(
+        tags=["course"],
+        query_serializer=AllCourseFilterSerializer)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -32,6 +52,16 @@ class CourseRetrieveView(generics.RetrieveAPIView):
     queryset = Course.api_objects.is_active().select_related('owner')
     serializer_class = serializers.CourseOneSerializer
     lookup_field = 'uuid'
+
+    def get_queryset(self):
+        user = self.request.user
+        return super().get_queryset().annotate(
+            mine=Exists(
+                UserCourse.objects.filter(
+                    course_id=OuterRef('pk'),
+                    user=user,
+                ))
+        )
 
     @swagger_auto_schema(tags=["course"])
     def get(self, request, *args, **kwargs):
