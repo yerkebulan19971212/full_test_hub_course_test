@@ -22,7 +22,7 @@ class CourseListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        mine_param = self.request.query_params.get('mine', False)
+        mine_param = self.request.query_params.get('mine', 'false')
         mine = mine_param.lower() == 'true' if mine_param is not None else False
 
         queryset = super().get_queryset()
