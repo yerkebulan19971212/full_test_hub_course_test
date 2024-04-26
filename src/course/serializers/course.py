@@ -87,8 +87,8 @@ class CourseSerializer(serializers.ModelSerializer):
         return passed / all * 100
 
     def get_all_lesson_count(self, obj):
-        return UserCLesson.objects.filter(
-            course_lesson__course_topic_lessons__course_topic__course=obj
+        return CLesson.objects.filter(
+            course_topic_lessons__course_topic__course=obj
         ).count()
 
 
