@@ -297,7 +297,7 @@ user_list_view = UserListView.as_view()
 
 class TeacherListView(generics.ListAPIView):
     # permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
-    queryset = User.objects.all()
+    queryset = User.objects.filter(role__name_code='teacher')
     serializer_class = UserBaseSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = UserStudentFilter
