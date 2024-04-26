@@ -43,9 +43,9 @@ class CourseSerializer(serializers.ModelSerializer):
     content_count = serializers.IntegerField(default=0)
     owner = OwnerSerializer(read_only=True)
     teacher = OwnerSerializer(read_only=True)
-    passed_lesson_count = serializers.IntegerField(default=0)
-    all_lesson_count = serializers.IntegerField(default=0)
-    passed_percent = serializers.IntegerField(default=0)
+    passed_lesson_count = serializers.SerializerMethodField()
+    all_lesson_count = serializers.SerializerMethodField()
+    passed_percent = serializers.SerializerMethodField()
     mine = serializers.BooleanField(default=False)
 
     class Meta:
