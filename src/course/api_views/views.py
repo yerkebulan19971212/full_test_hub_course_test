@@ -300,6 +300,8 @@ class LessonCoursePassView(APIView):
             user=self.request.user,
             course_lesson__uuid=lesson_uuid
         ).first()
+        print(user_c_lesson)
+        print("user_c_lesson")
         if user_c_lesson:
             user_c_lesson.passed = not user_c_lesson.passed
             user_c_lesson.save()
