@@ -304,7 +304,9 @@ class CourseLessonUserSerializer(serializers.ModelSerializer):
         )
 
     def get_passed(self, obj):
-        user_lesson = UserCLesson.objects.filter(course_lesson=obj)
+        user_lesson = UserCLesson.objects.filter(
+            course_lesson=obj,
+            user=self.context['request'].user)
         if user_lesson.exists():
             return user_lesson.first().passed
         return False
