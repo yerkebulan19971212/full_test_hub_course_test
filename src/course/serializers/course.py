@@ -71,13 +71,15 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_passed_lesson_count(self, obj):
         return UserCLesson.objects.filter(
             course_lesson__course_topic_lessons__course_topic__course=obj,
-            passed=True
+            passed=True,
+            user=self.context['request'].user
         ).count()
 
     def get_passed_percent(self, obj):
         passed = UserCLesson.objects.filter(
             course_lesson__course_topic_lessons__course_topic__course=obj,
-            passed=True
+            passed=True,
+            user=self.context['request'].user
         ).count()
         all = CLesson.objects.filter(
             course_topic_lessons__course_topic__course=obj
