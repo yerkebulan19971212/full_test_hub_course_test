@@ -303,6 +303,12 @@ class CourseLessonUserSerializer(serializers.ModelSerializer):
             'lesson_contents'
         )
 
+    def get_passed(self, obj):
+        user_lesson = UserCLesson.objects.filter(course_lesson=obj)
+        if user_lesson.exists():
+            return user_lesson.first().passed
+        return False
+
 
 class BuyCourseSerializer(serializers.ModelSerializer):
     course_uuid = serializers.UUIDField(write_only=True)
