@@ -1,6 +1,9 @@
 import uuid
 
-from django.db.models import Prefetch, Exists, OuterRef
+from django.db import models
+from django.db.models import Prefetch, Exists, OuterRef, Case, When, Count, \
+    Subquery, F
+from django.forms import BooleanField
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, permissions
@@ -103,13 +106,70 @@ class CourseCurriculumUserView(generics.ListAPIView):
     def get_queryset(self):
         uuid = self.request.query_params.get('uuid')
         user = self.request.user
+        lesson_count_subquery = CLesson.objects.filter(
+            course_topic_lessons__course_topic_id=OuterRef('pk')
+        ).values('course_topic_lessons__course_topic_id').annotate(
+            total_lessons=Count('id')
+        )
+        passed_lesson_count_subquery = UserCLesson.objects.filter(
+            course_lesson__course_topic_lessons__course_topic_id=OuterRef(
+                'pk'),
+            passed=True,
+            user=user,
+        ).values(
+            'course_lesson__course_topic_lessons__course_topic_id'
+        ).annotate(passed_lessons=Count('id'))
+
         queryset = super().get_queryset().filter(
             course__uuid=uuid,
-            course__user_courses__user=user
+            course__user_courses__user=user,
         )
         if not queryset.exists():
             raise BuyCourseException()
-        return queryset
+        lesson_count_subquery_for_lesson = CLesson.objects.filter(
+            course_topic_lessons__id=OuterRef('pk')
+        ).values('course_topic_lessons__course_topic_id').annotate(
+            total_lessons=Count('id')
+        )
+        passed_lesson_count_subquery_for_lesson = UserCLesson.objects.filter(
+            course_lesson__course_topic_lessons__id=OuterRef(
+                'pk'),
+            passed=True,
+            user=user,
+        ).values(
+            'course_lesson__course_topic_lessons__course_topic_id'
+        ).annotate(passed_lessons=Count('id'))
+
+        course_topic_lessons = CourseTopicLesson.objects.all().annotate(
+            total_lessons=Subquery(
+                lesson_count_subquery_for_lesson.values('total_lessons')[:1],
+                output_field=models.IntegerField()),
+            passed_lessons=Subquery(
+                passed_lesson_count_subquery_for_lesson.values(
+                    'passed_lessons')[:1],
+                output_field=models.IntegerField()),
+            status=Case(
+                When(total_lessons=F('passed_lessons'), then=True),
+                default=False,
+                output_field=models.BooleanField()
+            )
+        ).order_by(
+            'course_lesson__order')
+        return queryset.annotate(
+            total_lessons=Subquery(
+                lesson_count_subquery.values('total_lessons')[:1],
+                output_field=models.IntegerField()),
+            passed_lessons=Subquery(
+                passed_lesson_count_subquery.values('passed_lessons')[:1],
+                output_field=models.IntegerField()),
+            status=Case(
+                When(total_lessons=F('passed_lessons'), then=True),
+                default=False,
+                output_field=models.BooleanField()
+            )
+        ).prefetch_related(
+            Prefetch('course_topic_lessons', queryset=course_topic_lessons)
+        )
 
     @swagger_auto_schema(tags=["course"],
                          query_serializer=CourseCurriculumFilterSerializer)
@@ -236,14 +296,13 @@ class LessonCoursePassView(APIView):
     @swagger_auto_schema(tags=["course"])
     def post(self, request, *args, **kwargs):
         lesson_uuid = self.kwargs['uuid']
-        UserCLesson.objects.filter(
+        user_c_lesson = UserCLesson.objects.filter(
             user=self.request.user,
-            course_lesson__uuid=lesson_uuid,
-            passed=False
-        ).update(
-            passed=True,
-            passed_time=timezone.now()
-        )
+            course_lesson__uuid=lesson_uuid
+        ).first()
+        if user_c_lesson:
+            user_c_lesson.passed = not user_c_lesson.passed
+            user_c_lesson.save()
         return Response({"status": True})
 
 

@@ -79,8 +79,8 @@ class CourseSerializer(serializers.ModelSerializer):
             course_lesson__course_topic_lessons__course_topic__course=obj,
             passed=True
         ).count()
-        all = UserCLesson.objects.filter(
-            course_lesson__course_topic_lessons__course_topic__course=obj
+        all = CLesson.objects.filter(
+            course_topic_lessons__course_topic__course=obj
         ).count()
         if all == 0:
             return 0
@@ -96,9 +96,9 @@ class CourseOneSerializer(serializers.ModelSerializer):
     content_count = serializers.IntegerField(default=0)
     teacher = OwnerSerializer(read_only=True)
     category = CategorySerializer(read_only=True)
-    passed_lesson_count = serializers.IntegerField(default=0)
-    all_lesson_count = serializers.IntegerField(default=0)
-    passed_percent = serializers.IntegerField(default=0)
+    passed_lesson_count = serializers.SerializerMethodField()
+    all_lesson_count = serializers.SerializerMethodField()
+    passed_percent = serializers.SerializerMethodField()
     mine = serializers.BooleanField(default=False)
 
     class Meta:
@@ -122,21 +122,27 @@ class CourseOneSerializer(serializers.ModelSerializer):
             'mine',
         )
 
+    def get_passed_lesson_count(self, obj):
+        return UserCLesson.objects.filter(
+            course_lesson__course_topic_lessons__course_topic__course=obj,
+            passed=True
+        ).count()
+
     def get_passed_percent(self, obj):
         passed = UserCLesson.objects.filter(
             course_lesson__course_topic_lessons__course_topic__course=obj,
             passed=True
         ).count()
-        all = UserCLesson.objects.filter(
-            course_lesson__course_topic_lessons__course_topic__course=obj
+        all = CLesson.objects.filter(
+            course_topic_lessons__course_topic__course=obj
         ).count()
         if all == 0:
             return 0
         return passed / all * 100
 
     def get_all_lesson_count(self, obj):
-        return UserCLesson.objects.filter(
-            course_lesson__course_topic_lessons__course_topic__course=obj
+        return CLesson.objects.filter(
+            course_topic_lessons__course_topic__course=obj
         ).count()
 
 
