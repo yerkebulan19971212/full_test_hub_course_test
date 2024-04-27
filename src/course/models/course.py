@@ -7,7 +7,9 @@ from src.common.constant import TestLang, CourseStatus
 
 class CourseQuerySet(abstract_models.AbstractQuerySet):
     def content_count(self):
-        return self.annotate(content_count=Count('course_topic'))
+        return self.annotate(
+            content_count=Count('course_topic__course_topic_lessons')
+        )
 
 
 class CourseManager(abstract_models.AbstractManager):
