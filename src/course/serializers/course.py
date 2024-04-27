@@ -367,7 +367,7 @@ class BuyCourseSerializer(serializers.ModelSerializer):
 
 class UserCourseInfoSerializer(serializers.ModelSerializer):
     content_count = serializers.IntegerField(default=0)
-    passed_percent = serializers.IntegerField(default=0)
+    passed_percent = serializers.SerializerMethodField()
     teacher = OwnerSerializer(read_only=True)
     category = CategorySerializer(read_only=True)
 
@@ -388,6 +388,19 @@ class UserCourseInfoSerializer(serializers.ModelSerializer):
             'course_trailer',
             'duration',
         )
+
+    def get_passed_percent(self, obj):
+        passed = UserCLesson.objects.filter(
+            course_lesson__course_topic_lessons__course_topic__course=obj,
+            passed=True,
+            user=self.context['request'].user
+        ).count()
+        all = CLesson.objects.filter(
+            course_topic_lessons__course_topic__course=obj
+        ).count()
+        if all == 0:
+            return 0
+        return passed / all * 100
 
 
 class UserCoursePassSerializer(serializers.Serializer):

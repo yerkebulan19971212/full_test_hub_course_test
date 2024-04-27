@@ -270,7 +270,7 @@ has_course_view = HasCourseView.as_view()
 
 class UserCourseInfoRetrieveView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Course.api_objects.is_active().select_related('owner')
+    queryset = Course.api_objects.content_count().select_related('owner')
     serializer_class = serializers.UserCourseInfoSerializer
     lookup_field = 'uuid'
 
