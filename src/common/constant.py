@@ -85,6 +85,13 @@ class QuizzStatus(str, Choice):
     EXPIRED = 'EXPIRED'
 
 
+class CourseStatus(str, Choice):
+    NOT_PASSED = 'NOT_PASSED'
+    CONTINUE = 'CONTINUE'
+    PASSED = 'PASSED'
+    EXPIRED = 'EXPIRED'
+
+
 class AnswerStatus(str, Choice):
     NOT_ANSWERED = 'NOT_ANSWERED'
     CORRECT = 'CORRECT'

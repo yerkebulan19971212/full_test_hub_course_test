@@ -29,7 +29,6 @@ class AuthMeSerializer(serializers.ModelSerializer):
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(source='role.name', default=None)
 
     class Meta:
         model = User

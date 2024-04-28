@@ -106,3 +106,9 @@ class DoesNotHaveTest(APIException):
     message = _("does not have test")
     default_detail = _("does not have test")
     default_code = _("does_not_have_test")
+
+
+class BuyCourseException(APIException):
+    message = _("buy course")
+    default_detail = _("buy course")
+    default_code = _("buy_course")

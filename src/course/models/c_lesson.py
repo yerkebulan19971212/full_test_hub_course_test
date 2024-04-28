@@ -145,4 +145,4 @@ class UserCLesson(
         db_table = 'course\".\"user_course_lesson'
 
     def __str__(self):
-        return f'{self.course_lesson.name_ru}'
+        return f'{self.course_lesson.title}'

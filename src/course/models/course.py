@@ -2,12 +2,14 @@ from django.db import models
 from django.db.models import Count
 
 from src.common import abstract_models
-from src.common.constant import TestLang
+from src.common.constant import TestLang, CourseStatus
 
 
 class CourseQuerySet(abstract_models.AbstractQuerySet):
     def content_count(self):
-        return self.annotate(content_count=Count('course_topic'))
+        return self.annotate(
+            content_count=Count('course_topic__course_topic_lessons')
+        )
 
 
 class CourseManager(abstract_models.AbstractManager):
@@ -36,6 +38,11 @@ class Course(
         on_delete=models.CASCADE,
         null=True, blank=True,
         related_name="courses"
+    )
+    teacher = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
     )
     language = models.CharField(
         max_length=64,
@@ -74,5 +81,36 @@ class Course(
     class Meta:
         db_table = 'course\".\"course'
 
-    # def __str__(self):
-    #     return f'{self.name_code}'
+
+class UserCourse(
+    abstract_models.UUID,
+    abstract_models.Ordering,
+    abstract_models.IsActive,
+    abstract_models.TimeStampedModel,
+    abstract_models.Deleted,
+):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="user_courses"
+    )
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        related_name="user_courses"
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=CourseStatus.choices(),
+        default=CourseStatus.NOT_PASSED,
+        db_index=True
+    )
+    price = models.FloatField(default=0.0)
+    start_time = models.DateField(null=True, blank=True)
+    end_time = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'course\".\"user_course'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.course.title}"

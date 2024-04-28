@@ -53,8 +53,8 @@ class PacketSerializer(serializers.ModelSerializer):
         )
 
     def get_remainder(self, obj):
-        now = timezone.now()
         user = self.context['request'].user
+        now = timezone.now()
         packet = BoughtPacket.objects.filter(
             user=user,
             packet_id=obj.id,
@@ -67,14 +67,11 @@ class PacketSerializer(serializers.ModelSerializer):
         return 0
 
     def get_status(self, obj):
-        now = timezone.now()
         user = self.context['request'].user
         packet = BoughtPacket.objects.filter(
             user=user,
             packet_id=obj.id,
-            status=True,
-            start_time__lte=now,
-            end_time__gte=now
+            status=True
         )
         if packet:
             return True

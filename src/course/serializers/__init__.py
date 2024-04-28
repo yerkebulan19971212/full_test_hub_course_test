@@ -6,11 +6,15 @@ from .course import (
     CourseCurriculumUserSerializer,
     CourseLessonUserSerializer,
     CourseTopicCurriculumSerializer,
+    BuyCourseSerializer,
+    UserCourseInfoSerializer,
+    UserCoursePassSerializer
 )
 from .admin import (
     CourseCreateSerializer,
     CategorySerializer,
     CreateCLessonSerializer,
+    CourseLessonTypeSerializer, OrderUpdateInstanceSerializer,
     CourseListSerializer,
     TopicCreateSerializer,
     CourseTopicListSerializer,

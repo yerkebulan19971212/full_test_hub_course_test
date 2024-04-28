@@ -1,12 +1,17 @@
 import datetime
 
+from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from src.course.models import Category, Course, CourseTopic, CourseLessonType, \
-    CLesson, CourseTopicLesson
+from src.course.models import (Category, Course, CourseTopic, CourseLessonType,
+                               CLesson)
 from src.course import serializers, filters
+from src.course.models.c_lesson import CLessonContent, CourseTopicLesson
+from src.course.serializers.admin import OrderUpdateSerializer
 
 
 class CourseLessonTypeListView(generics.ListAPIView):
@@ -15,7 +20,7 @@ class CourseLessonTypeListView(generics.ListAPIView):
         is_active=True,
         deleted__isnull=True,
     ).order_by("order")
-    serializer_class = serializers.CategorySerializer
+    serializer_class = serializers.CourseLessonTypeSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
@@ -27,7 +32,8 @@ c_lesson_type_list_view = CourseLessonTypeListView.as_view()
 
 class CategoryListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Category.api_objects.all_active().order_by("order")
+    queryset = Category.api_objects.all_active().filter(
+        parent__isnull=True).order_by("order")
     serializer_class = serializers.CategorySerializer
 
     @swagger_auto_schema(tags=["course-admin"])
@@ -68,7 +74,7 @@ class CourseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = serializers.CourseCreateSerializer
     http_method_names = ['get', 'patch', 'delete']
-    lookup_field = 'uuid'
+    lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
@@ -103,15 +109,21 @@ topic_create_view = CreateTopicView.as_view()
 
 
 class CourseTopicListView(generics.ListAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.CourseTopicListSerializer
     queryset = CourseTopic.api_objects.all_active().select_related(
         'topic'
-    ).prefetch_related(
-        'course_topic_lessons'
     ).order_by('order')
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.CourseTopicFilter
+
+    def get_queryset(self):
+        course_topic_lessons = CourseTopicLesson.objects.all().order_by(
+            'course_lesson__order')
+        return super().get_queryset().prefetch_related(
+            Prefetch('course_topic_lessons', queryset=course_topic_lessons),
+            'course_topic_lessons__course_lesson__course_lesson_type'
+        )
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
@@ -124,10 +136,10 @@ admin_course_topic_list_view = CourseTopicListView.as_view()
 class CourseTopicRetrieveUpdateDestroyView(
     generics.RetrieveUpdateDestroyAPIView
 ):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CourseTopic.objects.all()
     serializer_class = serializers.CourseTopicCreateSerializer
-    lookup_field = 'uuid'
+    lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
@@ -168,11 +180,19 @@ class RetrieveUpdateDestroyCLessonView(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = [permissions.IsAuthenticated]
     queryset = CLesson.objects.all()
     serializer_class = serializers.CreateCLessonSerializer
-    lookup_field = 'uuid'
+    lookup_field = 'pk'
 
     @swagger_auto_schema(tags=["course-admin"])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
 retrieve_update_destroy_lesson_view = RetrieveUpdateDestroyCLessonView.as_view()
@@ -194,11 +214,46 @@ class RetrieveUpdateDestroyContentLessonView(
     generics.RetrieveUpdateDestroyAPIView
 ):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CLessonContent.objects.all()
     serializer_class = serializers.CreateContentLessonSerializer
 
     @swagger_auto_schema(tags=["course-admin"])
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(tags=["course-admin"])
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
 retrieve_update_destroy_content_lesson_view = RetrieveUpdateDestroyContentLessonView.as_view()
+
+
+class ContentCLessonOrderView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    @swagger_auto_schema(
+        tags=["course-admin"],
+        request_body=OrderUpdateSerializer()
+    )
+    def post(self, request, *args, **kwargs):
+        content_data = request.data
+        model = CLessonContent
+        if content_data.get("name") == 'CONTENT':
+            model = CLessonContent
+        elif content_data.get("name") == 'LESSON':
+            model = CLesson
+        elif content_data.get("name") == 'TOPIC':
+            model = CourseTopic
+        for o in content_data.get("order_list"):
+            model.objects.filter(id=o.get('id')).update(**{
+                'order': o.get("order")
+            })
+
+        return Response({"success": True}, status=status.HTTP_200_OK)
+
+
+order_view = ContentCLessonOrderView.as_view()
