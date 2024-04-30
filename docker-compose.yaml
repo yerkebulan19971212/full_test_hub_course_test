@@ -29,18 +29,9 @@ services:
     volumes:
       - .:/app
 
-  flower:
-    image: mher/flower
-    ports:
-      - "5555:5555"
-    depends_on:
-      - celery-worker
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3333:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-volumes:
-  grafana_data:
+#  flower:
+#    image: mher/flower
+#    ports:
+#      - "5555:5555"
+#    depends_on:
+#      - celery-worker
