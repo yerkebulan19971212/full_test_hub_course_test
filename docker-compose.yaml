@@ -30,10 +30,7 @@ services:
       - .:/app
 
   flower:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: flower -A myapp
+    image: mher/flower
     ports:
       - "5555:5555"
     depends_on:
