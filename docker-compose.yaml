@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-#    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -30,13 +29,19 @@ services:
     volumes:
       - .:/app
 
-#
-#  flower:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    command: flower -A myapp
-#    ports:
-#      - "5555:5555"
-#    depends_on:
-#      - celery-worker
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: flower -A myapp
+    ports:
+      - "5555:5555"
+    depends_on:
+      - celery-worker
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3333:3333"
+    volumes:
+      - grafana_data:/var/lib/grafana

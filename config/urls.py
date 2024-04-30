@@ -5,19 +5,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 import debug_toolbar
 from src.accounts.urls import accounts_api_v1_urlpatterns
-from src.common.urls import api_v1_urlpatterns as common_url,api_v1_quizzes, api_v1_super_admin_urlpatterns
+from src.common.urls import api_v1_urlpatterns as common_url, api_v1_quizzes, api_v1_super_admin_urlpatterns
 from src.quizzes.urls import urlpatterns as quizzes_url
 from src.course.urls import urlpatterns as course_url
 from src.accounts.urls import super_admin_api_v1_urlpatterns
 from src.services.views import utils_v
 
-
-def trigger_error(request):
-    division_by_zero = 1 / 0
-
-
 urlpatterns = [
-    path('sentry-debug/', trigger_error),
+    path('metrics/', include('django_prometheus.urls')),
     path('api/v1/super-admin/', include(api_v1_super_admin_urlpatterns)),
     path('api/v1/quizzes/', include(api_v1_quizzes)),
     path('api/v1/user/', include(super_admin_api_v1_urlpatterns)),
