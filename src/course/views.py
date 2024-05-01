@@ -13,7 +13,7 @@ class SaveImageView(generics.CreateAPIView):
         return Response(
             data={
                 "filename": filename,
-                "upload": 1,
+                "uploaded": 1,
                 "url": data.get('upload')
             },
             status=status.HTTP_200_OK
