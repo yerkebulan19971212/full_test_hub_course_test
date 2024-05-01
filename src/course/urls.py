@@ -18,6 +18,7 @@ from src.course.api_views import (category_list_view,
                                   admin_course_topic_list_view,
                                   c_lesson_create_view,order_view,
                                   content_lesson_create_view)
+from src.course.views import save_image_view
 
 admin_urlpatterns = [
     path('lesson-types/', c_lesson_type_list_view),
@@ -40,6 +41,7 @@ admin_urlpatterns = [
 
 api_v1_urlpatterns = [
     path('admin/', include(admin_urlpatterns)),
+    path('question-image/', save_image_view),
     path('all/', course_list_view),
     path('buy/', buy_course_view),
     path('buy/<uuid:uuid>/', check_buy_course_view),
