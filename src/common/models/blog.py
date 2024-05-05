@@ -4,8 +4,16 @@ from src.accounts.models import User
 from src.common import abstract_models
 
 
-class BlogCategory(abstract_models.AbstractBaseNameCode):
+class BlogCategory(
+    abstract_models.AbstractBaseNameCode,
+    abstract_models.AbstractBaseName
+):
     pass
+    # def __str__(self):
+    #     return self.name_ru
+
+    # class Meta:
+    #     db_table = 'common\".\"blog_category'
 
 
 class Blog(
@@ -14,9 +22,10 @@ class Blog(
     abstract_models.Ordering,
     abstract_models.IsActive,
     abstract_models.TimeStampedModel,
-    abstract_models.Description
+    abstract_models.Description,
 ):
     title = models.CharField(max_length=1024)
+    image = models.FileField(null=True, blank=True)
     views = models.PositiveIntegerField(default=0)
     duration_length = models.CharField(max_length=1024)
     category = models.ForeignKey(

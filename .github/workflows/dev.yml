@@ -1,8 +1,8 @@
 #name: Dev-Deploy
-#env:
+#.env:
 #  path: /var/www/full_test_hub_course_test/
 #  venv_file: venv
-#  env_file: .env
+#  env_file: ..env
 #  branch: dev
 #
 #on:
@@ -37,12 +37,12 @@
 #    - name: Deploy
 #      run: |
 #        rsync -e "ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no" \
-#        --exclude "${{ env.venv_file }}" \
-#        --exclude "${{ env.env_file }}" \
+#        --exclude "${{ .env.venv_file }}" \
+#        --exclude "${{ .env.env_file }}" \
 #        --archive  \
 #        --compress \
 #        . \
-#        "${{ secrets.TESTENV_USER }}@${{ secrets.TESTENV_IP }}:${{ env.path }}"
+#        "${{ secrets.TESTENV_USER }}@${{ secrets.TESTENV_IP }}:${{ .env.path }}"
 #    - name: Connect to remote server
 #      uses: appleboy/ssh-action@v0.1.7
 #      with:

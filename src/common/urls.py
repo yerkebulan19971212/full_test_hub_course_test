@@ -19,7 +19,7 @@ from src.common.super_admin_views import (add_question_view,
                                           variant_lesson_view, variant_list, create_variant_view, student_detail,
                                           student_detail_update, destroy_variant, add_common_question_view,
                                           get_update_common_view, question_items_list_view)
-from src.common.views import support_view
+from src.common.views import support_view, BlocList, BlogOne, BlogRecomendationList
 
 app_name = 'common'
 urlpatterns = [
@@ -35,6 +35,9 @@ urlpatterns = [
     path('schools/', get_all_school_view),
     path('cities/', get_all_cities_view),
     path('lessons-with-pairs/', get_all_active_lesson_with_pairs_view),
+    path('blog/all/', BlocList.as_view()),
+    path('blog/<int:id>/', BlogOne.as_view(), name='one'),
+    path('recomend/<int:id>', BlogRecomendationList.as_view(), name='one'),
 ]
 
 api_v1_urlpatterns = [
