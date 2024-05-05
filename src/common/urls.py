@@ -7,7 +7,7 @@ from src.common.api_views import (buy_packet_view, get_all_active_lesson_view,
                                   get_all_rating_test_view,
                                   get_all_school_view, lesson_pair_list_view,
                                   packet_view, promo_code_view,
-                                  quizz_types_view)
+                                  quizz_types_view, blog_list_view, blog_detail_view, blog_recommendation_view)
 from src.common.api_views.lesson import import_question_from_test_hub_app
 from src.common.super_admin_views import (add_question_view,
                                           check_add_question_view,
@@ -19,7 +19,7 @@ from src.common.super_admin_views import (add_question_view,
                                           variant_lesson_view, variant_list, create_variant_view, student_detail,
                                           student_detail_update, destroy_variant, add_common_question_view,
                                           get_update_common_view, question_items_list_view)
-from src.common.views import support_view, BlocList, BlogOne, BlogRecomendationList
+from src.common.views import support_view
 
 app_name = 'common'
 urlpatterns = [
@@ -35,9 +35,9 @@ urlpatterns = [
     path('schools/', get_all_school_view),
     path('cities/', get_all_cities_view),
     path('lessons-with-pairs/', get_all_active_lesson_with_pairs_view),
-    path('blog/all/', BlocList.as_view()),
-    path('blog/<int:id>/', BlogOne.as_view(), name='one'),
-    path('recomend/<int:id>', BlogRecomendationList.as_view(), name='one'),
+    path('blog/all/',  blog_list_view),
+    path('blog/<uuid:uuid>/', blog_detail_view),
+    path('blog/recommendation/<uuid:uuid>', blog_recommendation_view),
 ]
 
 api_v1_urlpatterns = [

@@ -4,3 +4,4 @@ from .common import (quizz_types_view, packet_view, buy_packet_view,
                      get_all_cities_view, get_all_school_view,
                      get_all_rating_test_view)
 from .promotion import promo_code_view
+from .blog import (blog_list_view, blog_detail_view, blog_recommendation_view)
