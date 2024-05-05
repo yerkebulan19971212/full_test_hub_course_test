@@ -9,3 +9,4 @@ from .quizz_type import (QuizzType, CourseTypeQuizz, Packet, BoughtPacket,
                          RatingTest, QuestionAnswerImage)
 from .promotion import PromoCode, UserPromoCode
 from .support import Support
+from .blog import Blog
