@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-#    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -30,12 +29,8 @@ services:
     volumes:
       - .:/app
 
-#
 #  flower:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    command: flower -A myapp
+#    image: mher/flower
 #    ports:
 #      - "5555:5555"
 #    depends_on:

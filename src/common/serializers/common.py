@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from src.common import models
+from src.common.abstract_serializer import NameSerializer
 from src.common.exception import PromoCodeNotExistsError, PassedTestError, \
     PromoCodeUsedError
 from src.common.models import BoughtPacket, PromoCode, UserPromoCode
@@ -38,6 +39,7 @@ class PacketSerializer(serializers.ModelSerializer):
         model = models.Packet
         fields = (
             'id',
+            'uuid',
             'name_code',
             'name_kz',
             'name_ru',
@@ -76,6 +78,46 @@ class PacketSerializer(serializers.ModelSerializer):
         if packet:
             return True
         return False
+
+
+class PacketTestSerializer(NameSerializer):
+    class Meta:
+        model = models.PacketTestType
+        fields = [
+            'name'
+        ]
+
+
+class PacketDetailSerializer(NameSerializer):
+    packet_test_type = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Packet
+        fields = (
+            'uuid',
+            'name_code',
+            'name',
+            'days',
+            'img',
+            'price',
+            'packet_type',
+            'packet_test_type',
+            'quantity',
+            'question_quantity',
+            'duration',
+            'subject_quantity',
+        )
+
+    def get_packet_test_type(self, obj):
+        if obj.packet_test_type:
+            return PacketTestSerializer(obj.packet_test_type).data
+        return None
+
+    def get_price(self, obj):
+        if obj.second_price > 0:
+            return obj.second_price
+        return obj.price
 
 
 class BuyPacketSerializer(serializers.ModelSerializer):

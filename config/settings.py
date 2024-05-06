@@ -33,7 +33,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://api.testhub.kz',
     'http://127.0.0.1:5000',
     'http://127.0.0.1:3000',
-
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
@@ -52,10 +51,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'django_prometheus',
     'celery',
-
     'storages',
-
     'drf_yasg',
     'rest_framework',
     'django_filters',

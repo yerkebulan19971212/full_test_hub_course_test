@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (BoughtPacket, City, Country, CourseType, CourseTypeLesson,
                      CourseTypeQuizz, KaspiPay, Lesson, LessonPair, Packet,
-                     QuizzType, School, PromoCode, Support, UserPromoCode)
+                     QuizzType, School, PromoCode, Support, UserPromoCode, Blog, BlogCategory, PacketTestType)
 from src.quizzes.admin import VariantPacketInline
 
 admin.site.register([
@@ -18,7 +18,10 @@ admin.site.register([
     QuizzType,
     School,
     PromoCode,
-    UserPromoCode
+    UserPromoCode,
+    Blog,
+    BlogCategory,
+PacketTestType
 ])
 
 
@@ -84,6 +87,7 @@ class PacketAdmin(admin.ModelAdmin):
         'second_price',
         'img',
         'packet_type',
+        'packet_test_type',
         'quantity',
         'is_active',
         'created',

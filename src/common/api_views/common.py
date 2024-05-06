@@ -43,6 +43,16 @@ class PacketListView(generics.ListAPIView):
 packet_view = PacketListView.as_view()
 
 
+class PacketListView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Packet.objects.all()
+    serializer_class = serializers.PacketSerializer
+    lookup_field = 'uuid'
+
+
+packet_one_view = PacketListView.as_view()
+
+
 class BuyPacket(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.BuyPacketSerializer

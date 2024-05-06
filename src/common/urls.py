@@ -7,7 +7,8 @@ from src.common.api_views import (buy_packet_view, get_all_active_lesson_view,
                                   get_all_rating_test_view,
                                   get_all_school_view, lesson_pair_list_view,
                                   packet_view, promo_code_view,
-                                  quizz_types_view)
+                                  quizz_types_view, blog_list_view, blog_detail_view, blog_recommendation_view,
+                                  packet_one_view)
 from src.common.api_views.lesson import import_question_from_test_hub_app
 from src.common.super_admin_views import (add_question_view,
                                           check_add_question_view,
@@ -30,11 +31,15 @@ urlpatterns = [
     path('lesson-pairs/', lesson_pair_list_view),
     path('quizz-types/', quizz_types_view),
     path('packet-list/', packet_view),
+    path('packet/<uuid:uuid>/', packet_one_view),
     path('rating-test-list/', get_all_rating_test_view),
     path('buy-packet/', buy_packet_view),
     path('schools/', get_all_school_view),
     path('cities/', get_all_cities_view),
     path('lessons-with-pairs/', get_all_active_lesson_with_pairs_view),
+    path('blog/all/',  blog_list_view),
+    path('blog/<uuid:uuid>/', blog_detail_view),
+    path('blog/recommendation/<uuid:uuid>', blog_recommendation_view),
 ]
 
 api_v1_urlpatterns = [
