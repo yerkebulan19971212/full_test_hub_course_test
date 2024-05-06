@@ -21,7 +21,7 @@ blog_list_view = BlocListView.as_view()
 
 
 class BlocDetailView(generics.RetrieveAPIView):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = BlogOneSerializer
     queryset = Blog.objects.filter(is_active=True)
     lookup_field = 'uuid'

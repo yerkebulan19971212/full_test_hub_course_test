@@ -86,6 +86,15 @@ class CourseTypeQuizz(
         return f"{self.quizz_type.name_code}"
 
 
+class PacketTestType(
+    abstract_models.AbstractBaseName,
+    abstract_models.AbstractBaseNameCode,
+    abstract_models.TimeStampedModel,
+    abstract_models.IsActive,
+):
+    pass
+
+
 class Packet(
     abstract_models.UUID,
     abstract_models.Ordering,
@@ -103,6 +112,12 @@ class Packet(
         db_index=True,
         related_name='course_type_quizzes'
     )
+    packet_test_type = models.ForeignKey(
+        PacketTestType,
+        on_delete=models.CASCADE,
+        related_name='packets',
+        null=True,
+    )
     days = models.IntegerField(default=0)
     price = models.IntegerField(default=0)
     second_price = models.IntegerField(default=0)
@@ -112,6 +127,9 @@ class Packet(
         default=PacketType.ONE_TIME
     )
     quantity = models.IntegerField(default=1)
+    question_quantity = models.IntegerField(default=1)
+    duration = models.CharField(default='', max_length=128)
+    subject_quantity = models.IntegerField(default=1)
 
     class Meta:
         db_table = 'common\".\"packet'
@@ -174,4 +192,3 @@ class QuestionAnswerImage(abstract_models.TimeStampedModel):
 
     class Meta:
         db_table = 'common\".\"question_answer_image'
-

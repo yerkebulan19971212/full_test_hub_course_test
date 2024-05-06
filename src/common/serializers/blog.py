@@ -8,7 +8,11 @@ from src.common.models import Blog, BlogCategory
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name')
+        fields = (
+            'first_name',
+            'avatar',
+            'last_name'
+        )
 
 
 class CategorySerializer(NameSerializer):
@@ -21,9 +25,7 @@ class CategorySerializer(NameSerializer):
 
 
 class BlogSerializer(serializers.ModelSerializer):
-    author_id = serializers.IntegerField(source='author.id')
-    author_first_name = serializers.CharField(source='author.first_name')
-    author_last_name = serializers.CharField(source='author.last_name')
+    author = AuthorSerializer()
     category = serializers.SerializerMethodField()
 
     class Meta:
@@ -36,9 +38,7 @@ class BlogSerializer(serializers.ModelSerializer):
             'duration_length',
             'views',
             'created',
-            'author_id',
-            'author_first_name',
-            'author_last_name',
+            'author',
             'category',
         ]
         ref_name = 'BlogSerializer'
@@ -48,9 +48,7 @@ class BlogSerializer(serializers.ModelSerializer):
 
 
 class BlogOneSerializer(serializers.ModelSerializer):
-    author_id = serializers.IntegerField(source='author.id')
-    author_first_name = serializers.CharField(source='author.first_name')
-    author_last_name = serializers.CharField(source='author.last_name')
+    author = AuthorSerializer()
     category = serializers.SerializerMethodField()
 
     class Meta:
@@ -66,9 +64,7 @@ class BlogOneSerializer(serializers.ModelSerializer):
             'author',
             'category',
             'description',
-            'author_id',
-            'author_first_name',
-            'author_last_name',
+            'author',
             'category',
         ]
         ref_name = 'BlogOneSerializer'
