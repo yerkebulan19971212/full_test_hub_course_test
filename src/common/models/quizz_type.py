@@ -100,6 +100,7 @@ class Packet(
     abstract_models.Ordering,
     abstract_models.IsActive,
     abstract_models.AbstractBaseNameCode,
+    abstract_models.Description,
     abstract_models.TimeStampedModel
 ):
     name_kz = models.CharField(max_length=255, default='', blank=True)

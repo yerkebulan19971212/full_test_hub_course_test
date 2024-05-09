@@ -107,11 +107,12 @@ class PacketDetailSerializer(NameSerializer):
             'question_quantity',
             'duration',
             'subject_quantity',
+            'description',
         )
 
     def get_packet_test_type(self, obj):
         if obj.packet_test_type:
-            return PacketTestSerializer(obj.packet_test_type).data
+            return PacketTestSerializer(obj.packet_test_type, context=self.context).data
         return None
 
     def get_price(self, obj):
