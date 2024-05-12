@@ -89,6 +89,9 @@ class PacketAdmin(admin.ModelAdmin):
         'packet_type',
         'packet_test_type',
         'quantity',
+        'question_quantity',
+        'duration',
+        'subject_quantity',
         'is_active',
         'created',
         'modified'
