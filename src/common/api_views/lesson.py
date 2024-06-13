@@ -63,7 +63,7 @@ class ImportQuestionFromTestHubApp(APIView):
                     print(variant)
                     print("variant")
                     for l in lessons:
-                        question_url = "https://api-ent.testhub.kz/api/v1/quizzes/get-all-question-2-2/?"
+                        question_url = "https://api-magister.testhub.kz/api/v1/quizzes/get-all-question-2-2/?"
                         question_url += "variant_id=" + str(
                             v.get('id')) + "&lesson_code=" + l.name_code
                         res_q = requests.get(question_url)
@@ -83,8 +83,11 @@ class ImportQuestionFromTestHubApp(APIView):
                                 common_q_o = None
                                 if comon_q:
                                     common_q_o, _ = CommonQuestion.objects.get_or_create(
+                                        name=comon_q["name"],
                                         text=comon_q["text"],
                                     )
+                                    if common_q_o['file']:
+                                        common_q_o.file.name = comon_q["file"].split('media')[1]
                                 lq = LessonQuestionLevel.objects.filter(
                                     question_level=ql,
                                     test_type_lesson__lesson=l
@@ -104,7 +107,7 @@ class ImportQuestionFromTestHubApp(APIView):
                                 )
                                 questions_objects[question["id"]] = q.id
                                 if question_type == QuestionType.SELECT:
-                                    parent_url = f"https://api-ent.testhub.kz/api/v1/quizzes/get-all-question-parent/?parent={question['id']}"
+                                    parent_url = f"https://api-magister.testhub.kz/api/v1/quizzes/get-all-question-parent/?parent={question['id']}"
                                     res_q_p = requests.get(parent_url)
                                     for r in res_q_p.json():
                                         question = r
