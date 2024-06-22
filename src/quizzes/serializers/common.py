@@ -152,22 +152,12 @@ class NewTestSerializer(serializers.ModelSerializer):
         quizz_type = packet.quizz_type
         quizz_type_name = quizz_type.quizz_type.name_code
         if quizz_type_name in ['full_test', 'rating']:
-            questions += Question.objects.get_history_full_test_v2(
+            questions += Question.objects.get_tgo(
                 language, packet, user, quizz_type
             )
-            r_questions = Question.objects.get_reading_literacy_full_test_v2(
-                language, packet, user, quizz_type)
-            questions += r_questions
-            if lesson_pair:
-                if lesson_pair.lesson_1.name_code != 'creative_exam':
-                    questions += Question.objects.get_mat_full_test_v2(
-                        language, packet, user, quizz_type)
-                    questions += Question.objects.get_full_test_v2(
-                        language, lesson_pair.lesson_1, packet, user,
-                        quizz_type)
-                    questions += Question.objects.get_full_test_v2(
-                        language, lesson_pair.lesson_2, packet, user,
-                        quizz_type)
+            questions += Question.objects.get_eng(
+                language, packet, user, quizz_type
+            )
         elif quizz_type_name == 'by_lesson':
             questions += Question.objects.get_questions_by_lesson(
                 lang=language,

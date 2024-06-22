@@ -8,7 +8,7 @@ from src.common import abstract_models
 from src.common.constant import ChoiceType, QuestionType
 from src.common.models import CourseTypeQuizz
 from src.quizzes import models as quizzes_models
-from src.quizzes.models import StudentQuizz, QuestionLevel
+from src.quizzes.models import StudentQuizz, QuestionLevel, Variant
 
 
 class CommonQuestionQuerySet(abstract_models.AbstractQuerySet):
@@ -241,6 +241,116 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     queryset.filter(common_question=common_question))
                 random.shuffle(questions)
             questions_list += questions[:5]
+        return questions_list
+    def get_tgo(self, lang: str, packet, user, quizz_type):
+        questions_list = []
+        queryset = self.select_related(
+            'lesson_question_level__test_type_lesson',
+        )
+        variant = Variant.objects.all().order_by('?').first()
+        questions_list = list(Question.objects.filter(
+            variant=variant,
+            lesson_question_level__test_type_lesson__lesson__name_code='tgo'
+        ).order_by('id'))
+        # for q in QuestionLevel.objects.all().order_by('id')[:4]:
+        #     if q.name_code == 'C' or q.name_code == 'D':
+        #         common_question = CommonQuestion.objects.get_common_question(
+        #             lang=lang, q=q,
+        #             packet=packet,
+        #             lesson='history_of_kazakhstan',
+        #             user=user, quizz_type=quizz_type
+        #         )
+        #         questions = queryset.filter(common_question=common_question)
+        #         questions_list += [q for q in questions[:5]]
+        #         continue
+        #     questions = queryset.filter(
+        #         variant__language=lang,
+        #         variant__is_active=True,
+        #         lesson_question_level__question_level=q,
+        #         variant__variant_packets__packet=packet,
+        #         lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan'
+        #     ).annotate(
+        #         user_question_count=Coalesce(
+        #             Sum(
+        #                 'user_questions_count__quantity',
+        #                 filter=Q(
+        #                     user_questions_count__user=user,
+        #                     user_questions_count__quizz_type=quizz_type
+        #                 )),
+        #             0)
+        #     ).order_by('user_question_count')
+        #     questions = list(questions)
+        #     if len(questions) >= 10:
+        #         questions = questions[:len(questions) // 2]
+        #         for i in range(random.randint(1, 5)):
+        #             random.shuffle(questions)
+        #     else:
+        #         random.shuffle(questions)
+        #     if q.name_code == 'C' or q.name_code == 'D':
+        #         common_question = CommonQuestion.objects.get_common_question(
+        #             lang=lang, q=q,
+        #             packet=packet,
+        #             lesson='history_of_kazakhstan',
+        #             user=user,
+        #             quizz_type=quizz_type
+        #         )
+        #         questions = list(
+        #             queryset.filter(common_question=common_question))
+        #         random.shuffle(questions)
+        #     questions_list += questions[:5]
+        return questions_list
+    def get_eng(self, lang: str, packet, user, quizz_type):
+        variant = Variant.objects.all().order_by('?').first()
+        questions_list = list(Question.objects.filter(
+            variant=variant,
+            lesson_question_level__test_type_lesson__lesson__name_code='eng'
+        ).order_by('id'))
+        # for q in QuestionLevel.objects.all().order_by('id')[:4]:
+        #     if q.name_code == 'C' or q.name_code == 'D':
+        #         common_question = CommonQuestion.objects.get_common_question(
+        #             lang=lang, q=q,
+        #             packet=packet,
+        #             lesson='history_of_kazakhstan',
+        #             user=user, quizz_type=quizz_type
+        #         )
+        #         questions = queryset.filter(common_question=common_question)
+        #         questions_list += [q for q in questions[:5]]
+        #         continue
+        #     questions = queryset.filter(
+        #         variant__language=lang,
+        #         variant__is_active=True,
+        #         lesson_question_level__question_level=q,
+        #         variant__variant_packets__packet=packet,
+        #         lesson_question_level__test_type_lesson__lesson__name_code='history_of_kazakhstan'
+        #     ).annotate(
+        #         user_question_count=Coalesce(
+        #             Sum(
+        #                 'user_questions_count__quantity',
+        #                 filter=Q(
+        #                     user_questions_count__user=user,
+        #                     user_questions_count__quizz_type=quizz_type
+        #                 )),
+        #             0)
+        #     ).order_by('user_question_count')
+        #     questions = list(questions)
+        #     if len(questions) >= 10:
+        #         questions = questions[:len(questions) // 2]
+        #         for i in range(random.randint(1, 5)):
+        #             random.shuffle(questions)
+        #     else:
+        #         random.shuffle(questions)
+        #     if q.name_code == 'C' or q.name_code == 'D':
+        #         common_question = CommonQuestion.objects.get_common_question(
+        #             lang=lang, q=q,
+        #             packet=packet,
+        #             lesson='history_of_kazakhstan',
+        #             user=user,
+        #             quizz_type=quizz_type
+        #         )
+        #         questions = list(
+        #             queryset.filter(common_question=common_question))
+        #         random.shuffle(questions)
+        #     questions_list += questions[:5]
         return questions_list
 
     def get_full_test_v2(self, lang: str, lesson, packet, user, quizz_type):
