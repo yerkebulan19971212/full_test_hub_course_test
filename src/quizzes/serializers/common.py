@@ -128,15 +128,15 @@ class NewTestSerializer(serializers.ModelSerializer):
 
         lesson_pair = None
         lesson = None
-        if len(lessons) > 1 or 8 in lessons:
-            lesson_pair = LessonPair.objects.filter(
-                Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
-                Q(lesson_1=lessons[-1], lesson_2=lessons[0])
-            ).first()
-            validated_data["lesson_pair"] = lesson_pair
-        else:
-            lesson = Lesson.objects.get(pk=lessons[0])
-            validated_data["lesson"] = lesson
+        # if len(lessons) > 1 or 8 in lessons:
+        #     lesson_pair = LessonPair.objects.filter(
+        #         Q(lesson_1=lessons[0], lesson_2=lessons[-1]) |
+        #         Q(lesson_1=lessons[-1], lesson_2=lessons[0])
+        #     ).first()
+        #     validated_data["lesson_pair"] = lesson_pair
+        # else:
+        #     lesson = Lesson.objects.get(pk=lessons[0])
+        #     validated_data["lesson"] = lesson
 
         validated_data["quizz_start_time"] = datetime.datetime.now()
         validated_data[
