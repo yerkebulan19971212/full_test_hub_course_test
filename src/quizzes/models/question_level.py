@@ -11,9 +11,9 @@ class QuestionLevel(
     abstract_models.TimeStampedModel
 ):
     point = models.PositiveSmallIntegerField(default=0, db_index=True)
-    choice = models.PositiveSmallIntegerField(
-        choices=ChoiceType.choices(),
-        default=ChoiceType.CHOICE,
+    choice = models.IntegerField(
+        # choices=ChoiceType.choices(),
+        default=0,
         db_index=True
     )
 

@@ -1,11 +1,12 @@
 from django.contrib import admin
 from .models import StudentQuizz, StudentQuizzFile, Question, QuestionLevel, \
-    Variant
+    Variant, LessonQuestionLevel
 from .models.variant import VariantPacket
 
 admin.site.register([
     QuestionLevel,
-    StudentQuizzFile
+    StudentQuizzFile,
+    LessonQuestionLevel
 ])
 
 
