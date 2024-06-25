@@ -45,7 +45,11 @@ def finish_full_test(student_quizz_id: int):
                 lessons.append(lesson_pair.lesson_1)
                 lessons.append(lesson_pair.lesson_2)
             else:
-                lessons = [student_quizz.lesson]
+                test_type_lessons = CourseTypeLesson.objects.filter(
+                    main=True, course_type__name_code='ent'
+                )
+                lessons = [test_type_lesson.lesson for test_type_lesson in
+                           test_type_lessons]
             index = 0
             test_full_score = []
             for lesson in lessons:
