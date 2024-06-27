@@ -350,7 +350,7 @@ def add_balance():
             user_id = int(user_id.strip())
             if user_id > 800000:
                 requests.post(
-                    url='',
+                    url='https://api-magister.testhub.kz/api/v1/user/add-balance-2/',
                     json={
                         "user_id": user_id,
                         "balance": int(float(price))
