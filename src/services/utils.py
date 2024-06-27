@@ -7,6 +7,7 @@ import re
 import ast
 import os
 
+import requests
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -346,13 +347,23 @@ def add_balance():
                 continue
             user_id = id_msg.group(0).split(' ')[-1].strip()
             price = str(price_msg.group(0)).split(' ')[-1].strip()
-            user = User.objects.filter(user_id=int(user_id)).first()
-            if user is not None:
-                BalanceHistory.objects.create(
-                    student=user,
-                    balance=int(float(price)),
-                    data=msg
+            user_id = int(user_id.strip())
+            if user_id > 800000:
+                requests.post(
+                    url='',
+                    json={
+                        "user_id": user_id,
+                        "balance": int(float(price))
+                    }
                 )
+            else:
+                user = User.objects.filter(user_id=int(user_id)).first()
+                if user is not None:
+                    BalanceHistory.objects.create(
+                        student=user,
+                        balance=int(float(price)),
+                        data=msg
+                    )
             as_read_message(message['id'])
     if not messages:
         print('No messages found')
