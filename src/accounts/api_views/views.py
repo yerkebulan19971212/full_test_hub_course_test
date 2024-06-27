@@ -323,3 +323,17 @@ class BalanceHistoryView(generics.CreateAPIView):
 
 
 add_balance_history = BalanceHistoryView.as_view()
+
+
+class BalanceHistory2View(generics.CreateAPIView):
+    serializer_class = BalanceHistorySerializer
+
+    def perform_create(self, serializer):
+        user_id = self.request.data.get("user_id")
+        student = User.objects.filter(user_id=user_id).first()
+        serializer.save(
+            student=student
+        )
+
+
+add_balance_history_2 = BalanceHistory2View.as_view()

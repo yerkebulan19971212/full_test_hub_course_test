@@ -11,7 +11,7 @@ from src.accounts.api_views.views import (auth_me_view, token_by_phone_view,
                                           profile_view,
                                           admin_update_password_view,
                                           user_list_view, add_balance_history,
-                                          teacher_list_view)
+                                          teacher_list_view, add_balance_history_2)
 
 app_name = 'accounts'
 urlpatterns = [
@@ -42,5 +42,6 @@ super_admin_api_v1_urlpatterns = [
     path('me/', auth_me_view),
     path('password/', admin_update_password_view),
     path('add-balance/', add_balance_history),
+    path('add-balance-2/', add_balance_history_2),
 
 ]
