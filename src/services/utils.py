@@ -347,7 +347,7 @@ def add_balance():
                 continue
             user_id = id_msg.group(0).split(' ')[-1].strip()
             price = str(price_msg.group(0)).split(' ')[-1].strip()
-            user_id = int(user_id.strip())
+            user_id = int(user_id)
             if user_id > 800000:
                 requests.post(
                     url='https://api-magister.testhub.kz/api/v1/user/add-balance-2/',
