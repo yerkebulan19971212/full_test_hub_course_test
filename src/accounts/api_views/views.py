@@ -329,6 +329,9 @@ class BalanceHistory2View(generics.CreateAPIView):
     serializer_class = BalanceHistorySerializer
 
     def perform_create(self, serializer):
+        print("+++++++++++++= ")
+        print(self.request.data)
+        print("+++++++++++++=1")
         user_id = self.request.data.get("user_id")
         student = User.objects.filter(user_id=user_id).first()
         serializer.save(
