@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
@@ -323,6 +325,7 @@ class BalanceHistoryView(generics.CreateAPIView):
 
 
 add_balance_history = BalanceHistoryView.as_view()
+logger = logging.getLogger(__name__)
 
 
 class BalanceHistory2View(generics.CreateAPIView):
@@ -330,6 +333,7 @@ class BalanceHistory2View(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         print("+++++++++++++= ")
+        logger.warning(f"cccc----ddd{self.request.data}")
         print(self.request.data)
         print("+++++++++++++=1")
         user_id = self.request.data.get("user_id")
