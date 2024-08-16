@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from src.common.models import Blog, blog
 from src.common.serializers.blog import BlogSerializer, BlogOneSerializer
 from src.common.serializers.common import SupportSerializer
+from src.services.utils import add_balance, create_read_token, create_token
 
 
 # Create your views here.
@@ -23,6 +24,8 @@ class BlocList(APIView):
         blocks = Blog.objects.all()
         blocks_serializer = BlogSerializer(blocks, many=True, context={'request': request})
         return Response(blocks_serializer.data)
+
+
 #
 class BlogOne(APIView):
     def get(self, request, id, format=None):
@@ -38,3 +41,21 @@ class BlogRecomendationList(APIView):
         blocks = Blog.objects.exclude(id=id).order_by('?')[:3]
         blocks_serializer = BlogSerializer(blocks, many=True, context={'request': request})
         return Response(blocks_serializer.data)
+
+
+class CreateReadToken(APIView):
+    def post(self, request):
+        create_read_token()
+        return Response({"status": True})
+
+
+create_read_token_view = CreateReadToken.as_view()
+
+
+class CreateToken(APIView):
+    def post(self, request):
+        create_token()
+        return Response({"status": True})
+
+
+create_token_view = CreateToken.as_view()

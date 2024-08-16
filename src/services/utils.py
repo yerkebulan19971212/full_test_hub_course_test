@@ -6,6 +6,7 @@ import os.path
 import re
 import ast
 import os
+import time
 
 import requests
 from google.auth.transport.requests import Request
@@ -290,8 +291,15 @@ def get_message(service, user_id, msg_id):
 def as_read_message(msg_id):
     creds = None
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json',
-                                                      MODIFY_SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file('token.json',
+
+                                                          MODIFY_SCOPES)
+        except Exception as e:
+            os.remove('read_token.json')
+            time.sleep(5)
+            print('No token.json found')
+            print(e)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -312,8 +320,14 @@ def add_balance():
 
     creds = None
     if os.path.exists('read_token.json'):
-        creds = Credentials.from_authorized_user_file('read_token.json',
-                                                      SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file('read_token.json',
+                                                          SCOPES)
+        except Exception as e:
+            os.remove('read_token.json')
+            time.sleep(5)
+            print('No token.json found')
+            print(e)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -367,3 +381,26 @@ def add_balance():
             as_read_message(message['id'])
     if not messages:
         print('No messages found')
+
+
+def create_read_token():
+    if os.path.exists('read_token.json'):
+        os.remove('read_token.json')
+        time.sleep(5)
+
+        flow = InstalledAppFlow.from_client_secrets_file(
+            'client_secret.json', SCOPES)
+        creds = flow.run_local_server(port=0)
+        with open('read_token.json', 'w') as token:
+            token.write(creds.to_json())
+
+
+def create_token():
+    if os.path.exists('token.json'):
+        os.remove('token.json')
+        time.sleep(5)
+        flow = InstalledAppFlow.from_client_secrets_file(
+            'client_secret.json', MODIFY_SCOPES)
+        creds = flow.run_local_server(port=0)
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
