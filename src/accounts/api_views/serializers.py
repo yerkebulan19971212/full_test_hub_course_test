@@ -13,7 +13,7 @@ User = get_user_model()
 
 
 class AuthMeSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(source='role.name', default=None)
+    role = serializers.CharField(source='role.name_code', default=None)
 
     class Meta:
         model = User
