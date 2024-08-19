@@ -11,6 +11,7 @@ class KaspiPay(
     account = models.CharField(max_length=128)
     txnDate = models.CharField(max_length=128, default="")
     price = models.FloatField()
+    data = models.JSONField(null=True)
 
     class Meta:
         db_table = 'integration\".\"kaspi_pay'

@@ -3,7 +3,7 @@ from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.common.models import Blog, blog
+from src.common.models import Blog, blog, KaspiPay
 from src.common.serializers.blog import BlogSerializer, BlogOneSerializer
 from src.common.serializers.common import SupportSerializer
 from src.services.utils import add_balance, create_read_token, create_token
@@ -59,3 +59,20 @@ class CreateToken(APIView):
 
 
 create_token_view = CreateToken.as_view()
+
+
+class GmailMessage(APIView):
+    def post(self, request):
+        data = request.data
+        KaspiPay.objects.create(
+            command='qweq',
+            txn_id='qweq',
+            account='qweq',
+            txnDate='qweq',
+            price=1,
+            data=data,
+        )
+        return Response({"status": True})
+
+
+gmail_message_view = GmailMessage.as_view()
