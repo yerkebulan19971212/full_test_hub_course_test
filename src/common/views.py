@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from src.common.models import Blog, blog, KaspiPay
 from src.common.serializers.blog import BlogSerializer, BlogOneSerializer
 from src.common.serializers.common import SupportSerializer
-from src.services.utils import add_balance, create_read_token, create_token
+from src.services.gmail import add_balance
 
 
 # Create your views here.
@@ -43,36 +43,11 @@ class BlogRecomendationList(APIView):
         return Response(blocks_serializer.data)
 
 
-class CreateReadToken(APIView):
-    def post(self, request):
-        create_read_token()
-        return Response({"status": True})
+class TestView(APIView):
+
+    def get(self, request, format=None):
+        add_balance()
+        return Response({'status': 'ok'})
 
 
-create_read_token_view = CreateReadToken.as_view()
-
-
-class CreateToken(APIView):
-    def post(self, request):
-        create_token()
-        return Response({"status": True})
-
-
-create_token_view = CreateToken.as_view()
-
-
-class GmailMessage(APIView):
-    def post(self, request):
-        data = request.data
-        KaspiPay.objects.create(
-            command='qweq',
-            txn_id='qweq',
-            account='qweq',
-            txnDate='qweq',
-            price=1,
-            data=data,
-        )
-        return Response({"status": True})
-
-
-gmail_message_view = GmailMessage.as_view()
+test_view = TestView.as_view()

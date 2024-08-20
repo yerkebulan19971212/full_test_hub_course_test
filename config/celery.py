@@ -19,7 +19,7 @@ celery_app.autodiscover_tasks()
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(7200.0, rating_quizz_full.s(), name='add every 3600')
     sender.add_periodic_task(3600.0, auto_complete_finish_test.s(), name='auto complete every 3600')
-    # sender.add_periodic_task(60, add_balance_to_student.s(), name='add_balance_to_student')
+    sender.add_periodic_task(60, add_balance_to_student.s(), name='add_balance_to_student')
 
 
 @celery_app.task
@@ -80,7 +80,7 @@ def auto_complete_finish_test():
 
 @celery_app.task
 def add_balance_to_student():
-    from src.services.utils import add_balance
+    from src.services.gmail import add_balance
     add_balance()
 
 

@@ -20,14 +20,12 @@ from src.common.super_admin_views import (add_question_view,
                                           variant_lesson_view, variant_list, create_variant_view, student_detail,
                                           student_detail_update, destroy_variant, add_common_question_view,
                                           get_update_common_view, question_items_list_view)
-from src.common.views import support_view, create_token_view, create_read_token_view, gmail_message_view
+from src.common.views import support_view, test_view
 
 app_name = 'common'
 urlpatterns = [
-    path('gmail-message', gmail_message_view),
-    path('create-read-token', create_read_token_view),
-    path('create-token/', create_token_view),
     path('promotion/promo-code/', promo_code_view),
+    path('test-view/', test_view),
     path('support/', support_view),
     path('lessons/', get_all_active_lesson_view),
     path('import-q/', import_question_from_test_hub_app),
