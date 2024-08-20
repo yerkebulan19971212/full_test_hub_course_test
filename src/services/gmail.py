@@ -8,7 +8,6 @@ import requests
 EMAIL_ADDRESS = 'testhubkz@gmail.com'
 EMAIL_PASSWORD = 'yiju favc kpog jiio'
 IMAP_SERVER = 'imap.gmail.com'
-WEBHOOK_URL = 'your_webhook_url'
 
 
 def add_balance():
@@ -21,7 +20,7 @@ def add_balance():
     mail.select('inbox')
 
     # Получение списка новых писем
-    status, data = mail.search(None, 'UNSEEN')
+    status, data = mail.search(None, 'UNSEEN', f'FROM "kaspi.payments@kaspibank.kz"')
     mail_ids = data[0]
 
     # Обработка каждого нового письма
@@ -33,8 +32,6 @@ def add_balance():
         email_message = email.message_from_bytes(raw_email)
 
         # Извлечение данных из письма
-        subject = email_message['Subject']
-        sender = email.utils.parseaddr(email_message['From'])[1]
         body = ''
         if email_message.is_multipart():
             for part in email_message.walk():
@@ -67,17 +64,6 @@ def add_balance():
                     balance=int(float(price)),
                     data=body
                 )
-
-        # Отправка данных на webhook
-        payload = {
-            'subject': subject,
-            'sender': sender,
-            'body': body
-        }
-        print(body)
-        print(price)
-        print(user_id)
-        print("body")
     # Закрытие соединения
     mail.close()
     mail.logout()
