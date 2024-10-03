@@ -27,7 +27,6 @@ class MyTestFilter(django_filters.FilterSet):
                     Q(quizz_type=quizz_type) |
                     Q(quizz_type__quizz_type__name_code='rating')
                 )
-        else:
             queryset = queryset.filter(Q(quizz_type=quizz_type))
 
         return queryset
