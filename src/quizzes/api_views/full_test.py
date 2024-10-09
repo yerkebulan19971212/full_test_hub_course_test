@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.db import transaction
-from django.db.models import (Sum,Avg, Count, Q, Prefetch, Exists, OuterRef, Max,
+from django.db.models import (Sum, Avg, Count, Q, Prefetch, Exists, OuterRef, Max,
                               Case, When, IntegerField, F, Value, CharField,
                               BooleanField, Subquery)
 from django.db.models.functions import Concat, Coalesce
@@ -265,10 +265,9 @@ class PassStudentAnswerView(generics.CreateAPIView):
                         if correct_answers[0].id == answers[0]:
                             score += 1
                     else:
-                        len_correct_answers = correct_answers.count()
                         user_answers = Answer.objects.filter(id__in=answers)
                         len_student_answers = user_answers.count()
-                        if len_correct_answers >= len_student_answers:
+                        if len_student_answers > 4:
                             user_answers = list(set(user_answers))
                             correct_answers = list(
                                 set([ans for ans in correct_answers]))
