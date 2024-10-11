@@ -267,7 +267,7 @@ class PassStudentAnswerView(generics.CreateAPIView):
                     else:
                         user_answers = Answer.objects.filter(id__in=answers)
                         len_student_answers = user_answers.count()
-                        if len_student_answers > 4:
+                        if len_student_answers < 4:
                             user_answers = list(set(user_answers))
                             correct_answers = list(
                                 set([ans for ans in correct_answers]))
