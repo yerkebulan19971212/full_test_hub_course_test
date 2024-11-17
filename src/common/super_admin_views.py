@@ -286,6 +286,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             'question_level',
             'answer_question',
             'answer_url',
+            'description'
             # 'number'
         )
         ref_name = "QuestionSerializer_1"

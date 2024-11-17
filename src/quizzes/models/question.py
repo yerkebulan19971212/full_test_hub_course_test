@@ -336,6 +336,7 @@ class Question(
     )
     answer_question = models.TextField(null=True, blank=True)
     answer_url = models.URLField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
 
     objects = QuestionManager.from_queryset(QuestionQuerySet)()
 
