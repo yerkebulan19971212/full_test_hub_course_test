@@ -253,7 +253,8 @@ class QuestionAdminSerializer(serializers.ModelSerializer):
             'common_question',
             'question',
             'sub_questions',
-            'answers'
+            'answers',
+            'answer_question'
         )
 
 
