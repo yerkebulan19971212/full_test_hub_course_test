@@ -368,6 +368,11 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         return question
 
 
+class AnswerQuestionUpdateItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    answer_question = serializers.CharField()
+
+
 class CreateVariantJuz40Serializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     test_lang = serializers.IntegerField(write_only=True)
@@ -647,6 +652,27 @@ class GetUpdateDestroyQuestionView(generics.RetrieveUpdateDestroyAPIView):
 
 
 get_update_destroy_question_view = GetUpdateDestroyQuestionView.as_view()
+
+
+class UpdateAnswerQuestionView(APIView):
+    permission_classes = [permissions.IsAuthenticated, SuperAdminPermission]
+
+    @swagger_auto_schema(tags=["super_admin"], request_body=AnswerQuestionUpdateItemSerializer(many=True))
+    def post(self, request, *args, **kwargs):
+        serializer = AnswerQuestionUpdateItemSerializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        questions_to_update = []
+        for item in validated_data:
+            questions_to_update.append(Question(
+                id=item['id'],
+                answer_question=item['answer_question'],
+            ))
+        Question.objects.bulk_update(questions_to_update, ['answer_question'])
+        return Response(data=serializer.validated_data, status=status.HTTP_200_OK)
+
+
+update_answers_question_view = UpdateAnswerQuestionView.as_view()
 
 
 class QuestionAnswerImageSerializer(serializers.ModelSerializer):
