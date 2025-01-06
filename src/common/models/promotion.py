@@ -46,3 +46,18 @@ class UserPromoCode(
 
     def __str__(self):
         return f"{self.name_code}"
+
+
+class TelegramPromoCode(
+    abstract_models.UUID,
+    abstract_models.TimeStampedModel
+):
+    promo_code = models.ForeignKey(
+        PromoCode,
+        on_delete=models.CASCADE,
+        related_name='telegram_promo_code'
+    )
+    telegram_user_id = models.CharField(default=0)
+
+    class Meta:
+        db_table = 'common\".\"telegram_promo_code'

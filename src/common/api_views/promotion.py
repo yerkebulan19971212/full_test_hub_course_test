@@ -7,6 +7,7 @@ from src.accounts.models import User
 from src.common.constant import PromoCodeType
 from src.common.exception import PromoCodeDoesNotExistError, UserNotExistError
 from src.common.models import PromoCode
+from src.common.models.promotion import TelegramPromoCode
 from src.common.serializers import PromoCodeSerializer
 from src.common.serializers.common import TelegramPromoCodeSerializer
 
@@ -29,19 +30,21 @@ class GetTelegramPromoCodeView(generics.RetrieveAPIView):
 
     def get_object(self):
         user_id = self.kwargs.get('user_id')
-        users = User.objects.filter(user_id=user_id)
-        if not users.exists():
-            raise UserNotExistError()
         now = datetime.datetime.now()
-        promo_code_obj = PromoCode.objects.filter(
+        promo_codes = PromoCode.objects.filter(
             start_date__lte=now.date(),
             end_date__gte=now.date(),
             promo_type=PromoCodeType.TELEGRAM,
             is_active=True,
-        ).exclude(userpromocode__user__user_id=user_id)
-        if not promo_code_obj.exists():
+        ).exclude(telegram_promo_code__telegram_user_id=user_id)
+        if not promo_codes.exists():
             raise PromoCodeDoesNotExistError()
-        return promo_code_obj.first()
+        promo_code = promo_codes.first()
+        TelegramPromoCode.objects.create(
+            promo_code=promo_code,
+            telegram_user_id=user_id
+        )
+        return promo_code
 
 
 get_telegram_promo_code_view = GetTelegramPromoCodeView.as_view()
