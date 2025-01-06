@@ -102,3 +102,8 @@ class AnswerStatus(str, Choice):
 class QuestionType(str, Choice):
     DEFAULT = 'DEFAULT'
     SELECT = 'SELECT'
+
+
+class PromoCodeType(str, Choice):
+    ORDINARY = 'ORDINARY'
+    TELEGRAM = 'TELEGRAM'

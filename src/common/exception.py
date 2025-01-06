@@ -112,3 +112,9 @@ class BuyCourseException(APIException):
     message = _("buy course")
     default_detail = _("buy course")
     default_code = _("buy_course")
+
+
+class PromoCodeDoesNotExistError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("promo code does not exist")
+    default_code = "promo code does not exist"

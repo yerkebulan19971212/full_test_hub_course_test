@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from src.common import models
 from src.common.abstract_serializer import NameSerializer
+from src.common.constant import PromoCodeType
 from src.common.exception import PromoCodeNotExistsError, PassedTestError, \
     PromoCodeUsedError
 from src.common.models import BoughtPacket, PromoCode, UserPromoCode
@@ -198,7 +199,7 @@ class PromoCodeSerializer(serializers.ModelSerializer):
             name_code=promo_code,
             start_date__lte=now.date(),
             end_date__gte=now.date(),
-            is_active=True
+            is_active=True,
         )
         if not promo_code_obj.exists():
             raise PromoCodeNotExistsError()
@@ -231,3 +232,11 @@ class SupportSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         validated_data['user'] = user
         return super().create(validated_data)
+
+
+class TelegramPromoCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PromoCode
+        fields = (
+            'name_code',
+        )

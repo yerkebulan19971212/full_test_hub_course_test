@@ -1,6 +1,7 @@
 from django.db import models
 
 from src.common import abstract_models
+from src.common.constant import PromoCodeType
 
 
 class PromoCode(
@@ -11,6 +12,11 @@ class PromoCode(
     abstract_models.TimeStampedModel
 ):
     bonus = models.IntegerField(default=100)
+    promo_type = models.CharField(
+        max_length=11,
+        choices=PromoCodeType.choices(),
+        default=PromoCodeType.ORDINARY
+    )
     start_date = models.DateField()
     end_date = models.DateField()
 

@@ -10,6 +10,7 @@ from src.common.api_views import (buy_packet_view, get_all_active_lesson_view,
                                   quizz_types_view, blog_list_view, blog_detail_view, blog_recommendation_view,
                                   packet_one_view)
 from src.common.api_views.lesson import import_question_from_test_hub_app
+from src.common.api_views.promotion import get_telegram_promo_code_view
 from src.common.super_admin_views import (add_question_view,
                                           check_add_question_view,
                                           common_question_list_view,
@@ -24,6 +25,7 @@ from src.common.views import support_view, test_view
 
 app_name = 'common'
 urlpatterns = [
+    path('promotion/telegram-promo-code/<int:user_id>/', get_telegram_promo_code_view),
     path('promotion/promo-code/', promo_code_view),
     path('test-view/', test_view),
     path('support/', support_view),
@@ -67,6 +69,7 @@ api_v1_super_admin_urlpatterns = [
     path('student-update/<int:pk>/', student_detail_update),
     path('add-common-question/', add_common_question_view),
 ]
+
 api_v1_quizzes = [
     path('question-image/', save_image_view),
 ]
