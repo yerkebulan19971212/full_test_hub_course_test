@@ -137,7 +137,7 @@ class BuyPacketSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         packet = validated_data['packet']
-        price = packet.second_price if packet.second_price is not None else packet.price
+        price = packet.second_price if packet.second_price else packet.price
         user = self.context['request'].user
         validated_data['user'] = user
         end_time = datetime.datetime.now() + datetime.timedelta(
