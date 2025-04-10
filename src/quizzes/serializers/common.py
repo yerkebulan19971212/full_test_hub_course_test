@@ -117,11 +117,14 @@ class NewTestSerializer(serializers.ModelSerializer):
         rating_test = None
         if packet.name_code == 'rating':
             rating_test = RatingTest.objects.all().order_by('id').last()
+        now = datetime.datetime.now()
         bought_packet = BoughtPacket.objects.filter(
             user=user,
             packet=packet,
             rating_test=rating_test,
-            status=True
+            status=True,
+            start_time__lte=now,
+            end_time__gte=now,
         ).first()
         if not bought_packet or bought_packet.remainder < 1:
             raise exception.DoesNotHaveTest()
