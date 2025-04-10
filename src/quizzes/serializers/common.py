@@ -192,6 +192,6 @@ class NewTestSerializer(serializers.ModelSerializer):
         student_user_question_count.delay(user.id, question_ids, quizz_type.id)
         if bought_packet.remainder == 1:
             bought_packet.status = False
-        bought_packet.remainder -= 1
+        bought_packet.remainder = bought_packet.remainder - 1
         bought_packet.save()
         return student_quizz
