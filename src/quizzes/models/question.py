@@ -260,7 +260,7 @@ class QuestionQuerySet(abstract_models.AbstractQuerySet):
                     questions = list(
                         queryset.filter(common_question=common_question))
                     random.shuffle(questions)
-                    questions_list += questions
+                    questions_list += questions[:5]
                     continue
             questions = list(queryset.filter(
                 variant__is_active=True,
