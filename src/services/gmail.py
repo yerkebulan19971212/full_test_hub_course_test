@@ -6,7 +6,7 @@ import requests
 
 # Настройки Gmail
 EMAIL_ADDRESS = 'testhubkz@gmail.com'
-EMAIL_PASSWORD = 'yiju favc kpog jiio'
+EMAIL_PASSWORD = 'PCT2027y257yop183r!'
 IMAP_SERVER = 'imap.gmail.com'
 
 
