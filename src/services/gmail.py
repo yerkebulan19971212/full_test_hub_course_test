@@ -5,9 +5,9 @@ import re
 import requests
 
 # Настройки Gmail
-EMAIL_ADDRESS = 'testhubkz@gmail.com'
-EMAIL_PASSWORD = 'PCT2027y257yop183r!'
-IMAP_SERVER = 'imap.gmail.com'
+EMAIL_ADDRESS = "testhubkz@gmail.com"
+EMAIL_PASSWORD = "plwi nkja sdxp sdiq"
+IMAP_SERVER = "imap.gmail.com"
 
 
 def add_balance():
