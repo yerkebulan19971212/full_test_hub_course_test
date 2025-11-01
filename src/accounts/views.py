@@ -20,9 +20,8 @@ def telegram_login_page(request):
     bot_username = os.getenv('TELEGRAM_BOT_USERNAME', 'testup1bot')
     
     # Construct the auth URL
-    # domain = request.build_absolute_uri('/').rstrip('/')
-    domain = "https://api.testhub.kz/"
-    auth_url = f"{domain}/api/v1/telegram-auth/"
+    domain = "https://api.testhub.kz"
+    auth_url = f"{domain}/accounts/api/v1/telegram-auth/"
     
     context = {
         'bot_username': bot_username,
@@ -35,13 +34,12 @@ def telegram_login_page(request):
 @csrf_exempt
 def telegram_auth_callback(request):
     """
-    Handle Telegram Web App authentication
-    Validates initData from Telegram Mini App and creates/authenticates user
+    Handle Telegram Login Widget authentication callback
+    Validates data from Telegram Login Widget and creates/authenticates user
+    Returns JWT tokens in JSON format
     """
-    import json
-    
     # Get Telegram bot token from environment
-    bot_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
+    bot_token = os.getenv('TELEGRAM_BOT_TOKEN', '8565856173:AAFTypWFfOHVmCoZoI0jz68xn0gld6KToMU')
     
     if not bot_token:
         return JsonResponse({
@@ -49,40 +47,33 @@ def telegram_auth_callback(request):
             'error': 'Telegram bot token not configured'
         }, status=500)
     
+    # Get data from GET request (Telegram Login Widget sends GET)
+    auth_data = {}
+    for key in ['id', 'first_name', 'last_name', 'username', 'photo_url', 'auth_date', 'hash']:
+        value = request.GET.get(key)
+        if value:
+            auth_data[key] = value
+    
+    if not auth_data.get('hash'):
+        return JsonResponse({
+            'success': False,
+            'error': 'No authentication data provided'
+        }, status=400)
+    
+    # Verify Telegram authentication
+    if not verify_telegram_authentication(auth_data, bot_token):
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid authentication data'
+        }, status=403)
+    
     try:
-        # Parse JSON body
-        body = json.loads(request.body.decode('utf-8'))
-        init_data = body.get('initData', '')
-        init_data_unsafe = body.get('initDataUnsafe', {})
-        
-        if not init_data:
-            return JsonResponse({
-                'success': False,
-                'error': 'No initData provided'
-            }, status=400)
-        
-        # Verify Telegram Web App data
-        if not verify_telegram_web_app_data(init_data, bot_token):
-            return JsonResponse({
-                'success': False,
-                'error': 'Invalid authentication data'
-            }, status=403)
-        
-        # Get user data from initDataUnsafe
-        user_data = init_data_unsafe.get('user', {})
-        
-        if not user_data:
-            return JsonResponse({
-                'success': False,
-                'error': 'No user data provided'
-            }, status=400)
-        
         # Extract user information
-        telegram_id = str(user_data.get('id', ''))
-        username = user_data.get('username', f'telegram_{telegram_id}')
-        first_name = user_data.get('first_name', '')
-        last_name = user_data.get('last_name', '')
-        language_code = user_data.get('language_code', 'ru')
+        telegram_id = auth_data.get('id', '')
+        username = auth_data.get('username', f'telegram_{telegram_id}')
+        first_name = auth_data.get('first_name', '')
+        last_name = auth_data.get('last_name', '')
+        photo_url = auth_data.get('photo_url', '')
         
         # Get or create user
         user = User.objects.filter(username=username).first()
@@ -94,9 +85,9 @@ def telegram_auth_callback(request):
                 first_name=first_name,
                 last_name=last_name,
             )
-            # You can add telegram_id and other fields to user profile if needed
+            # You can add telegram_id and photo_url to user profile if needed
             # user.telegram_id = telegram_id
-            # user.language_code = language_code
+            # user.telegram_photo = photo_url
             # user.save()
         else:
             # Update existing user info
@@ -109,27 +100,21 @@ def telegram_auth_callback(request):
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
         
-        # Return success response with tokens
-        response_data = {
+        # Get frontend URL from environment (optional)
+        frontend_url = os.getenv('FRONTEND_URL', '')
+        
+        # Return success page with tokens
+        context = {
             'success': True,
             'access_token': access_token,
             'refresh_token': refresh_token,
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'telegram_id': telegram_id,
-            }
+            'user': user,
+            'telegram_id': telegram_id,
+            'frontend_url': frontend_url,
         }
         
-        return JsonResponse(response_data)
+        return render(request, 'accounts/telegram_success.html', context)
         
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Invalid JSON data'
-        }, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
