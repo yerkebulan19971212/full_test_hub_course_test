@@ -12,6 +12,7 @@ from src.accounts.api_views.views import (auth_me_view, token_by_phone_view,
                                           admin_update_password_view,
                                           user_list_view, add_balance_history,
                                           teacher_list_view)
+from src.accounts.views import telegram_login_page, telegram_auth_callback
 
 app_name = 'accounts'
 urlpatterns = [
@@ -22,6 +23,10 @@ urlpatterns = [
     path('register-email/', register_email_view),
     path('google/', google),
     path('me/', auth_me_view),
+
+    # Telegram authentication
+    path('telegram-login/', telegram_login_page, name='telegram_login'),
+    path('telegram-auth/', telegram_auth_callback, name='telegram_auth_callback'),
 
     path('change-password/', update_password_view),
     path('google/password/', update_google_password_view),
