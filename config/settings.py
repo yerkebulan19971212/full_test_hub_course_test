@@ -257,3 +257,6 @@ CACHES = {
         }
     }
 }
+
+
+TELEGRAM_BOT_TOKEN = '8565856173:AAFTypWFfOHVmCoZoI0jz68xn0gld6KToMU'

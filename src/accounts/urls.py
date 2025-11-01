@@ -12,7 +12,7 @@ from src.accounts.api_views.views import (auth_me_view, token_by_phone_view,
                                           admin_update_password_view,
                                           user_list_view, add_balance_history,
                                           teacher_list_view)
-from src.accounts.views import telegram_login_page, telegram_auth_callback
+from src.accounts.views import telegram_login_page, telegram_auth_callback, TelegramAuthView, RefreshToken
 
 app_name = 'accounts'
 urlpatterns = [
@@ -33,6 +33,9 @@ urlpatterns = [
     path('profile/', profile_view),
     path('update-profile/', update_profile_view),
     path('update-login/', update_login_profile_view),
+
+    path('auth/telegram/', TelegramAuthView.as_view(), name='telegram-auth'),
+    # path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]
 
 accounts_api_v1_urlpatterns = [
