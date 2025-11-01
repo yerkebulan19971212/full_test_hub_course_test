@@ -20,7 +20,8 @@ def telegram_login_page(request):
     bot_username = os.getenv('TELEGRAM_BOT_USERNAME', 'testup1bot')
     
     # Construct the auth URL
-    domain = request.build_absolute_uri('/').rstrip('/')
+    # domain = request.build_absolute_uri('/').rstrip('/')
+    domain = "https://api.testhub.kz/"
     auth_url = f"{domain}/api/v1/telegram-auth/"
     
     context = {
@@ -34,37 +35,56 @@ def telegram_login_page(request):
 @csrf_exempt
 def telegram_auth_callback(request):
     """
-    Handle Telegram authentication callback
-    Validates the data from Telegram and creates/authenticates user
+    Handle Telegram Web App authentication
+    Validates initData from Telegram Mini App and creates/authenticates user
     """
+    import json
+    
     # Get Telegram bot token from environment
     bot_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
     
     if not bot_token:
         return JsonResponse({
+            'success': False,
             'error': 'Telegram bot token not configured'
         }, status=500)
     
-    # Get data from request
-    auth_data = {}
-    for key in ['id', 'first_name', 'last_name', 'username', 'photo_url', 'auth_date', 'hash']:
-        value = request.GET.get(key)
-        if value:
-            auth_data[key] = value
-    
-    # Verify Telegram authentication
-    if not verify_telegram_authentication(auth_data, bot_token):
-        return redirect('/api/v1/telegram-login/?error=Invalid authentication data')
-    
-    # Get or create user
-    telegram_id = auth_data.get('id')
-    username = auth_data.get('username', f'telegram_{telegram_id}')
-    first_name = auth_data.get('first_name', '')
-    last_name = auth_data.get('last_name', '')
-    photo_url = auth_data.get('photo_url', '')
-    
     try:
-        # Try to find user by telegram_id (you may need to add this field to your User model)
+        # Parse JSON body
+        body = json.loads(request.body.decode('utf-8'))
+        init_data = body.get('initData', '')
+        init_data_unsafe = body.get('initDataUnsafe', {})
+        
+        if not init_data:
+            return JsonResponse({
+                'success': False,
+                'error': 'No initData provided'
+            }, status=400)
+        
+        # Verify Telegram Web App data
+        if not verify_telegram_web_app_data(init_data, bot_token):
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid authentication data'
+            }, status=403)
+        
+        # Get user data from initDataUnsafe
+        user_data = init_data_unsafe.get('user', {})
+        
+        if not user_data:
+            return JsonResponse({
+                'success': False,
+                'error': 'No user data provided'
+            }, status=400)
+        
+        # Extract user information
+        telegram_id = str(user_data.get('id', ''))
+        username = user_data.get('username', f'telegram_{telegram_id}')
+        first_name = user_data.get('first_name', '')
+        last_name = user_data.get('last_name', '')
+        language_code = user_data.get('language_code', 'ru')
+        
+        # Get or create user
         user = User.objects.filter(username=username).first()
         
         if not user:
@@ -74,10 +94,15 @@ def telegram_auth_callback(request):
                 first_name=first_name,
                 last_name=last_name,
             )
-            # You can add telegram_id and photo_url to user profile if needed
+            # You can add telegram_id and other fields to user profile if needed
             # user.telegram_id = telegram_id
-            # user.telegram_photo = photo_url
+            # user.language_code = language_code
             # user.save()
+        else:
+            # Update existing user info
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
         
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
@@ -85,7 +110,6 @@ def telegram_auth_callback(request):
         refresh_token = str(refresh)
         
         # Return success response with tokens
-        # You can redirect to frontend with tokens or return JSON
         response_data = {
             'success': True,
             'access_token': access_token,
@@ -95,24 +119,65 @@ def telegram_auth_callback(request):
                 'username': user.username,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
+                'telegram_id': telegram_id,
             }
         }
         
-        # Option 1: Return JSON response
         return JsonResponse(response_data)
         
-        # Option 2: Redirect to frontend with tokens in URL (less secure)
-        # frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-        # redirect_url = f"{frontend_url}/auth/callback?{urlencode({'access': access_token, 'refresh': refresh_token})}"
-        # return redirect(redirect_url)
-        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
     except Exception as e:
-        return redirect(f'/api/v1/telegram-login/?error={str(e)}')
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+def verify_telegram_web_app_data(init_data, bot_token):
+    """
+    Verify Telegram Web App initData
+    https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
+    """
+    try:
+        # Parse initData string into dict
+        parsed_data = dict(item.split('=', 1) for item in init_data.split('&'))
+        
+        # Extract hash
+        received_hash = parsed_data.pop('hash', None)
+        if not received_hash:
+            return False
+        
+        # Create data check string (sorted keys)
+        data_check_arr = [f'{key}={value}' for key, value in sorted(parsed_data.items())]
+        data_check_string = '\n'.join(data_check_arr)
+        
+        # Create secret key using HMAC-SHA256 with "WebAppData" constant
+        secret_key = hmac.new(
+            'WebAppData'.encode(),
+            bot_token.encode(),
+            hashlib.sha256
+        ).digest()
+        
+        # Calculate hash
+        calculated_hash = hmac.new(
+            secret_key,
+            data_check_string.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return calculated_hash == received_hash
+    except Exception as e:
+        print(f"Error verifying Telegram Web App data: {e}")
+        return False
 
 
 def verify_telegram_authentication(auth_data, bot_token):
     """
-    Verify that the authentication data is from Telegram
+    Verify that the authentication data is from Telegram Login Widget
     https://core.telegram.org/widgets/login#checking-authorization
     """
     check_hash = auth_data.get('hash')
