@@ -357,3 +357,37 @@ class BalanceHistorySerializer(serializers.ModelSerializer):
         user = User.objects.filter(is_superuser=True).first()
         validated_data['user'] = user
         return super().create(validated_data)
+
+
+class CreateLoginTokenSerializer(serializers.Serializer):
+    """Сериализатор для создания login токена (используется ботом)"""
+    telegram_id = serializers.IntegerField(required=True)
+    username = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=255
+    )
+    first_name = serializers.CharField(required=True, max_length=255)
+    last_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=255
+    )
+
+    def validate_telegram_id(self, value):
+        """Проверка telegram_id"""
+        if value <= 0:
+            raise serializers.ValidationError("telegram_id должен быть положительным числом")
+        return value
+
+    def validate_first_name(self, value):
+        """Проверка first_name"""
+        if not value or not value.strip():
+            raise serializers.ValidationError("first_name не может быть пустым")
+        return value.strip()
+
+
+
+class TelegramSerializer(serializers.Serializer):
+    token = serializers.CharField(required=True)

@@ -1,4 +1,7 @@
+import secrets
+
 import requests
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -28,9 +31,9 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UserChangePasswordSerializer,
                                                 AllStudentSerializer,
                                                 BalanceHistorySerializer,
-                                                UserBaseSerializer)
+                                                UserBaseSerializer, CreateLoginTokenSerializer, TelegramSerializer)
 from src.accounts.filters import UserStudentFilter
-from src.accounts.models import Role
+from src.accounts.models import Role, TelegramToken
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
                                   IsNotStaffError, UserNotExistError)
@@ -323,3 +326,70 @@ class BalanceHistoryView(generics.CreateAPIView):
 
 
 add_balance_history = BalanceHistoryView.as_view()
+
+
+class CreateLoginTokenAPIView(APIView):
+    """API для создания login токена (для бота)"""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        auth_header = request.headers.get('Authorization')
+        if auth_header != f"Bearer {settings.TELEGRAM_BOT_TOKEN}":
+            return Response(
+                {"detail": "error"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        serializer = CreateLoginTokenSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        user = User.objects.create(
+            username=serializer.validated_data.get('username') + '_telegram',
+            first_name=serializer.validated_data.get('first_name'),
+            last_name=serializer.validated_data.get('last_name'),
+            telegram_id=serializer.validated_data.get('telegram_id'),
+            is_active=False
+        )
+        token = secrets.token_urlsafe(36)
+        TelegramToken.objects.create(
+            user=user,
+            telegram_user_id=serializer.validated_data.get('telegram_id'),
+            token=token,
+            used=False
+        )
+        return Response(
+            {
+                "token": token
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+create_login_token_api_view = CreateLoginTokenAPIView.as_view()
+
+
+class TelegramJWTView(APIView):
+    @swagger_auto_schema(request_body=TelegramSerializer)
+    def post(self, request, *args, **kwargs):
+        token = request.data.get('token', None)
+        if not token:
+            return None
+        telegram_token = TelegramToken.objects.filter(token=token).first()
+        telegram_token.used = True
+        telegram_token.save()
+        user = telegram_token.user
+        user.is_active = True
+        user.save()
+
+        refresh = TokenObtainPairSerializer.get_token(user)
+        data = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+
+telegram_view = GoogleJWTView.as_view()

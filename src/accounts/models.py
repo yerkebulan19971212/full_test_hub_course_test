@@ -129,6 +129,7 @@ class User(
         blank=True
     )
     login_count = models.IntegerField(default=0)
+    telegram_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return str(self.username)
@@ -184,3 +185,18 @@ class BalanceHistory(abstract_models.UUID, abstract_models.TimeStampedModel):
     )
     balance = models.IntegerField()
     data = models.TextField(null=True, blank=True)
+
+
+class TelegramToken(
+    abstract_models.UUID,
+    abstract_models.TimeStampedModel
+):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='telegram_users',
+        null=True, blank=True
+    )
+    telegram_user_id = models.IntegerField(default=0)
+    token = models.CharField(max_length=255)
+    used = models.BooleanField(default=False)
