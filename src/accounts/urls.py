@@ -11,7 +11,9 @@ from src.accounts.api_views.views import (auth_me_view, token_by_phone_view,
                                           profile_view,
                                           admin_update_password_view,
                                           user_list_view, add_balance_history,
-                                          teacher_list_view, telegram_view, create_login_token_api_view)
+                                          teacher_list_view, telegram_view, 
+                                          create_login_token_api_view,
+                                          telegram_auth_page_view)
 
 app_name = 'accounts'
 urlpatterns = [
@@ -28,8 +30,11 @@ urlpatterns = [
     path('profile/', profile_view),
     path('update-profile/', update_profile_view),
     path('update-login/', update_login_profile_view),
-    path('get-token/', create_login_token_api_view),
-    path('telegram-login/', telegram_view),
+    
+    # Telegram authentication
+    path('telegram-auth/', telegram_auth_page_view, name='telegram_auth_page'),  # Страница с кнопкой
+    path('get-token/', create_login_token_api_view),  # API для бота
+    path('telegram-login/', telegram_view),  # Обработка токена
 ]
 
 accounts_api_v1_urlpatterns = [

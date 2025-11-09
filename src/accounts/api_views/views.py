@@ -333,12 +333,13 @@ class CreateLoginTokenAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        print('======')
         auth_header = request.headers.get('Authorization')
-        if auth_header != f"Bearer {settings.TELEGRAM_BOT_TOKEN}":
-            return Response(
-                {"detail": "error"},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+        # if auth_header != f"Bearer {settings.TELEGRAM_BOT_TOKEN}":
+        #     return Response(
+        #         {"detail": "error"},
+        #         status=status.HTTP_401_UNAUTHORIZED
+        #     )
 
         serializer = CreateLoginTokenSerializer(data=request.data)
         if not serializer.is_valid():
@@ -346,13 +347,19 @@ class CreateLoginTokenAPIView(APIView):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
-        user = User.objects.create(
+        user, _ = User.objects.get_or_create(
             username=serializer.validated_data.get('username') + '_telegram',
-            first_name=serializer.validated_data.get('first_name'),
-            last_name=serializer.validated_data.get('last_name'),
-            telegram_id=serializer.validated_data.get('telegram_id'),
-            is_active=False
+
         )
+        print(serializer.validated_data.get('first_name'))
+        # first_name = serializer.validated_data.get('first_name'),
+        # last_name = serializer.validated_data.get('last_name'),
+        # telegram_id = serializer.validated_data.get('telegram_id'),
+        # is_active = False
+        # if user:
+        #     user.first_name = serializer.validated_data.get('first_name')
+        #     user.last_name = serializer.validated_data.get('first_name')
+        #     user.telegram_id = serializer.validated_data.get('first_name')
         token = secrets.token_urlsafe(36)
         TelegramToken.objects.create(
             user=user,
@@ -364,7 +371,7 @@ class CreateLoginTokenAPIView(APIView):
             {
                 "token": token
             },
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_200_OK
         )
 
 
@@ -392,4 +399,12 @@ class TelegramJWTView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-telegram_view = GoogleJWTView.as_view()
+telegram_view = TelegramJWTView.as_view()
+
+
+def telegram_auth_page_view(request):
+    """
+    Страница с кнопкой для открытия Telegram бота
+    """
+    from django.shortcuts import render
+    return render(request, 'accounts/telegram_auth_page.html')
