@@ -197,6 +197,6 @@ class TelegramToken(
         related_name='telegram_users',
         null=True, blank=True
     )
-    telegram_user_id = models.IntegerField(default=0)
+    telegram_user_id = models.CharField(default=0)
     token = models.CharField(max_length=255)
     used = models.BooleanField(default=False)

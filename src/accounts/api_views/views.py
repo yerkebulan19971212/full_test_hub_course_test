@@ -363,7 +363,7 @@ class CreateLoginTokenAPIView(APIView):
         token = secrets.token_urlsafe(36)
         TelegramToken.objects.create(
             user=user,
-            telegram_user_id=serializer.validated_data.get('telegram_id'),
+            telegram_user_id=str(serializer.validated_data.get('telegram_id')),
             token=token,
             used=False
         )
