@@ -13,8 +13,8 @@ BASE_URL = "https://api.testup.kz"
 LOGIN_URL = f"{BASE_URL}/accounts/api/v1/login-email/"
 ADD_BALANCE_URL = f"{BASE_URL}/accounts/api/v1/add-balance/"
 
-EMAIL = "your@email.com"
-PASSWORD = "your_password"
+EMAIL = "yerke@gmail.com"
+PASSWORD = "5vvsc7PXe6Uq12n0"
 
 access_token = None
 
