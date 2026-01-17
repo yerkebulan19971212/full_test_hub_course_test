@@ -22,7 +22,7 @@ class BalanceHistoryAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'username',
-        'user_id'
+        'user_id',
         'id',
         'email',
         'phone',
