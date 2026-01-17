@@ -22,6 +22,7 @@ class BalanceHistoryAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'username',
+        'user_id'
         'id',
         'email',
         'phone',
@@ -40,4 +41,4 @@ class UserAdmin(admin.ModelAdmin):
         'user_id',
         'login_count'
     ]
-    search_fields = ['email', 'phone', 'id', 'username']
+    search_fields = ['email', 'phone', 'id', 'username', 'user_id']
