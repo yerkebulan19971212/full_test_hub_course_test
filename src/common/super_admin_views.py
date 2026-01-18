@@ -14,6 +14,7 @@ from src.accounts.api_views.serializers import StudentInformationUpdateSerialize
 from src.accounts.models import User
 from src.common.models import CourseTypeLesson, Lesson, QuestionAnswerImage, CourseType
 from src.common.paginations import SimplePagination, SimplePaginationV2
+from src.common.send_kafka import send_to_kafka
 from src.quizzes.models import (Answer, CommonQuestion, Question,
                                 QuestionLevel, Variant, LessonQuestionLevel)
 from src.services.permissions import SuperAdminPermission
@@ -300,6 +301,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     def update(self, instance, validated_data):
         lesson = validated_data.pop('lesson')
         question_level = self.context['request'].data.get('question_level', None)
+        question_level_obj = None
         if question_level is not None:
             question_level_obj = LessonQuestionLevel.objects.filter(
                 test_type_lesson=lesson,
@@ -330,7 +332,16 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 self.fields['sub_questions'].create(sub_questions_data_c)
         else:
             Question.objects.filter(parent=instance).delete()
-
+        variant = validated_data.get("variant")
+        send_to_kafka("questions", {
+            "question": {
+                "validated_data": validated_data,
+                "lesson_id": lesson.id,
+                "lq": question_level_obj.id if question_level_obj else None,
+                "vaiant_code": variant.name_code,
+            },
+            "type": "update"
+        })
         return instance
 
     def create(self, validated_data):
@@ -342,7 +353,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             variant=variant,
             lesson_question_level__test_type_lesson_id=lesson
         ).count()
-
+        lql = None
         if question_level is not None:
             lql = LessonQuestionLevel.objects.filter(
                 test_type_lesson=lesson,
@@ -365,6 +376,16 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             s["parent"] = question
         if sub_questions_data:
             sub_questions = sub_questions_serializer.create(sub_questions_data)
+        send_to_kafka("questions", {
+            "question": {
+                "validated_data": validated_data,
+                "lesson_id": lesson.id,
+                "lq": lql.id if lql else None,
+                "vaiant_code": variant.name_code,
+            },
+            "type": "update"
+        })
+
         return question
 
 
@@ -579,6 +600,7 @@ class ImportQuestionsView(generics.CreateAPIView):
         print(lql_list)
         print("lql_list")
         print("lql_list")
+        variant = Variant.objects.get(id=variant_id)
         with request.FILES['file'] as f:
             # try:
             with transaction.atomic():
@@ -595,7 +617,8 @@ class ImportQuestionsView(generics.CreateAPIView):
                             questions_texts=questions_texts,
                             variant_id=variant_id,
                             lesson_id=lesson_id,
-                            lql=lql_list[index_lql]
+                            lql=lql_list[index_lql],
+                            v=variant.name_code,
                         )
                         print(questions_texts)
                         print("questions_texts")

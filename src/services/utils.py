@@ -19,6 +19,8 @@ from datetime import datetime
 from django.db.models import Sum, Q, Count
 from django.db.models.functions import Coalesce
 
+from src.common.send_kafka import send_to_kafka
+
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 MODIFY_SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
@@ -164,8 +166,7 @@ def get_result_st(student_quizz_id: int):
     }
 
 
-def create_question(questions_texts: str, variant_id: int, lesson_id: int,
-                    lql):
+def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, v):
     from src.common import constant
     from src.quizzes.models import AnswerSign, Question, Answer, CommonQuestion
     if not questions_texts and 'new_line' not in questions_texts:
@@ -268,5 +269,14 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int,
                 correct=True if (i + 1) == correct_answers[1] else False
             ) for i, ans in enumerate(answers)
         ])
+        send_to_kafka("questions", {
+            "question": {
+                "questions_texts": questions_texts,
+                "lesson_id": lesson_id,
+                "lq": lql.id,
+                "vaiant_code": v,
+            },
+            "type": "import"
+        })
 
         return test_question
