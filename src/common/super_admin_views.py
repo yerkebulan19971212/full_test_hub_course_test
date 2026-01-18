@@ -300,7 +300,10 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     def update(self, instance, validated_data):
         lesson = validated_data.pop('lesson')
+        variant = validated_data.pop('variant')
         question_level = self.context['request'].data.get('question_level', None)
+
+        validated_data_v2 = dict(validated_data)
         question_level_obj = None
         if question_level is not None:
             question_level_obj = LessonQuestionLevel.objects.filter(
@@ -332,12 +335,11 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 self.fields['sub_questions'].create(sub_questions_data_c)
         else:
             Question.objects.filter(parent=instance).delete()
-        variant = validated_data.get("variant")
         send_to_kafka("questions", {
             "question": {
-                "validated_data": validated_data,
-                "lesson_id": lesson.id,
-                "lq": question_level_obj.id if question_level_obj else None,
+                "validated_data": validated_data_v2,
+                "lesson_id": lesson,
+                "lq": question_level_obj.first().id if question_level_obj else None,
                 "vaiant_code": variant.name_code,
             },
             "type": "update"
@@ -376,16 +378,17 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
             s["parent"] = question
         if sub_questions_data:
             sub_questions = sub_questions_serializer.create(sub_questions_data)
+        variant = validated_data.pop('variant')
+        validated_data_v2 = dict(validated_data)
         send_to_kafka("questions", {
             "question": {
-                "validated_data": validated_data,
-                "lesson_id": lesson.id,
+                "validated_data": validated_data_v2,
+                "lesson_id": lesson,
                 "lq": lql.id if lql else None,
                 "vaiant_code": variant.name_code,
             },
-            "type": "update"
+            "type": "create"
         })
-
         return question
 
 
