@@ -381,6 +381,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
         if sub_questions_data:
             sub_questions = sub_questions_serializer.create(sub_questions_data)
         variant = validated_data.pop('variant')
+        validated_data.pop('lesson_question_level')
         validated_data_v2 = dict(validated_data)
         send_to_kafka("questions", {
             "question": {
