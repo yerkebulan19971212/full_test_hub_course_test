@@ -166,7 +166,7 @@ def get_result_st(student_quizz_id: int):
     }
 
 
-def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, v):
+def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, v, lang):
     from src.common import constant
     from src.quizzes.models import AnswerSign, Question, Answer, CommonQuestion
     if not questions_texts and 'new_line' not in questions_texts:
@@ -228,7 +228,8 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, 
                 "questions_texts": questions_texts,
                 "lesson_id": lesson_id,
                 "lq": lql.id,
-                "vaiant_code": v,
+                "variant_code": v,
+                "lang": lang,
                 "question_id": test_question.id
             },
             "type": "import"
@@ -284,7 +285,8 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, 
                 "questions_texts": questions_texts,
                 "lesson_id": lesson_id,
                 "lq": lql.id,
-                "vaiant_code": v,
+                "variant_code": v,
+                "lang": lang,
                 "question_id": test_question.id
             },
             "type": "import"

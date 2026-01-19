@@ -342,6 +342,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 "lq": question_level_obj.first().id if question_level_obj else None,
                 "vaiant_code": variant.name_code,
                 "question_id": instance.id,
+                "lang":variant.language,
             },
             "type": "update"
         })
@@ -388,6 +389,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 "lq": lql.id if lql else None,
                 "vaiant_code": variant.name_code,
                 "question_id": question.id,
+                "lang": variant.language,
             },
             "type": "create"
         })
@@ -624,6 +626,7 @@ class ImportQuestionsView(generics.CreateAPIView):
                             lesson_id=lesson_id,
                             lql=lql_list[index_lql],
                             v=variant.name_code,
+                            lang=variant.language
                         )
                         print(questions_texts)
                         print("questions_texts")
