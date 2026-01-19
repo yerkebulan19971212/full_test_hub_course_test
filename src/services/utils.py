@@ -223,6 +223,16 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, 
                 correct=True if (i + 1) in correct_answers else False
             ) for i, ans in enumerate(answers)
         ])
+        send_to_kafka("questions", {
+            "question": {
+                "questions_texts": questions_texts,
+                "lesson_id": lesson_id,
+                "lq": lql.id,
+                "vaiant_code": v,
+                "question_id": test_question.id
+            },
+            "type": "import"
+        })
         return test_question
     else:
         correct_answers = list(map(int, questions_detail[-2].split(',')))
@@ -275,6 +285,7 @@ def create_question(questions_texts: str, variant_id: int, lesson_id: int, lql, 
                 "lesson_id": lesson_id,
                 "lq": lql.id,
                 "vaiant_code": v,
+                "question_id": test_question.id
             },
             "type": "import"
         })

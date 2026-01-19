@@ -341,6 +341,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 "lesson_id": lesson,
                 "lq": question_level_obj.first().id if question_level_obj else None,
                 "vaiant_code": variant.name_code,
+                "question_id": instance.id,
             },
             "type": "update"
         })
@@ -386,6 +387,7 @@ class QuestionSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
                 "lesson_id": lesson,
                 "lq": lql.id if lql else None,
                 "vaiant_code": variant.name_code,
+                "question_id": question.id,
             },
             "type": "create"
         })
