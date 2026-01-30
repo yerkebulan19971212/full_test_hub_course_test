@@ -11,6 +11,7 @@ from src.accounts.api_views.views import (auth_me_view, token_by_phone_view,
                                           profile_view,
                                           admin_update_password_view,
                                           user_list_view, add_balance_history,
+                                          add_balance_from_excel,
                                           teacher_list_view, telegram_view, 
                                           create_login_token_api_view,
                                           telegram_auth_page_view)
@@ -49,5 +50,6 @@ super_admin_api_v1_urlpatterns = [
     path('me/', auth_me_view),
     path('password/', admin_update_password_view),
     path('add-balance/', add_balance_history),
+    path('add-balance-excel/', add_balance_from_excel),
 
 ]

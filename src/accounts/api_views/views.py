@@ -33,7 +33,7 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 BalanceHistorySerializer,
                                                 UserBaseSerializer, CreateLoginTokenSerializer, TelegramSerializer)
 from src.accounts.filters import UserStudentFilter
-from src.accounts.models import Role, TelegramToken
+from src.accounts.models import Role, TelegramToken, BalanceHistory
 from src.common.exception import (UnexpectedError, PhoneExistError,
                                   EmailExistError, IsNotStudentError,
                                   IsNotStaffError, UserNotExistError)
@@ -326,6 +326,136 @@ class BalanceHistoryView(generics.CreateAPIView):
 
 
 add_balance_history = BalanceHistoryView.as_view()
+
+DEFAULT_BALANCE_ADMIN_EMAIL = "yerke@gmail.com"
+
+
+class BalanceFromExcelView(APIView):
+    """
+    Accepts an Excel file with columns LOGIN (email) and AMOUNT.
+    For each row: find student by email; if balance < amount, create BalanceHistory
+    with balance=(amount - current_balance). Admin user for history: yerke@gmail.com.
+    """
+    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+
+    def post(self, request):
+        import openpyxl
+
+        file = request.FILES.get("file")
+        if not file:
+            return Response(
+                {"detail": "No file provided. Use form field 'file' with an Excel (.xlsx) file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not file.name.endswith((".xlsx", ".xls")):
+            return Response(
+                {"detail": "File must be Excel (.xlsx or .xls)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        default_user = User.objects.filter(email=DEFAULT_BALANCE_ADMIN_EMAIL).first()
+        if not default_user:
+            return Response(
+                {"detail": f"Default admin user not found: {DEFAULT_BALANCE_ADMIN_EMAIL}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            wb = openpyxl.load_workbook(file, read_only=True, data_only=True)
+            ws = wb.active
+            rows = list(ws.iter_rows(values_only=True))
+        except Exception as e:
+            return Response(
+                {"detail": f"Invalid Excel file: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not rows:
+            return Response(
+                {"detail": "Excel file is empty."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        header = [str(c).strip().upper() if c is not None else "" for c in rows[0]]
+        login_col = None
+        amount_col = None
+        for i, h in enumerate(header):
+            if h in ("LOGIN", "EMAIL"):
+                login_col = i
+            if h in ("AMOUNT", "BALANCE"):
+                amount_col = i
+        if login_col is None:
+            return Response(
+                {"detail": "Excel must have a column 'LOGIN' or 'EMAIL'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if amount_col is None:
+            return Response(
+                {"detail": "Excel must have a column 'AMOUNT' or 'BALANCE'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        created = 0
+        skipped = 0
+        errors = []
+
+        for row_idx, row in enumerate(rows[1:], start=2):
+            try:
+                email_val = row[login_col] if login_col < len(row) else None
+                amount_val = row[amount_col] if amount_col < len(row) else None
+                if email_val is None or (isinstance(email_val, str) and not email_val.strip()):
+                    skipped += 1
+                    continue
+                email = str(email_val).strip().lower()
+                if amount_val is None or (isinstance(amount_val, str) and not str(amount_val).strip()):
+                    errors.append({"row": row_idx, "email": email, "error": "Amount is empty"})
+                    continue
+                try:
+                    amount = int(float(amount_val))
+                except (TypeError, ValueError):
+                    errors.append({"row": row_idx, "email": email, "error": "Invalid amount"})
+                    continue
+                if amount <= 0:
+                    errors.append({"row": row_idx, "email": email, "error": "Amount must be positive"})
+                    continue
+
+                student = User.objects.filter(
+                    email=email,
+                    role__name_code="student",
+                ).first()
+                if not student:
+                    errors.append({"row": row_idx, "email": email, "error": "Student not found"})
+                    continue
+                if student.balance >= amount:
+                    skipped += 1
+                    continue
+                add_balance = amount - student.balance
+                BalanceHistory.objects.create(
+                    student=student,
+                    user=default_user,
+                    balance=add_balance,
+                    data=f"Excel upload row {row_idx}",
+                )
+                created += 1
+            except Exception as e:
+                email_display = str(row[login_col]).strip() if login_col < len(row) and row[login_col] is not None else ""
+                errors.append({
+                    "row": row_idx,
+                    "email": email_display,
+                    "error": str(e),
+                })
+
+        wb.close()
+        return Response(
+            {
+                "created": created,
+                "skipped": skipped,
+                "errors": errors,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+add_balance_from_excel = BalanceFromExcelView.as_view()
 
 
 class CreateLoginTokenAPIView(APIView):

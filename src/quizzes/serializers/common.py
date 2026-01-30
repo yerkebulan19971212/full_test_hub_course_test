@@ -185,7 +185,7 @@ class NewTestSerializer(serializers.ModelSerializer):
                 question_number=question_number,
                 quizz_type=quizz_type
             ))
-        StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
+        _ = StudentQuizzQuestion.objects.bulk_create([StudentQuizzQuestion(
             order=i,
             question=q,
             lesson_id=q.lesson_question_level.test_type_lesson.lesson_id,
