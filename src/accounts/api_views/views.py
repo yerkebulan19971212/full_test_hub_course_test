@@ -31,7 +31,8 @@ from src.accounts.api_views.serializers import (AuthMeSerializer,
                                                 UserChangePasswordSerializer,
                                                 AllStudentSerializer,
                                                 BalanceHistorySerializer,
-                                                UserBaseSerializer, CreateLoginTokenSerializer, TelegramSerializer)
+                                                UserBaseSerializer, CreateLoginTokenSerializer, TelegramSerializer,
+                                                BalanceHistoryFileSerializer)
 from src.accounts.filters import UserStudentFilter
 from src.accounts.models import Role, TelegramToken, BalanceHistory
 from src.common.exception import (UnexpectedError, PhoneExistError,
@@ -330,17 +331,19 @@ add_balance_history = BalanceHistoryView.as_view()
 DEFAULT_BALANCE_ADMIN_EMAIL = "yerke@gmail.com"
 
 
-class BalanceFromExcelView(APIView):
+class BalanceFromExcelView(generics.CreateAPIView):
     """
     Accepts an Excel file with columns LOGIN (email) and AMOUNT.
     For each row: find student by email; if balance < amount, create BalanceHistory
     with balance=(amount - current_balance). Admin user for history: yerke@gmail.com.
     """
-    permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    # permission_classes = (permissions.IsAuthenticated, SuperAdminPermission)
+    serializer_class = BalanceHistoryFileSerializer
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         import openpyxl
 
+        amount_val = request.data.get("amount")
         file = request.FILES.get("file")
         if not file:
             return Response(
@@ -377,22 +380,23 @@ class BalanceFromExcelView(APIView):
 
         header = [str(c).strip().upper() if c is not None else "" for c in rows[0]]
         login_col = None
-        amount_col = None
+        # amount_col = None
+        password_col = None
         for i, h in enumerate(header):
             if h in ("LOGIN", "EMAIL"):
                 login_col = i
-            if h in ("AMOUNT", "BALANCE"):
-                amount_col = i
+            if h in ("PASSWORD", "PASSWORD"):
+                password_col = i
         if login_col is None:
             return Response(
                 {"detail": "Excel must have a column 'LOGIN' or 'EMAIL'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if amount_col is None:
-            return Response(
-                {"detail": "Excel must have a column 'AMOUNT' or 'BALANCE'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # if amount_col is None:
+        #     return Response(
+        #         {"detail": "Excel must have a column 'AMOUNT' or 'BALANCE'."},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
 
         created = 0
         skipped = 0
@@ -401,7 +405,8 @@ class BalanceFromExcelView(APIView):
         for row_idx, row in enumerate(rows[1:], start=2):
             try:
                 email_val = row[login_col] if login_col < len(row) else None
-                amount_val = row[amount_col] if amount_col < len(row) else None
+                password = row[password_col] if password_col < len(row) else None
+                # amount_val = row[amount_col] if amount_col < len(row) else None
                 if email_val is None or (isinstance(email_val, str) and not email_val.strip()):
                     skipped += 1
                     continue
@@ -429,6 +434,7 @@ class BalanceFromExcelView(APIView):
                     skipped += 1
                     continue
                 add_balance = amount - student.balance
+                student.set_password(password)
                 BalanceHistory.objects.create(
                     student=student,
                     user=default_user,
@@ -437,7 +443,8 @@ class BalanceFromExcelView(APIView):
                 )
                 created += 1
             except Exception as e:
-                email_display = str(row[login_col]).strip() if login_col < len(row) and row[login_col] is not None else ""
+                email_display = str(row[login_col]).strip() if login_col < len(row) and row[
+                    login_col] is not None else ""
                 errors.append({
                     "row": row_idx,
                     "email": email_display,

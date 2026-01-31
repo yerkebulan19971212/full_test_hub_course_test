@@ -391,3 +391,8 @@ class CreateLoginTokenSerializer(serializers.Serializer):
 
 class TelegramSerializer(serializers.Serializer):
     token = serializers.CharField(required=True)
+
+
+class BalanceHistoryFileSerializer(serializers.Serializer):
+    file = serializers.FileField(write_only=True, required=True)
+    amount = serializers.IntegerField(write_only=True, required=True)

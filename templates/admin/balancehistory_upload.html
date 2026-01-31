@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <div class="module">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="default">Upload</button>
+      <a href=".." class="button cancel-link">Cancel</a>
+    </form>
+  </div>
+  <div class="help">
+    <p>Required columns: <strong>LOGIN</strong> (or EMAIL), <strong>AMOUNT</strong> (or BALANCE).</p>
+    <p>Optional column: <strong>PASSWORD</strong> (or PASS) to reset student passwords.</p>
+  </div>
+{% endblock %}
