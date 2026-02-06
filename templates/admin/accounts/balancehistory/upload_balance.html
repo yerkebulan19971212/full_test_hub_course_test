@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <div class="module">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="default">Upload</button>
+      <a href=".." class="button cancel-link">Cancel</a>
+    </form>
+  </div>
+  <div class="help" style="margin-top: 15px;">
+    <p><strong>Required columns:</strong></p>
+    <table style="border-collapse: collapse; margin-top: 5px;">
+      <tr>
+        <th style="border: 1px solid #ccc; padding: 5px 10px; background: #f0f0f0;">Column</th>
+        <th style="border: 1px solid #ccc; padding: 5px 10px; background: #f0f0f0;">Description</th>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>Аккаунт</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">User username (email or phone)</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>Сумма</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">Balance amount to add</td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
