@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <div class="module">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="default">Upload</button>
+      <a href=".." class="button cancel-link">Cancel</a>
+    </form>
+  </div>
+  <div class="help" style="margin-top: 15px;">
+    <p><strong>Required columns:</strong></p>
+    <table style="border-collapse: collapse; margin-top: 5px;">
+      <tr>
+        <th style="border: 1px solid #ccc; padding: 5px 10px; background: #f0f0f0;">Column</th>
+        <th style="border: 1px solid #ccc; padding: 5px 10px; background: #f0f0f0;">Description</th>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>Имя</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">First name</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>Фамилия</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">Last name</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>Почта</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">Email (used as login)</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>Пароль</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">Password</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;"><strong>школа</strong></td>
+        <td style="border: 1px solid #ccc; padding: 5px 10px;">School name_code</td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
